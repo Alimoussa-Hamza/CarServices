@@ -154,7 +154,7 @@ X-Request-Id: <uuid>             # optionnel client, sinon généré serveur
 | Method | Path | Rôle | Description |
 |--------|------|------|-------------|
 | GET | `/providers/me` | provider | Mon profil |
-| PATCH | `/providers/me` | provider | Mettre à jour bio, zones |
+| PATCH | `/providers/me` | provider | Mettre à jour identité publique, bio, méthodes et adresse de base |
 | POST | `/providers/kyc/submit` | provider | Soumettre dossier |
 | GET | `/providers/kyc/status` | provider | Statut KYC |
 | POST | `/providers/stripe/onboard` | provider | Lien onboarding Connect |
@@ -162,6 +162,42 @@ X-Request-Id: <uuid>             # optionnel client, sinon généré serveur
 | PUT | `/providers/availability` | provider | Maj dispo |
 | GET | `/providers/capabilities` | provider | Formules proposées |
 | PUT | `/providers/capabilities` | provider | Maj capabilities |
+
+### GET `/providers/me`
+
+```json
+{
+  "data": {
+    "id": "uuid",
+    "userId": "uuid",
+    "companyName": "Clean Auto Lyon",
+    "siret": "12345678901234",
+    "bio": "Lavage écologique sans eau.",
+    "avatarUrl": "https://example.com/avatar.jpg",
+    "kycStatus": "draft",
+    "kycRejectionReason": null,
+    "washMethods": ["waterless"],
+    "ratingAvg": 0,
+    "ratingCount": 0,
+    "acceptanceRate": 100,
+    "stripeAccountId": null,
+    "baseAddressId": null
+  }
+}
+```
+
+### PATCH `/providers/me`
+
+```json
+{
+  "companyName": "Clean Auto Lyon",
+  "siret": "12345678901234",
+  "bio": "Lavage écologique sans eau.",
+  "avatarUrl": "https://example.com/avatar.jpg",
+  "washMethods": ["waterless"],
+  "baseAddressId": "uuid"
+}
+```
 
 ---
 

@@ -387,4 +387,71 @@ describe('api-client', () => {
       });
     });
   });
+
+  describe('api.providers', () => {
+    const providerProfile = {
+      id: '11111111-1111-4111-8111-111111111111',
+      userId: '22222222-2222-4222-8222-222222222222',
+      companyName: 'Clean Auto Lyon',
+      siret: '12345678901234',
+      bio: 'Lavage écologique à domicile.',
+      avatarUrl: 'https://example.com/avatar.jpg',
+      kycStatus: 'draft',
+      kycRejectionReason: null,
+      washMethods: ['waterless'],
+      ratingAvg: 0,
+      ratingCount: 0,
+      acceptanceRate: 100,
+      stripeAccountId: null,
+      baseAddressId: null,
+    };
+
+    it('récupère le profil pro courant avec Authorization', async () => {
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: providerProfile }));
+      initApiClient({
+        baseUrl: 'http://api.test',
+        getAccessToken: jest.fn().mockResolvedValue('provider.jwt'),
+      });
+
+      await expect(api.providers.me()).resolves.toEqual(providerProfile);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/providers/me',
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer provider.jwt',
+          },
+        },
+      );
+    });
+
+    it('met à jour le profil pro courant', async () => {
+      fetchMock.mockResolvedValue(
+        mockFetchResponse({
+          data: { ...providerProfile, companyName: 'Clean Auto Pro' },
+        }),
+      );
+
+      await expect(
+        api.providers.updateMe({
+          companyName: 'Clean Auto Pro',
+          siret: '12345678901234',
+          washMethods: ['waterless'],
+        }),
+      ).resolves.toMatchObject({ companyName: 'Clean Auto Pro' });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/providers/me',
+        {
+          method: 'PATCH',
+          body: JSON.stringify({
+            companyName: 'Clean Auto Pro',
+            siret: '12345678901234',
+            washMethods: ['waterless'],
+          }),
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    });
+  });
 });

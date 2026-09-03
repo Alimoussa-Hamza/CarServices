@@ -4,11 +4,13 @@ import {
   CatalogQuoteResponseSchema,
   HealthResponseSchema,
   OutOfZoneLeadDto,
+  ProviderProfileSchema,
   RefreshTokenDto,
   SendOtpDto,
   SendOtpResponseSchema,
   ServiceCategorySchema,
   ServiceOfferSchema,
+  UpdateProviderProfileDto,
   VerifyOtpDto,
   ZoneCheckDto,
   ZoneCheckResponseSchema,
@@ -134,11 +136,23 @@ export const api = {
         body: JSON.stringify(dto),
       }),
   },
+  providers: {
+    me: () =>
+      apiRequest('/api/v1/providers/me').then((data) =>
+        ProviderProfileSchema.parse(data),
+      ),
+    updateMe: (dto: UpdateProviderProfileDto) =>
+      apiRequest('/api/v1/providers/me', {
+        method: 'PATCH',
+        body: JSON.stringify(dto),
+      }).then((data) => ProviderProfileSchema.parse(data)),
+  },
 };
 
 export type {
   CatalogQuoteDto,
   OutOfZoneLeadDto,
+  UpdateProviderProfileDto,
   RefreshTokenDto,
   SendOtpDto,
   VerifyOtpDto,

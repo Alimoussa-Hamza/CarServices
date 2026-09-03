@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { CatalogModule } from './modules/catalog/catalog.module';
 import { HealthModule } from './modules/health/health.module';
+import { ProvidersModule } from './modules/providers/providers.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { ZonesModule } from './modules/zones/zones.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -17,6 +18,7 @@ import { PrismaModule } from './prisma/prisma.module';
     AuthModule,
     CatalogModule,
     ZonesModule,
+    ProvidersModule,
   ],
   controllers: [AppController],
 })

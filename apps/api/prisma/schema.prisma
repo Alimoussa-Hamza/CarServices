@@ -13,6 +13,18 @@ enum UserRole {
   admin
 }
 
+enum KycStatus {
+  draft
+  submitted
+  approved
+  rejected
+}
+
+enum WashMethod {
+  waterless
+  steam
+}
+
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   phone        String   @unique @db.VarChar(20)
@@ -45,14 +57,26 @@ model ClientProfile {
 }
 
 model ProviderProfile {
-  id          String   @id @default(uuid()) @db.Uuid
-  userId      String   @unique @map("user_id") @db.Uuid
-  companyName String?  @map("company_name") @db.VarChar(255)
-  siret       String?  @unique @db.VarChar(14)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id                 String       @id @default(uuid()) @db.Uuid
+  userId             String       @unique @map("user_id") @db.Uuid
+  companyName        String?      @map("company_name") @db.VarChar(255)
+  siret              String?      @unique @db.VarChar(14)
+  iban               String?      @db.VarChar(34)
+  bio                String?
+  avatarUrl          String?      @map("avatar_url") @db.VarChar(500)
+  kycStatus          KycStatus    @default(draft) @map("kyc_status")
+  kycRejectionReason String?      @map("kyc_rejection_reason")
+  washMethods        WashMethod[] @default([]) @map("wash_methods")
+  ratingAvg          Decimal      @default(0) @map("rating_avg") @db.Decimal(3, 2)
+  ratingCount        Int          @default(0) @map("rating_count")
+  acceptanceRate     Decimal      @default(100) @map("acceptance_rate") @db.Decimal(5, 2)
+  stripeAccountId    String?      @map("stripe_account_id") @db.VarChar(255)
+  baseAddressId      String?      @map("base_address_id") @db.Uuid
+  createdAt          DateTime     @default(now()) @map("created_at")
+  updatedAt          DateTime     @updatedAt @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  baseAddress   Address?       @relation("ProviderBaseAddress", fields: [baseAddressId], references: [id], onDelete: SetNull)
   providerZones ProviderZone[]
 
   @@map("provider_profiles")
@@ -87,21 +111,22 @@ model Address {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user                 User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  providerBaseProfiles ProviderProfile[] @relation("ProviderBaseAddress")
 
   @@index([userId])
   @@map("addresses")
 }
 
 model ServiceZone {
-  id                  String   @id @default(uuid()) @db.Uuid
-  name                String   @db.VarChar(100)
-  slug                String   @unique @db.VarChar(100)
+  id                  String                                 @id @default(uuid()) @db.Uuid
+  name                String                                 @db.VarChar(100)
+  slug                String                                 @unique @db.VarChar(100)
   polygon             Unsupported("geography(Polygon,4326)")
-  isActive            Boolean  @default(false) @map("is_active")
-  priceCoefficient    Decimal  @default(1.00) @map("price_coefficient") @db.Decimal(4, 2)
-  minBookingLeadHours Int      @default(2) @map("min_booking_lead_hours")
-  createdAt           DateTime @default(now()) @map("created_at")
+  isActive            Boolean                                @default(false) @map("is_active")
+  priceCoefficient    Decimal                                @default(1.00) @map("price_coefficient") @db.Decimal(4, 2)
+  minBookingLeadHours Int                                    @default(2) @map("min_booking_lead_hours")
+  createdAt           DateTime                               @default(now()) @map("created_at")
 
   providerZones ProviderZone[]
   zonePricing   ZonePricing[]

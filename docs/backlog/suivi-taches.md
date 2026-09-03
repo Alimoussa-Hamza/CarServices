@@ -16,7 +16,8 @@
 | C — Auth & Users (M02) | 6/6 | — terminé |
 | D — Tests & qualité | 9/9 | — terminé |
 | E — Catalogue & zones (M03) | 7/7 | — terminé |
-| F — Apps clientes | 3/6 | CS-M11-S02 Écran login OTP client |
+| F — Apps clientes | 3/6 | — en attente maquettes |
+| G — Backend Pros & KYC (M04) | 1/8 | CS-M04-S02 Wizard KYC submit |
 
 ---
 
@@ -103,9 +104,29 @@
 - [x] Socle `apps/admin` — Next.js 15, page statut API
 - [x] Socle `apps/mobile-client` — Expo SDK 52, écran statut API
 - [x] Socle `apps/mobile-provider` — Expo SDK 52, écran statut API
-- [~] **CS-M11-S02** Écran login OTP client (attend M02 ✓ → prêt à démarrer)
+- [ ] **CS-M11-S02** Écran login OTP client (en attente maquettes fournies)
 - [ ] **CS-M12-S01** Setup navigation app pro
 - [ ] Migration vers Expo Router (bloquée : conflit `@types/react` 18/19 dans le monorepo)
+
+---
+
+## Piste G — Backend Pros & KYC · Module M04
+
+- [x] **CS-M04-S01** CRUD profil pro
+  - [x] Schéma Prisma `provider_profiles` enrichi (bio, SIRET, KYC status, méthodes lavage, stats, adresse de base)
+  - [x] `GET /providers/me` protégé `provider`
+  - [x] `PATCH /providers/me` avec validation Zod
+  - [x] Client API `api.providers.me/updateMe`
+  - [x] TUs service providers + shared-types + api-client
+- [~] **CS-M04-S02** Wizard KYC submit
+- [ ] **CS-M04-S03** Capabilities (formules proposées)
+- [ ] **CS-M04-S04** Disponibilités hebdomadaires
+- [ ] **CS-M04-S05** Zones intervention pro
+- [ ] **CS-M04-S06** Stripe Connect onboarding link
+- [ ] **CS-M04-S07** Blocage missions si KYC non approved
+- [ ] **CS-M04-S08** Alerte expiration RC Pro
+
+**Vérifié manuellement :** OTP provider → `GET /providers/me` → `PATCH /providers/me` avec `companyName`, `siret`, `bio`, `washMethods`.
 
 ---
 

@@ -4,15 +4,19 @@ import {
   CatalogQuoteResponseSchema,
   CatalogQuoteSchema,
   DirtLevelSchema,
+  KycStatusSchema,
   OtpRoleSchema,
   OutOfZoneLeadSchema,
+  ProviderProfileSchema,
   SendOtpResponseSchema,
   SendOtpSchema,
   ServiceCategorySchema,
   ServiceOfferSchema,
+  UpdateProviderProfileSchema,
   UserRoleSchema,
   VehicleTypeSchema,
   VerifyOtpSchema,
+  WashMethodSchema,
   ZoneCheckResponseSchema,
   ZoneCheckSchema,
 } from '../index';
@@ -355,6 +359,87 @@ describe('OutOfZoneLeadSchema', () => {
         lat: 44.0,
         lng: 4.0,
         addressText: 'abc',
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe('KycStatusSchema', () => {
+  it.each(['draft', 'submitted', 'approved', 'rejected'])(
+    'accepte le statut KYC %s',
+    (status) => {
+      expect(KycStatusSchema.parse(status)).toBe(status);
+    },
+  );
+});
+
+describe('WashMethodSchema', () => {
+  it('accepte les méthodes de lavage MVP', () => {
+    expect(WashMethodSchema.options).toEqual(['waterless', 'steam']);
+  });
+});
+
+describe('ProviderProfileSchema', () => {
+  const profile = {
+    id: '11111111-1111-4111-8111-111111111111',
+    userId: '22222222-2222-4222-8222-222222222222',
+    companyName: 'Clean Auto Lyon',
+    siret: '12345678901234',
+    bio: 'Lavage écologique à domicile.',
+    avatarUrl: 'https://example.com/avatar.jpg',
+    kycStatus: 'draft',
+    kycRejectionReason: null,
+    washMethods: ['waterless'],
+    ratingAvg: 4.5,
+    ratingCount: 12,
+    acceptanceRate: 98.5,
+    stripeAccountId: null,
+    baseAddressId: null,
+  };
+
+  it('valide un profil prestataire', () => {
+    expect(ProviderProfileSchema.parse(profile)).toEqual(profile);
+  });
+
+  it('rejette une note supérieure à 5', () => {
+    expect(
+      ProviderProfileSchema.safeParse({ ...profile, ratingAvg: 6 }).success,
+    ).toBe(false);
+  });
+
+  it('rejette un avatarUrl invalide', () => {
+    expect(
+      ProviderProfileSchema.safeParse({ ...profile, avatarUrl: 'not-url' })
+        .success,
+    ).toBe(false);
+  });
+});
+
+describe('UpdateProviderProfileSchema', () => {
+  it('valide les champs éditables par un prestataire', () => {
+    expect(
+      UpdateProviderProfileSchema.parse({
+        companyName: 'Clean Auto Lyon',
+        siret: '12345678901234',
+        bio: 'Lavage sans eau.',
+        avatarUrl: 'https://example.com/avatar.jpg',
+        washMethods: ['waterless', 'steam'],
+        baseAddressId: null,
+      }),
+    ).toMatchObject({ companyName: 'Clean Auto Lyon' });
+  });
+
+  it('rejette un SIRET mal formé', () => {
+    expect(
+      UpdateProviderProfileSchema.safeParse({ siret: '123' }).success,
+    ).toBe(false);
+  });
+
+  it('rejette les champs non éditables comme kycStatus', () => {
+    expect(
+      UpdateProviderProfileSchema.strict().safeParse({
+        companyName: 'Clean Auto Lyon',
+        kycStatus: 'approved',
       }).success,
     ).toBe(false);
   });

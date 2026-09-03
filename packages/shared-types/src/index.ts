@@ -6,6 +6,17 @@ export type UserRole = z.infer<typeof UserRoleSchema>;
 export const OtpRoleSchema = z.enum(['client', 'provider']);
 export type OtpRole = z.infer<typeof OtpRoleSchema>;
 
+export const KycStatusSchema = z.enum([
+  'draft',
+  'submitted',
+  'approved',
+  'rejected',
+]);
+export type KycStatus = z.infer<typeof KycStatusSchema>;
+
+export const WashMethodSchema = z.enum(['waterless', 'steam']);
+export type WashMethod = z.infer<typeof WashMethodSchema>;
+
 export const BookingStatusSchema = z.enum([
   'draft',
   'payment_authorized',
@@ -166,3 +177,33 @@ export const OutOfZoneLeadSchema = z.object({
   addressText: z.string().min(5).max(500),
 });
 export type OutOfZoneLeadDto = z.infer<typeof OutOfZoneLeadSchema>;
+
+export const ProviderProfileSchema = z.object({
+  id: z.string().uuid(),
+  userId: z.string().uuid(),
+  companyName: z.string().nullable(),
+  siret: z.string().nullable(),
+  bio: z.string().nullable(),
+  avatarUrl: z.string().url().nullable(),
+  kycStatus: KycStatusSchema,
+  kycRejectionReason: z.string().nullable(),
+  washMethods: z.array(WashMethodSchema),
+  ratingAvg: z.number().min(0).max(5),
+  ratingCount: z.number().int().nonnegative(),
+  acceptanceRate: z.number().min(0).max(100),
+  stripeAccountId: z.string().nullable(),
+  baseAddressId: z.string().uuid().nullable(),
+});
+export type ProviderProfileDto = z.infer<typeof ProviderProfileSchema>;
+
+export const UpdateProviderProfileSchema = z.object({
+  companyName: z.string().min(2).max(255).optional(),
+  siret: z.string().regex(/^\d{14}$/).nullable().optional(),
+  bio: z.string().max(1000).nullable().optional(),
+  avatarUrl: z.string().url().nullable().optional(),
+  washMethods: z.array(WashMethodSchema).max(2).optional(),
+  baseAddressId: z.string().uuid().nullable().optional(),
+});
+export type UpdateProviderProfileDto = z.infer<
+  typeof UpdateProviderProfileSchema
+>;
