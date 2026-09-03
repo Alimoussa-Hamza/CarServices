@@ -3,6 +3,7 @@ import {
   CatalogQuoteDto,
   CatalogQuoteResponseSchema,
   HealthResponseSchema,
+  KycStatusResponseSchema,
   OutOfZoneLeadDto,
   ProviderProfileSchema,
   RefreshTokenDto,
@@ -10,6 +11,7 @@ import {
   SendOtpResponseSchema,
   ServiceCategorySchema,
   ServiceOfferSchema,
+  SubmitKycDto,
   UpdateProviderProfileDto,
   VerifyOtpDto,
   ZoneCheckDto,
@@ -146,12 +148,22 @@ export const api = {
         method: 'PATCH',
         body: JSON.stringify(dto),
       }).then((data) => ProviderProfileSchema.parse(data)),
+    submitKyc: (dto: SubmitKycDto) =>
+      apiRequest('/api/v1/providers/kyc/submit', {
+        method: 'POST',
+        body: JSON.stringify(dto),
+      }).then((data) => KycStatusResponseSchema.parse(data)),
+    kycStatus: () =>
+      apiRequest('/api/v1/providers/kyc/status').then((data) =>
+        KycStatusResponseSchema.parse(data),
+      ),
   },
 };
 
 export type {
   CatalogQuoteDto,
   OutOfZoneLeadDto,
+  SubmitKycDto,
   UpdateProviderProfileDto,
   RefreshTokenDto,
   SendOtpDto,

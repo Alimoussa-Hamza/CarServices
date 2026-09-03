@@ -25,6 +25,12 @@ enum WashMethod {
   steam
 }
 
+enum KycDocumentType {
+  rc_pro
+  identity
+  other
+}
+
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   phone        String   @unique @db.VarChar(20)
@@ -35,10 +41,11 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  clientProfile   ClientProfile?
-  providerProfile ProviderProfile?
-  refreshTokens   RefreshToken[]
-  addresses       Address[]
+  clientProfile        ClientProfile?
+  providerProfile      ProviderProfile?
+  refreshTokens        RefreshToken[]
+  addresses            Address[]
+  verifiedKycDocuments ProviderKycDocument[] @relation("VerifiedKycDocuments")
 
   @@map("users")
 }
@@ -75,11 +82,30 @@ model ProviderProfile {
   createdAt          DateTime     @default(now()) @map("created_at")
   updatedAt          DateTime     @updatedAt @map("updated_at")
 
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  baseAddress   Address?       @relation("ProviderBaseAddress", fields: [baseAddressId], references: [id], onDelete: SetNull)
+  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  baseAddress   Address?              @relation("ProviderBaseAddress", fields: [baseAddressId], references: [id], onDelete: SetNull)
   providerZones ProviderZone[]
+  kycDocuments  ProviderKycDocument[]
 
   @@map("provider_profiles")
+}
+
+model ProviderKycDocument {
+  id         String          @id @default(uuid()) @db.Uuid
+  providerId String          @map("provider_id") @db.Uuid
+  docType    KycDocumentType @map("doc_type")
+  fileUrl    String          @map("file_url") @db.VarChar(500)
+  expiresAt  DateTime?       @map("expires_at") @db.Date
+  verifiedAt DateTime?       @map("verified_at")
+  verifiedBy String?         @map("verified_by") @db.Uuid
+  createdAt  DateTime        @default(now()) @map("created_at")
+
+  provider        ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  verifiedByAdmin User?           @relation("VerifiedKycDocuments", fields: [verifiedBy], references: [id], onDelete: SetNull)
+
+  @@index([providerId])
+  @@index([verifiedBy])
+  @@map("provider_kyc_documents")
 }
 
 model RefreshToken {

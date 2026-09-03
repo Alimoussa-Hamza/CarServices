@@ -17,7 +17,7 @@
 | D — Tests & qualité | 9/9 | — terminé |
 | E — Catalogue & zones (M03) | 7/7 | — terminé |
 | F — Apps clientes | 3/6 | — en attente maquettes |
-| G — Backend Pros & KYC (M04) | 1/8 | CS-M04-S02 Wizard KYC submit |
+| G — Backend Pros & KYC (M04) | 2/8 | CS-M04-S03 Capabilities |
 
 ---
 
@@ -118,8 +118,15 @@
   - [x] `PATCH /providers/me` avec validation Zod
   - [x] Client API `api.providers.me/updateMe`
   - [x] TUs service providers + shared-types + api-client
-- [~] **CS-M04-S02** Wizard KYC submit
-- [ ] **CS-M04-S03** Capabilities (formules proposées)
+- [x] **CS-M04-S02** Wizard KYC submit
+  - [x] Modèle Prisma `provider_kyc_documents`
+  - [x] Validation SIRET 14 chiffres
+  - [x] RC Pro obligatoire et non expirée
+  - [x] Au moins une méthode éco déclarée
+  - [x] State machine `draft/rejected -> submitted`, blocage `submitted/approved`
+  - [x] `POST /providers/kyc/submit` et `GET /providers/kyc/status`
+  - [x] Tests shared-types + API + api-client
+- [~] **CS-M04-S03** Capabilities (formules proposées)
 - [ ] **CS-M04-S04** Disponibilités hebdomadaires
 - [ ] **CS-M04-S05** Zones intervention pro
 - [ ] **CS-M04-S06** Stripe Connect onboarding link

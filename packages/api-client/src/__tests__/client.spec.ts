@@ -453,5 +453,58 @@ describe('api-client', () => {
         },
       );
     });
+
+    it('soumet le dossier KYC provider', async () => {
+      const status = {
+        status: 'submitted',
+        rejectionReason: null,
+        documents: [
+          {
+            id: '33333333-3333-4333-8333-333333333333',
+            docType: 'rc_pro',
+            fileUrl: 'https://example.com/rc-pro.pdf',
+            expiresAt: '2099-12-31',
+            verifiedAt: null,
+          },
+        ],
+      };
+      const dto = {
+        siret: '12345678901234',
+        washMethods: ['waterless' as const],
+        documents: [
+          {
+            docType: 'rc_pro' as const,
+            fileUrl: 'https://example.com/rc-pro.pdf',
+            expiresAt: '2099-12-31',
+          },
+        ],
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: status }));
+
+      await expect(api.providers.submitKyc(dto)).resolves.toEqual(status);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/providers/kyc/submit',
+        {
+          method: 'POST',
+          body: JSON.stringify(dto),
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    });
+
+    it('récupère le statut KYC provider', async () => {
+      const status = {
+        status: 'draft',
+        rejectionReason: null,
+        documents: [],
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: status }));
+
+      await expect(api.providers.kycStatus()).resolves.toEqual(status);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/providers/kyc/status',
+        { headers: { 'Content-Type': 'application/json' } },
+      );
+    });
   });
 });

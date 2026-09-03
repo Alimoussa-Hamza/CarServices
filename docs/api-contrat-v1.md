@@ -199,6 +199,44 @@ X-Request-Id: <uuid>             # optionnel client, sinon généré serveur
 }
 ```
 
+### POST `/providers/kyc/submit`
+
+Règles appliquées : SIRET 14 chiffres, RC Pro obligatoire non expirée, au moins une méthode éco (`waterless` ou `steam`). Transitions autorisées : `draft -> submitted` et `rejected -> submitted`.
+
+```json
+{
+  "siret": "12345678901234",
+  "washMethods": ["waterless"],
+  "documents": [
+    {
+      "docType": "rc_pro",
+      "fileUrl": "https://example.com/rc-pro.pdf",
+      "expiresAt": "2099-12-31"
+    }
+  ]
+}
+```
+
+### GET `/providers/kyc/status`
+
+```json
+{
+  "data": {
+    "status": "submitted",
+    "rejectionReason": null,
+    "documents": [
+      {
+        "id": "uuid",
+        "docType": "rc_pro",
+        "fileUrl": "https://example.com/rc-pro.pdf",
+        "expiresAt": "2099-12-31",
+        "verifiedAt": null
+      }
+    ]
+  }
+}
+```
+
 ---
 
 ## Bookings

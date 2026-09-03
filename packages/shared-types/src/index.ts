@@ -17,6 +17,9 @@ export type KycStatus = z.infer<typeof KycStatusSchema>;
 export const WashMethodSchema = z.enum(['waterless', 'steam']);
 export type WashMethod = z.infer<typeof WashMethodSchema>;
 
+export const KycDocumentTypeSchema = z.enum(['rc_pro', 'identity', 'other']);
+export type KycDocumentType = z.infer<typeof KycDocumentTypeSchema>;
+
 export const BookingStatusSchema = z.enum([
   'draft',
   'payment_authorized',
@@ -207,3 +210,66 @@ export const UpdateProviderProfileSchema = z.object({
 export type UpdateProviderProfileDto = z.infer<
   typeof UpdateProviderProfileSchema
 >;
+
+export const SubmitKycDocumentSchema = z.object({
+  docType: KycDocumentTypeSchema,
+  fileUrl: z.string().url(),
+  expiresAt: z.string().date().nullable().optional(),
+});
+export type SubmitKycDocumentDto = z.infer<typeof SubmitKycDocumentSchema>;
+
+export const SubmitKycSchema = z
+  .object({
+    siret: z.string().regex(/^\d{14}$/),
+    washMethods: z.array(WashMethodSchema).min(1).max(2),
+    documents: z.array(SubmitKycDocumentSchema).min(1),
+  })
+  .superRefine((dto, ctx) => {
+    const rcPro = dto.documents.find(
+      (document) => document.docType === 'rc_pro',
+    );
+
+    if (!rcPro) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['documents'],
+        message: 'RC Pro obligatoire.',
+      });
+      return;
+    }
+
+    if (!rcPro.expiresAt) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['documents'],
+        message: "Date d'expiration RC Pro obligatoire.",
+      });
+      return;
+    }
+
+    const expiresAtEndOfDay = new Date(`${rcPro.expiresAt}T23:59:59.999Z`);
+    if (expiresAtEndOfDay.getTime() < Date.now()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['documents'],
+        message: 'RC Pro expirée.',
+      });
+    }
+  });
+export type SubmitKycDto = z.infer<typeof SubmitKycSchema>;
+
+export const KycDocumentSchema = z.object({
+  id: z.string().uuid(),
+  docType: KycDocumentTypeSchema,
+  fileUrl: z.string().url(),
+  expiresAt: z.string().date().nullable(),
+  verifiedAt: z.string().datetime().nullable(),
+});
+export type KycDocumentDto = z.infer<typeof KycDocumentSchema>;
+
+export const KycStatusResponseSchema = z.object({
+  status: KycStatusSchema,
+  rejectionReason: z.string().nullable(),
+  documents: z.array(KycDocumentSchema),
+});
+export type KycStatusResponse = z.infer<typeof KycStatusResponseSchema>;

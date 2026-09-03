@@ -4,6 +4,8 @@ import {
   CatalogQuoteResponseSchema,
   CatalogQuoteSchema,
   DirtLevelSchema,
+  KycDocumentTypeSchema,
+  KycStatusResponseSchema,
   KycStatusSchema,
   OtpRoleSchema,
   OutOfZoneLeadSchema,
@@ -12,6 +14,7 @@ import {
   SendOtpSchema,
   ServiceCategorySchema,
   ServiceOfferSchema,
+  SubmitKycSchema,
   UpdateProviderProfileSchema,
   UserRoleSchema,
   VehicleTypeSchema,
@@ -373,9 +376,92 @@ describe('KycStatusSchema', () => {
   );
 });
 
+describe('KycDocumentTypeSchema', () => {
+  it.each(['rc_pro', 'identity', 'other'])(
+    'accepte le type de document KYC %s',
+    (docType) => {
+      expect(KycDocumentTypeSchema.parse(docType)).toBe(docType);
+    },
+  );
+});
+
 describe('WashMethodSchema', () => {
   it('accepte les méthodes de lavage MVP', () => {
     expect(WashMethodSchema.options).toEqual(['waterless', 'steam']);
+  });
+});
+
+describe('SubmitKycSchema', () => {
+  const validDto = {
+    siret: '12345678901234',
+    washMethods: ['waterless'],
+    documents: [
+      {
+        docType: 'rc_pro',
+        fileUrl: 'https://example.com/rc-pro.pdf',
+        expiresAt: '2099-12-31',
+      },
+    ],
+  };
+
+  it('valide un dossier KYC conforme RG-KYC-01/RG-KYC-03', () => {
+    expect(SubmitKycSchema.parse(validDto)).toEqual(validDto);
+  });
+
+  it('rejette un SIRET mal formé', () => {
+    expect(SubmitKycSchema.safeParse({ ...validDto, siret: '123' }).success).toBe(
+      false,
+    );
+  });
+
+  it('rejette un dossier sans méthode éco déclarée', () => {
+    expect(
+      SubmitKycSchema.safeParse({ ...validDto, washMethods: [] }).success,
+    ).toBe(false);
+  });
+
+  it('rejette un dossier sans RC Pro', () => {
+    expect(
+      SubmitKycSchema.safeParse({
+        ...validDto,
+        documents: [{ docType: 'identity', fileUrl: 'https://example.com/id.pdf' }],
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejette une RC Pro expirée', () => {
+    expect(
+      SubmitKycSchema.safeParse({
+        ...validDto,
+        documents: [
+          {
+            docType: 'rc_pro',
+            fileUrl: 'https://example.com/rc-pro.pdf',
+            expiresAt: '2000-01-01',
+          },
+        ],
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe('KycStatusResponseSchema', () => {
+  it('valide la réponse statut KYC', () => {
+    expect(
+      KycStatusResponseSchema.parse({
+        status: 'submitted',
+        rejectionReason: null,
+        documents: [
+          {
+            id: '33333333-3333-4333-8333-333333333333',
+            docType: 'rc_pro',
+            fileUrl: 'https://example.com/rc-pro.pdf',
+            expiresAt: '2099-12-31',
+            verifiedAt: null,
+          },
+        ],
+      }),
+    ).toMatchObject({ status: 'submitted' });
   });
 });
 

@@ -1,6 +1,8 @@
-import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 import {
+  SubmitKycDto,
+  SubmitKycSchema,
   UpdateProviderProfileDto,
   UpdateProviderProfileSchema,
 } from '@carservice/shared-types';
@@ -32,5 +34,18 @@ export class ProvidersController {
     dto: UpdateProviderProfileDto,
   ) {
     return this.providersService.updateMe(user.sub, dto);
+  }
+
+  @Post('kyc/submit')
+  submitKyc(
+    @CurrentUser() user: AuthPayload,
+    @Body(new ZodValidationPipe(SubmitKycSchema)) dto: SubmitKycDto,
+  ) {
+    return this.providersService.submitKyc(user.sub, dto);
+  }
+
+  @Get('kyc/status')
+  getKycStatus(@CurrentUser() user: AuthPayload) {
+    return this.providersService.getKycStatus(user.sub);
   }
 }
