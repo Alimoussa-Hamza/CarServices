@@ -1,0 +1,316 @@
+Issue Type,Issue ID,Summary,Description,Epic Link,Parent,Priority,Story Points,Sprint,Labels,Component
+Epic,CS-EP-01,Fondations & Monorepo,Epic CARSERVICE: Fondations & Monorepo,,,Highest,,,"M00,M01",M00
+Epic,CS-EP-02,Identité & Comptes,Epic CARSERVICE: Identité & Comptes,,,Highest,,,M02,M02
+Epic,CS-EP-03,Catalogue & Géographie,Epic CARSERVICE: Catalogue & Géographie,,,Highest,,,M03,M03
+Epic,CS-EP-04,Pros & KYC,Epic CARSERVICE: Pros & KYC,,,Highest,,,M04,M04
+Epic,CS-EP-05,Réservations & Matching,Epic CARSERVICE: Réservations & Matching,,,Highest,,,M05,M05
+Epic,CS-EP-06,Paiements Stripe,Epic CARSERVICE: Paiements Stripe,,,Highest,,,M06,M06
+Epic,CS-EP-07,Médias & Preuves,Epic CARSERVICE: Médias & Preuves,,,Highest,,,M07,M07
+Epic,CS-EP-08,Avis & Litiges,Epic CARSERVICE: Avis & Litiges,,,High,,,M08,M08
+Epic,CS-EP-09,Notifications,Epic CARSERVICE: Notifications,,,High,,,M09,M09
+Epic,CS-EP-10,API Admin,Epic CARSERVICE: API Admin,,,Highest,,,M10,M10
+Epic,CS-EP-11,App Mobile Client,Epic CARSERVICE: App Mobile Client,,,Highest,,,M11,M11
+Epic,CS-EP-12,App Mobile Pro,Epic CARSERVICE: App Mobile Pro,,,Highest,,,M12,M12
+Epic,CS-EP-13,Admin Web,Epic CARSERVICE: Admin Web,,,Highest,,,M13,M13
+Epic,CS-EP-14,QA & Mise en production,Epic CARSERVICE: QA & Mise en production,,,Highest,,,M14,M14
+Story,CS-M00-S01,Initialiser monorepo Turborepo + pnpm,Module M00. Story Points: 5,CS-EP-01,,Highest,5,S0,"M00,api",M00
+Task,CS-M00-S01-T01,Créer pnpm-workspace.yaml + turbo.json,Sub-task of CS-M00-S01. Est: 1h,CS-EP-01,CS-M00-S01,Highest,1,S0,"M00,infra",M00
+Task,CS-M00-S01-T02,Scaffold apps/api NestJS,Sub-task of CS-M00-S01. Est: 1h,CS-EP-01,CS-M00-S01,Highest,1,S0,"M00,infra",M00
+Task,CS-M00-S01-T03,Scaffold apps/admin Next.js,Sub-task of CS-M00-S01. Est: 1h,CS-EP-01,CS-M00-S01,Highest,1,S0,"M00,infra",M00
+Task,CS-M00-S01-T04,Scaffold apps/mobile-client Expo,Sub-task of CS-M00-S01. Est: 1h,CS-EP-01,CS-M00-S01,Highest,1,S0,"M00,infra",M00
+Task,CS-M00-S01-T05,Scaffold apps/mobile-provider Expo,Sub-task of CS-M00-S01. Est: 1h,CS-EP-01,CS-M00-S01,Highest,1,S0,"M00,infra",M00
+Story,CS-M00-S02,Docker Compose local Postgres+PostGIS Redis,Module M00. Story Points: 3,CS-EP-01,,Highest,3,S0,"M00,api",M00
+Task,CS-M00-S02-T01,docker-compose PostGIS 16,Sub-task of CS-M00-S02. Est: 1h,CS-EP-01,CS-M00-S02,Highest,1,S0,"M00,infra",M00
+Task,CS-M00-S02-T02,Service Redis 7,Sub-task of CS-M00-S02. Est: 1h,CS-EP-01,CS-M00-S02,Highest,1,S0,"M00,infra",M00
+Task,CS-M00-S02-T03,Script pnpm db:up + README,Sub-task of CS-M00-S02. Est: 1h,CS-EP-01,CS-M00-S02,Highest,1,S0,"M00,infra",M00
+Story,CS-M00-S03,CI GitHub Actions lint test build,Module M00. Story Points: 5,CS-EP-01,,Highest,5,S0,"M00,api",M00
+Task,CS-M00-S03-T01,Workflow PR install lint typecheck,Sub-task of CS-M00-S03. Est: 2h,CS-EP-01,CS-M00-S03,Highest,2,S0,"M00,infra",M00
+Task,CS-M00-S03-T02,Workflow PR test build turbo,Sub-task of CS-M00-S03. Est: 2h,CS-EP-01,CS-M00-S03,Highest,2,S0,"M00,infra",M00
+Task,CS-M00-S03-T03,Cache pnpm turbo,Sub-task of CS-M00-S03. Est: 1h,CS-EP-01,CS-M00-S03,Highest,1,S0,"M00,infra",M00
+Story,CS-M00-S04,Environnements staging Railway/Render,Module M00. Story Points: 5,CS-EP-01,,Highest,5,S0,"M00,api",M00
+Task,CS-M00-S04-T01,Projet Railway API + worker,Sub-task of CS-M00-S04. Est: 2h,CS-EP-01,CS-M00-S04,Highest,2,S0,"M00,infra",M00
+Task,CS-M00-S04-T02,Postgres staging PostGIS,Sub-task of CS-M00-S04. Est: 2h,CS-EP-01,CS-M00-S04,Highest,2,S0,"M00,infra",M00
+Task,CS-M00-S04-T03,Redis staging env vars,Sub-task of CS-M00-S04. Est: 1h,CS-EP-01,CS-M00-S04,Highest,1,S0,"M00,infra",M00
+Story,CS-M00-S05,Sentry + logging Pino API,Module M00. Story Points: 3,CS-EP-01,,High,3,S1,"M00,api",M00
+Task,CS-M00-S05-T01,Intégration Sentry NestJS,Sub-task of CS-M00-S05. Est: 2h,CS-EP-01,CS-M00-S05,High,2,S1,"M00,infra",M00
+Task,CS-M00-S05-T02,Logger Pino JSON requestId,Sub-task of CS-M00-S05. Est: 1h,CS-EP-01,CS-M00-S05,High,1,S1,"M00,infra",M00
+Story,CS-M00-S06,Documentation .env.example toutes apps,Module M00. Story Points: 2,CS-EP-01,,Highest,2,S0,"M00,api",M00
+Task,CS-M00-S06-T01,Créer .env.example api admin mobile,Sub-task of CS-M00-S06. Est: 2h,CS-EP-01,CS-M00-S06,Highest,2,S0,"M00,infra",M00
+Story,CS-M01-S01,Package @carservice/shared-types,Module M01. Story Points: 5,CS-EP-01,,Highest,5,S1,"M01,api",M01
+Task,CS-M01-S01-T01,Enums BookingStatus UserRole KycStatus VehicleType,Sub-task of CS-M01-S01. Est: 1h,CS-EP-01,CS-M01-S01,Highest,1,S1,"M01,shared",M01
+Task,CS-M01-S01-T02,Schemas Zod auth,Sub-task of CS-M01-S01. Est: 1h,CS-EP-01,CS-M01-S01,Highest,1,S1,"M01,shared",M01
+Task,CS-M01-S01-T03,Schemas Zod catalog booking,Sub-task of CS-M01-S01. Est: 2h,CS-EP-01,CS-M01-S01,Highest,2,S1,"M01,shared",M01
+Task,CS-M01-S01-T04,Export barrel index.ts,Sub-task of CS-M01-S01. Est: 1h,CS-EP-01,CS-M01-S01,Highest,1,S1,"M01,shared",M01
+Story,CS-M01-S02,Package @carservice/api-client,Module M01. Story Points: 5,CS-EP-01,,Highest,5,S1,"M01,api",M01
+Task,CS-M01-S02-T01,apiRequest wrapper ApiError,Sub-task of CS-M01-S02. Est: 2h,CS-EP-01,CS-M01-S02,Highest,2,S1,"M01,shared",M01
+Task,CS-M01-S02-T02,Module auth token refresh,Sub-task of CS-M01-S02. Est: 2h,CS-EP-01,CS-M01-S02,Highest,2,S1,"M01,shared",M01
+Task,CS-M01-S02-T03,Stubs catalog bookings endpoints,Sub-task of CS-M01-S02. Est: 1h,CS-EP-01,CS-M01-S02,Highest,1,S1,"M01,shared",M01
+Story,CS-M01-S03,Package @carservice/ui-tokens,Module M01. Story Points: 3,CS-EP-01,,Highest,3,S1,"M01,api",M01
+Task,CS-M01-S03-T01,Colors spacing radius typography,Sub-task of CS-M01-S03. Est: 2h,CS-EP-01,CS-M01-S03,Highest,2,S1,"M01,shared",M01
+Task,CS-M01-S03-T02,Export pour NativeWind + Tailwind admin,Sub-task of CS-M01-S03. Est: 1h,CS-EP-01,CS-M01-S03,Highest,1,S1,"M01,shared",M01
+Story,CS-M01-S04,Config ESLint Prettier partagée,Module M01. Story Points: 2,CS-EP-01,,High,2,S1,"M01,api",M01
+Task,CS-M01-S04-T01,Package eslint-config + husky lint-staged,Sub-task of CS-M01-S04. Est: 2h,CS-EP-01,CS-M01-S04,High,2,S1,"M01,shared",M01
+Story,CS-M02-S01,Schéma Prisma users profiles,Module M02. Story Points: 3,CS-EP-02,,Highest,3,S1,"M02,api",M02
+Task,CS-M02-S01-T01,Models users client_profiles provider_profiles,Sub-task of CS-M02-S01. Est: 1h,CS-EP-02,CS-M02-S01,Highest,1,S1,"M02,backend",M02
+Task,CS-M02-S01-T02,Migration initiale seed admin,Sub-task of CS-M02-S01. Est: 1h,CS-EP-02,CS-M02-S01,Highest,1,S1,"M02,backend",M02
+Task,CS-M02-S01-T03,PrismaService Nest module,Sub-task of CS-M02-S01. Est: 1h,CS-EP-02,CS-M02-S01,Highest,1,S1,"M02,backend",M02
+Story,CS-M02-S02,Envoi OTP SMS,Module M02. Story Points: 5,CS-EP-02,,Highest,5,S2,"M02,api",M02
+Task,CS-M02-S02-T01,Intégration Twilio/Brevo SMS,Sub-task of CS-M02-S02. Est: 2h,CS-EP-02,CS-M02-S02,Highest,2,S2,"M02,backend",M02
+Task,CS-M02-S02-T02,Cache OTP hash TTL 5min,Sub-task of CS-M02-S02. Est: 1h,CS-EP-02,CS-M02-S02,Highest,1,S2,"M02,backend",M02
+Task,CS-M02-S02-T03,Rate limit Redis RG-SEC,Sub-task of CS-M02-S02. Est: 2h,CS-EP-02,CS-M02-S02,Highest,2,S2,"M02,backend",M02
+Story,CS-M02-S03,Vérification OTP + JWT,Module M02. Story Points: 5,CS-EP-02,,Highest,5,S2,"M02,api",M02
+Task,CS-M02-S03-T01,POST /auth/otp/verify,Sub-task of CS-M02-S03. Est: 2h,CS-EP-02,CS-M02-S03,Highest,2,S2,"M02,backend",M02
+Task,CS-M02-S03-T02,Génération access refresh JWT,Sub-task of CS-M02-S03. Est: 2h,CS-EP-02,CS-M02-S03,Highest,2,S2,"M02,backend",M02
+Task,CS-M02-S03-T03,Création auto client_profile,Sub-task of CS-M02-S03. Est: 1h,CS-EP-02,CS-M02-S03,Highest,1,S2,"M02,backend",M02
+Story,CS-M02-S04,Refresh token + logout,Module M02. Story Points: 3,CS-EP-02,,Highest,3,S2,"M02,api",M02
+Task,CS-M02-S04-T01,POST /auth/refresh rotation,Sub-task of CS-M02-S04. Est: 2h,CS-EP-02,CS-M02-S04,Highest,2,S2,"M02,backend",M02
+Task,CS-M02-S04-T02,POST /auth/logout revoke,Sub-task of CS-M02-S04. Est: 1h,CS-EP-02,CS-M02-S04,Highest,1,S2,"M02,backend",M02
+Story,CS-M02-S05,Guards rôles client provider admin,Module M02. Story Points: 3,CS-EP-02,,Highest,3,S2,"M02,api",M02
+Task,CS-M02-S05-T01,JwtAuthGuard RolesGuard decorators,Sub-task of CS-M02-S05. Est: 3h,CS-EP-02,CS-M02-S05,Highest,3,S2,"M02,backend",M02
+Story,CS-M02-S06,Endpoint GET /auth/me,Module M02. Story Points: 2,CS-EP-02,,Highest,2,S2,"M02,api",M02
+Task,CS-M02-S06-T01,GET /auth/me profil selon rôle,Sub-task of CS-M02-S06. Est: 2h,CS-EP-02,CS-M02-S06,Highest,2,S2,"M02,backend",M02
+Story,CS-M03-S01,Schéma Prisma catalog,Module M03. Story Points: 3,CS-EP-03,,Highest,3,S2,"M03,api",M03
+Task,CS-M03-S01-T01,Models categories offers options,Sub-task of CS-M03-S01. Est: 2h,CS-EP-03,CS-M03-S01,Highest,2,S2,"M03,backend",M03
+Task,CS-M03-S01-T02,Migration catalog,Sub-task of CS-M03-S01. Est: 1h,CS-EP-03,CS-M03-S01,Highest,1,S2,"M03,backend",M03
+Story,CS-M03-S02,Schéma zones PostGIS,Module M03. Story Points: 5,CS-EP-03,,Highest,5,S2,"M03,api",M03
+Task,CS-M03-S02-T01,Extension PostGIS migration,Sub-task of CS-M03-S02. Est: 1h,CS-EP-03,CS-M03-S02,Highest,1,S2,"M03,backend",M03
+Task,CS-M03-S02-T02,Model service_zones polygon,Sub-task of CS-M03-S02. Est: 2h,CS-EP-03,CS-M03-S02,Highest,2,S2,"M03,backend",M03
+Task,CS-M03-S02-T03,Model zone_pricing,Sub-task of CS-M03-S02. Est: 2h,CS-EP-03,CS-M03-S02,Highest,2,S2,"M03,backend",M03
+Story,CS-M03-S03,GET catalog offres par zone,Module M03. Story Points: 3,CS-EP-03,,Highest,3,S3,"M03,api",M03
+Task,CS-M03-S03-T01,GET /catalog/categories,Sub-task of CS-M03-S03. Est: 1h,CS-EP-03,CS-M03-S03,Highest,1,S3,"M03,backend",M03
+Task,CS-M03-S03-T02,GET /catalog/offers?zone=,Sub-task of CS-M03-S03. Est: 2h,CS-EP-03,CS-M03-S03,Highest,2,S3,"M03,backend",M03
+Story,CS-M03-S04,POST /catalog/quote calcul prix,Module M03. Story Points: 5,CS-EP-03,,Highest,5,S3,"M03,api",M03
+Task,CS-M03-S04-T01,PricingService RG-CAT-02,Sub-task of CS-M03-S04. Est: 2h,CS-EP-03,CS-M03-S04,Highest,2,S3,"M03,backend",M03
+Task,CS-M03-S04-T02,Tests unitaires pricing,Sub-task of CS-M03-S04. Est: 2h,CS-EP-03,CS-M03-S04,Highest,2,S3,"M03,backend",M03
+Task,CS-M03-S04-T03,Endpoint + Zod validation,Sub-task of CS-M03-S04. Est: 1h,CS-EP-03,CS-M03-S04,Highest,1,S3,"M03,backend",M03
+Story,CS-M03-S05,POST /zones/check couverture,Module M03. Story Points: 5,CS-EP-03,,Highest,5,S3,"M03,api",M03
+Task,CS-M03-S05-T01,GeoService point-in-polygon,Sub-task of CS-M03-S05. Est: 3h,CS-EP-03,CS-M03-S05,Highest,3,S3,"M03,backend",M03
+Task,CS-M03-S05-T02,Endpoint /zones/check,Sub-task of CS-M03-S05. Est: 1h,CS-EP-03,CS-M03-S05,Highest,1,S3,"M03,backend",M03
+Task,CS-M03-S05-T03,Tests polygone Lyon,Sub-task of CS-M03-S05. Est: 1h,CS-EP-03,CS-M03-S05,Highest,1,S3,"M03,backend",M03
+Story,CS-M03-S06,POST /zones/leads hors zone,Module M03. Story Points: 2,CS-EP-03,,High,2,S3,"M03,api",M03
+Task,CS-M03-S06-T01,Model out_of_zone_leads + endpoint,Sub-task of CS-M03-S06. Est: 2h,CS-EP-03,CS-M03-S06,High,2,S3,"M03,backend",M03
+Story,CS-M03-S07,Seed Lyon 4 formules zone,Module M03. Story Points: 3,CS-EP-03,,Highest,3,S3,"M03,api",M03
+Task,CS-M03-S07-T01,prisma/seed.ts catalog + zone Lyon,Sub-task of CS-M03-S07. Est: 3h,CS-EP-03,CS-M03-S07,Highest,3,S3,"M03,backend",M03
+Story,CS-M04-S01,CRUD profil pro,Module M04. Story Points: 3,CS-EP-04,,Highest,3,S3,"M04,api",M04
+Task,CS-M04-S01-T01,GET PATCH /providers/me,Sub-task of CS-M04-S01. Est: 3h,CS-EP-04,CS-M04-S01,Highest,3,S3,"M04,backend",M04
+Story,CS-M04-S02,Wizard KYC submit documents,Module M04. Story Points: 8,CS-EP-04,,Highest,8,S4,"M04,api",M04
+Task,CS-M04-S02-T01,Model provider_kyc_documents,Sub-task of CS-M04-S02. Est: 1h,CS-EP-04,CS-M04-S02,Highest,1,S4,"M04,backend",M04
+Task,CS-M04-S02-T02,POST /providers/kyc/submit,Sub-task of CS-M04-S02. Est: 2h,CS-EP-04,CS-M04-S02,Highest,2,S4,"M04,backend",M04
+Task,CS-M04-S02-T03,Validation SIRET,Sub-task of CS-M04-S02. Est: 1h,CS-EP-04,CS-M04-S02,Highest,1,S4,"M04,backend",M04
+Task,CS-M04-S02-T04,State machine kyc_status,Sub-task of CS-M04-S02. Est: 2h,CS-EP-04,CS-M04-S02,Highest,2,S4,"M04,backend",M04
+Task,CS-M04-S02-T05,Tests RG-KYC-01,Sub-task of CS-M04-S02. Est: 2h,CS-EP-04,CS-M04-S02,Highest,2,S4,"M04,backend",M04
+Story,CS-M04-S03,Capabilities formules pro,Module M04. Story Points: 3,CS-EP-04,,Highest,3,S4,"M04,api",M04
+Task,CS-M04-S03-T01,GET PUT /providers/capabilities,Sub-task of CS-M04-S03. Est: 3h,CS-EP-04,CS-M04-S03,Highest,3,S4,"M04,backend",M04
+Story,CS-M04-S04,Disponibilités hebdomadaires,Module M04. Story Points: 5,CS-EP-04,,Highest,5,S4,"M04,api",M04
+Task,CS-M04-S04-T01,Model provider_availability,Sub-task of CS-M04-S04. Est: 1h,CS-EP-04,CS-M04-S04,Highest,1,S4,"M04,backend",M04
+Task,CS-M04-S04-T02,GET PUT /providers/availability,Sub-task of CS-M04-S04. Est: 2h,CS-EP-04,CS-M04-S04,Highest,2,S4,"M04,backend",M04
+Task,CS-M04-S04-T03,Blocked slots,Sub-task of CS-M04-S04. Est: 2h,CS-EP-04,CS-M04-S04,Highest,2,S4,"M04,backend",M04
+Story,CS-M04-S05,Zones intervention pro,Module M04. Story Points: 5,CS-EP-04,,Highest,5,S4,"M04,api",M04
+Task,CS-M04-S05-T01,Model provider_zones,Sub-task of CS-M04-S05. Est: 1h,CS-EP-04,CS-M04-S05,Highest,1,S4,"M04,backend",M04
+Task,CS-M04-S05-T02,API zones + rayon,Sub-task of CS-M04-S05. Est: 2h,CS-EP-04,CS-M04-S05,Highest,2,S4,"M04,backend",M04
+Task,CS-M04-S05-T03,Base address pro,Sub-task of CS-M04-S05. Est: 2h,CS-EP-04,CS-M04-S05,Highest,2,S4,"M04,backend",M04
+Story,CS-M04-S06,Stripe Connect onboarding link,Module M04. Story Points: 5,CS-EP-04,,Highest,5,S4,"M04,api",M04
+Task,CS-M04-S06-T01,POST /providers/stripe/onboard,Sub-task of CS-M04-S06. Est: 3h,CS-EP-04,CS-M04-S06,Highest,3,S4,"M04,backend",M04
+Task,CS-M04-S06-T02,Store stripe_account_id,Sub-task of CS-M04-S06. Est: 2h,CS-EP-04,CS-M04-S06,Highest,2,S4,"M04,backend",M04
+Story,CS-M04-S07,Blocage si KYC non approved,Module M04. Story Points: 3,CS-EP-04,,Highest,3,S4,"M04,api",M04
+Task,CS-M04-S07-T01,Guard missions KYC approved,Sub-task of CS-M04-S07. Est: 3h,CS-EP-04,CS-M04-S07,Highest,3,S4,"M04,backend",M04
+Story,CS-M04-S08,Alerte expiration RC Pro,Module M04. Story Points: 2,CS-EP-04,,High,2,S4,"M04,api",M04
+Task,CS-M04-S08-T01,Job check expiry J-30,Sub-task of CS-M04-S08. Est: 2h,CS-EP-04,CS-M04-S08,High,2,S4,"M04,backend",M04
+Story,CS-M05-S01,Schéma Prisma bookings,Module M05. Story Points: 5,CS-EP-05,,Highest,5,S4,"M05,api",M05
+Task,CS-M05-S01-T01,Models bookings items history,Sub-task of CS-M05-S01. Est: 3h,CS-EP-05,CS-M05-S01,Highest,3,S4,"M05,backend",M05
+Task,CS-M05-S01-T02,Migration bookings,Sub-task of CS-M05-S01. Est: 2h,CS-EP-05,CS-M05-S01,Highest,2,S4,"M05,backend",M05
+Story,CS-M05-S02,BookingStateMachine RG-BOOK,Module M05. Story Points: 8,CS-EP-05,,Highest,8,S5,"M05,api",M05
+Task,CS-M05-S02-T01,Map transitions autorisées,Sub-task of CS-M05-S02. Est: 2h,CS-EP-05,CS-M05-S02,Highest,2,S5,"M05,backend",M05
+Task,CS-M05-S02-T02,Guard canTransition,Sub-task of CS-M05-S02. Est: 3h,CS-EP-05,CS-M05-S02,Highest,3,S5,"M05,backend",M05
+Task,CS-M05-S02-T03,booking_status_history,Sub-task of CS-M05-S02. Est: 1h,CS-EP-05,CS-M05-S02,Highest,1,S5,"M05,backend",M05
+Task,CS-M05-S02-T04,Tests transitions,Sub-task of CS-M05-S02. Est: 2h,CS-EP-05,CS-M05-S02,Highest,2,S5,"M05,backend",M05
+Story,CS-M05-S03,POST /bookings création snapshot,Module M05. Story Points: 8,CS-EP-05,,Highest,8,S5,"M05,api",M05
+Task,CS-M05-S03-T01,Create booking + pricing snapshot,Sub-task of CS-M05-S03. Est: 3h,CS-EP-05,CS-M05-S03,Highest,3,S5,"M05,backend",M05
+Task,CS-M05-S03-T02,Idempotency-Key header,Sub-task of CS-M05-S03. Est: 2h,CS-EP-05,CS-M05-S03,Highest,2,S5,"M05,backend",M05
+Task,CS-M05-S03-T03,Tests intégration create,Sub-task of CS-M05-S03. Est: 3h,CS-EP-05,CS-M05-S03,Highest,3,S5,"M05,backend",M05
+Story,CS-M05-S04,MatchingService broadcast pros,Module M05. Story Points: 8,CS-EP-05,,Highest,8,S5,"M05,api",M05
+Task,CS-M05-S04-T01,Filter eligible pros,Sub-task of CS-M05-S04. Est: 3h,CS-EP-05,CS-M05-S04,Highest,3,S5,"M05,backend",M05
+Task,CS-M05-S04-T02,Score distance rating,Sub-task of CS-M05-S04. Est: 2h,CS-EP-05,CS-M05-S04,Highest,2,S5,"M05,backend",M05
+Task,CS-M05-S04-T03,Job broadcast push,Sub-task of CS-M05-S04. Est: 2h,CS-EP-05,CS-M05-S04,Highest,2,S5,"M05,backend",M05
+Task,CS-M05-S04-T04,Lock premier accept,Sub-task of CS-M05-S04. Est: 1h,CS-EP-05,CS-M05-S04,Highest,1,S5,"M05,backend",M05
+Story,CS-M05-S05,Accept decline mission pro,Module M05. Story Points: 5,CS-EP-05,,Highest,5,S5,"M05,api",M05
+Task,CS-M05-S05-T01,POST accept exclusive lock,Sub-task of CS-M05-S05. Est: 3h,CS-EP-05,CS-M05-S05,Highest,3,S5,"M05,backend",M05
+Task,CS-M05-S05-T02,POST decline + motif,Sub-task of CS-M05-S05. Est: 2h,CS-EP-05,CS-M05-S05,Highest,2,S5,"M05,backend",M05
+Story,CS-M05-S06,Transitions en_route in_progress completed,Module M05. Story Points: 5,CS-EP-05,,Highest,5,S6,"M05,api",M05
+Task,CS-M05-S06-T01,PATCH /bookings/:id/status,Sub-task of CS-M05-S06. Est: 3h,CS-EP-05,CS-M05-S06,Highest,3,S6,"M05,backend",M05
+Task,CS-M05-S06-T02,Validation photos min clôture,Sub-task of CS-M05-S06. Est: 2h,CS-EP-05,CS-M05-S06,Highest,2,S6,"M05,backend",M05
+Story,CS-M05-S07,Jobs BullMQ timeout T1 T2,Module M05. Story Points: 5,CS-EP-05,,Highest,5,S6,"M05,api",M05
+Task,CS-M05-S07-T01,Queue matching jobs,Sub-task of CS-M05-S07. Est: 2h,CS-EP-05,CS-M05-S07,Highest,2,S6,"M05,backend",M05
+Task,CS-M05-S07-T02,Job expand-radius T1 30min,Sub-task of CS-M05-S07. Est: 2h,CS-EP-05,CS-M05-S07,Highest,2,S6,"M05,backend",M05
+Task,CS-M05-S07-T03,Job unassigned T2 2h,Sub-task of CS-M05-S07. Est: 1h,CS-EP-05,CS-M05-S07,Highest,1,S6,"M05,backend",M05
+Story,CS-M05-S08,Annulation RG-CANCEL,Module M05. Story Points: 5,CS-EP-05,,Highest,5,S6,"M05,api",M05
+Task,CS-M05-S08-T01,PATCH cancel client rules,Sub-task of CS-M05-S08. Est: 3h,CS-EP-05,CS-M05-S08,Highest,3,S6,"M05,backend",M05
+Task,CS-M05-S08-T02,PATCH cancel provider rules,Sub-task of CS-M05-S08. Est: 2h,CS-EP-05,CS-M05-S08,Highest,2,S6,"M05,backend",M05
+Story,CS-M05-S09,GET bookings list detail timeline,Module M05. Story Points: 3,CS-EP-05,,Highest,3,S6,"M05,api",M05
+Task,CS-M05-S09-T01,GET /bookings GET /bookings/:id,Sub-task of CS-M05-S09. Est: 3h,CS-EP-05,CS-M05-S09,Highest,3,S6,"M05,backend",M05
+Story,CS-M05-S10,API créneaux disponibles slot picker,Module M05. Story Points: 5,CS-EP-05,,Highest,5,S5,"M05,api",M05
+Task,CS-M05-S10-T01,SlotService capacité zone,Sub-task of CS-M05-S10. Est: 3h,CS-EP-05,CS-M05-S10,Highest,3,S5,"M05,backend",M05
+Task,CS-M05-S10-T02,Endpoint slots J+14,Sub-task of CS-M05-S10. Est: 2h,CS-EP-05,CS-M05-S10,Highest,2,S5,"M05,backend",M05
+Story,CS-M06-S01,Schéma Prisma payments,Module M06. Story Points: 2,CS-EP-06,,Highest,2,S5,"M06,api",M06
+Task,CS-M06-S01-T01,Model payments,Sub-task of CS-M06-S01. Est: 2h,CS-EP-06,CS-M06-S01,Highest,2,S5,"M06,backend",M06
+Story,CS-M06-S02,PaymentIntent manual capture booking,Module M06. Story Points: 5,CS-EP-06,,Highest,5,S5,"M06,api",M06
+Task,CS-M06-S02-T01,Create PI on booking,Sub-task of CS-M06-S02. Est: 3h,CS-EP-06,CS-M06-S02,Highest,3,S5,"M06,backend",M06
+Task,CS-M06-S02-T02,Return clientSecret mobile,Sub-task of CS-M06-S02. Est: 2h,CS-EP-06,CS-M06-S02,Highest,2,S5,"M06,backend",M06
+Story,CS-M06-S03,Capture completed + commission,Module M06. Story Points: 5,CS-EP-06,,Highest,5,S5,"M06,api",M06
+Task,CS-M06-S03-T01,Capture on completed,Sub-task of CS-M06-S03. Est: 3h,CS-EP-06,CS-M06-S03,Highest,3,S5,"M06,backend",M06
+Task,CS-M06-S03-T02,application_fee calculation,Sub-task of CS-M06-S03. Est: 2h,CS-EP-06,CS-M06-S03,Highest,2,S5,"M06,backend",M06
+Story,CS-M06-S04,Webhook Stripe idempotent,Module M06. Story Points: 5,CS-EP-06,,Highest,5,S6,"M06,api",M06
+Task,CS-M06-S04-T01,POST /webhooks/stripe verify sig,Sub-task of CS-M06-S04. Est: 2h,CS-EP-06,CS-M06-S04,Highest,2,S6,"M06,backend",M06
+Task,CS-M06-S04-T02,Queue process webhook,Sub-task of CS-M06-S04. Est: 2h,CS-EP-06,CS-M06-S04,Highest,2,S6,"M06,backend",M06
+Task,CS-M06-S04-T03,Store event IDs,Sub-task of CS-M06-S04. Est: 1h,CS-EP-06,CS-M06-S04,Highest,1,S6,"M06,backend",M06
+Story,CS-M06-S05,Refund admin annulation auth,Module M06. Story Points: 3,CS-EP-06,,High,3,S6,"M06,api",M06
+Task,CS-M06-S05-T01,Refund + cancel PI endpoints,Sub-task of CS-M06-S05. Est: 3h,CS-EP-06,CS-M06-S05,High,3,S6,"M06,backend",M06
+Story,CS-M06-S06,Sync stripe charges_enabled,Module M06. Story Points: 3,CS-EP-06,,Highest,3,S6,"M06,api",M06
+Task,CS-M06-S06-T01,Webhook account.updated sync,Sub-task of CS-M06-S06. Est: 3h,CS-EP-06,CS-M06-S06,Highest,3,S6,"M06,backend",M06
+Story,CS-M07-S01,Config S3 Scaleway R2,Module M07. Story Points: 3,CS-EP-07,,Highest,3,S6,"M07,api",M07
+Task,CS-M07-S01-T01,S3 module Nest config,Sub-task of CS-M07-S01. Est: 3h,CS-EP-07,CS-M07-S01,Highest,3,S6,"M07,backend",M07
+Story,CS-M07-S02,POST /media/upload-url presigned,Module M07. Story Points: 5,CS-EP-07,,Highest,5,S6,"M07,api",M07
+Task,CS-M07-S02-T01,S3 client presigned PUT,Sub-task of CS-M07-S02. Est: 2h,CS-EP-07,CS-M07-S02,Highest,2,S6,"M07,backend",M07
+Task,CS-M07-S02-T02,MIME whitelist max size,Sub-task of CS-M07-S02. Est: 2h,CS-EP-07,CS-M07-S02,Highest,2,S6,"M07,backend",M07
+Task,CS-M07-S02-T03,Endpoint upload-url,Sub-task of CS-M07-S02. Est: 1h,CS-EP-07,CS-M07-S02,Highest,1,S6,"M07,backend",M07
+Story,CS-M07-S03,POST /media/confirm link booking,Module M07. Story Points: 3,CS-EP-07,,Highest,3,S6,"M07,api",M07
+Task,CS-M07-S03-T01,Model booking_photos confirm,Sub-task of CS-M07-S03. Est: 3h,CS-EP-07,CS-M07-S03,Highest,3,S6,"M07,backend",M07
+Story,CS-M07-S04,Validation min photos clôture,Module M07. Story Points: 2,CS-EP-07,,Highest,2,S6,"M07,api",M07
+Task,CS-M07-S04-T01,Check 2 before 2 after RG-BOOK-04,Sub-task of CS-M07-S04. Est: 2h,CS-EP-07,CS-M07-S04,Highest,2,S6,"M07,backend",M07
+Story,CS-M08-S01,POST /reviews rating pro,Module M08. Story Points: 3,CS-EP-08,,High,3,S7,"M08,api",M08
+Task,CS-M08-S01-T01,Create review update rating_avg,Sub-task of CS-M08-S01. Est: 3h,CS-EP-08,CS-M08-S01,High,3,S7,"M08,backend",M08
+Story,CS-M08-S02,POST /disputes freeze payout,Module M08. Story Points: 5,CS-EP-08,,High,5,S7,"M08,api",M08
+Task,CS-M08-S02-T01,Create dispute freeze payment,Sub-task of CS-M08-S02. Est: 3h,CS-EP-08,CS-M08-S02,High,3,S7,"M08,backend",M08
+Task,CS-M08-S02-T02,Window 48h check,Sub-task of CS-M08-S02. Est: 2h,CS-EP-08,CS-M08-S02,High,2,S7,"M08,backend",M08
+Story,CS-M08-S03,GET reviews public pro,Module M08. Story Points: 2,CS-EP-08,,High,2,S7,"M08,api",M08
+Task,CS-M08-S03-T01,GET /reviews/provider/:id,Sub-task of CS-M08-S03. Est: 2h,CS-EP-08,CS-M08-S03,High,2,S7,"M08,backend",M08
+Story,CS-M08-S04,Fenêtres 72h avis 48h litige,Module M08. Story Points: 3,CS-EP-08,,High,3,S7,"M08,api",M08
+Task,CS-M08-S04-T01,Validation windows RG-QUAL RG-DISPUTE,Sub-task of CS-M08-S04. Est: 3h,CS-EP-08,CS-M08-S04,High,3,S7,"M08,backend",M08
+Story,CS-M09-S01,Enregistrement expo push token,Module M09. Story Points: 2,CS-EP-09,,High,2,S7,"M09,api",M09
+Task,CS-M09-S01-T01,POST /users/push-token,Sub-task of CS-M09-S01. Est: 2h,CS-EP-09,CS-M09-S01,High,2,S7,"M09,backend",M09
+Story,CS-M09-S02,Worker send-push Expo API,Module M09. Story Points: 3,CS-EP-09,,High,3,S7,"M09,api",M09
+Task,CS-M09-S02-T01,Notification worker Expo push,Sub-task of CS-M09-S02. Est: 3h,CS-EP-09,CS-M09-S02,High,3,S7,"M09,backend",M09
+Story,CS-M09-S03,SMS email templates booking,Module M09. Story Points: 5,CS-EP-09,,High,5,S7,"M09,api",M09
+Task,CS-M09-S03-T01,Email templates Brevo,Sub-task of CS-M09-S03. Est: 2h,CS-EP-09,CS-M09-S03,High,2,S7,"M09,backend",M09
+Task,CS-M09-S03-T02,SMS templates,Sub-task of CS-M09-S03. Est: 2h,CS-EP-09,CS-M09-S03,High,2,S7,"M09,backend",M09
+Task,CS-M09-S03-T03,Queue notifications,Sub-task of CS-M09-S03. Est: 1h,CS-EP-09,CS-M09-S03,High,1,S7,"M09,backend",M09
+Story,CS-M09-S04,Events statut mission,Module M09. Story Points: 3,CS-EP-09,,High,3,S7,"M09,api",M09
+Task,CS-M09-S04-T01,Triggers on status change,Sub-task of CS-M09-S04. Est: 3h,CS-EP-09,CS-M09-S04,High,3,S7,"M09,backend",M09
+Story,CS-M10-S01,Auth admin email role,Module M10. Story Points: 3,CS-EP-10,,Highest,3,S7,M10,M10
+Task,CS-M10-S01-T01,Admin login guard,Sub-task of CS-M10-S01. Est: 3h,CS-EP-10,CS-M10-S01,Highest,3,S7,"M10,backend",M10
+Story,CS-M10-S02,GET /admin/dashboard KPIs,Module M10. Story Points: 5,CS-EP-10,,High,5,S8,M10,M10
+Task,CS-M10-S02-T01,Dashboard aggregation queries,Sub-task of CS-M10-S02. Est: 5h,CS-EP-10,CS-M10-S02,High,5,S8,"M10,backend",M10
+Story,CS-M10-S03,Approve reject KYC,Module M10. Story Points: 3,CS-EP-10,,Highest,3,S7,M10,M10
+Task,CS-M10-S03-T01,POST approve reject endpoints,Sub-task of CS-M10-S03. Est: 3h,CS-EP-10,CS-M10-S03,Highest,3,S7,"M10,backend",M10
+Story,CS-M10-S04,CRUD catalog admin,Module M10. Story Points: 5,CS-EP-10,,Highest,5,S8,M10,M10
+Task,CS-M10-S04-T01,Admin catalog CRUD offers options,Sub-task of CS-M10-S04. Est: 5h,CS-EP-10,CS-M10-S04,Highest,5,S8,"M10,backend",M10
+Story,CS-M10-S05,CRUD zones pricing,Module M10. Story Points: 5,CS-EP-10,,Highest,5,S8,M10,M10
+Task,CS-M10-S05-T01,Admin zones CRUD polygon pricing,Sub-task of CS-M10-S05. Est: 5h,CS-EP-10,CS-M10-S05,Highest,5,S8,"M10,backend",M10
+Story,CS-M10-S06,Admin bookings search refund,Module M10. Story Points: 3,CS-EP-10,,High,3,S8,M10,M10
+Task,CS-M10-S06-T01,Admin bookings list refund,Sub-task of CS-M10-S06. Est: 3h,CS-EP-10,CS-M10-S06,High,3,S8,"M10,backend",M10
+Story,CS-M10-S07,Resolve disputes,Module M10. Story Points: 3,CS-EP-10,,High,3,S8,M10,M10
+Task,CS-M10-S07-T01,PATCH admin disputes resolve,Sub-task of CS-M10-S07. Est: 3h,CS-EP-10,CS-M10-S07,High,3,S8,"M10,backend",M10
+Story,CS-M10-S08,PATCH /admin/config,Module M10. Story Points: 3,CS-EP-10,,Highest,3,S8,M10,M10
+Task,CS-M10-S08-T01,platform_config commission timeouts,Sub-task of CS-M10-S08. Est: 3h,CS-EP-10,CS-M10-S08,Highest,3,S8,"M10,backend",M10
+Story,CS-M11-S01,Setup Expo Router design tokens,Module M11. Story Points: 3,CS-EP-11,,Highest,3,S6,M11,M11
+Task,CS-M11-S01-T01,Expo Router layout tabs,Sub-task of CS-M11-S01. Est: 2h,CS-EP-11,CS-M11-S01,Highest,2,S6,"M11,mobile-client",M11
+Task,CS-M11-S01-T01b,NativeWind ui-tokens,Sub-task of CS-M11-S01. Est: 1h,CS-EP-11,CS-M11-S01,Highest,1,S6,"M11,mobile-client",M11
+Story,CS-M11-S02,Écrans auth C01 OTP,Module M11. Story Points: 5,CS-EP-11,,Highest,5,S6,M11,M11
+Task,CS-M11-S02-T01,Login phone input,Sub-task of CS-M11-S02. Est: 2h,CS-EP-11,CS-M11-S02,Highest,2,S6,"M11,mobile-client",M11
+Task,CS-M11-S02-T02,OTP verify screen,Sub-task of CS-M11-S02. Est: 2h,CS-EP-11,CS-M11-S02,Highest,2,S6,"M11,mobile-client",M11
+Task,CS-M11-S02-T03,SecureStore tokens,Sub-task of CS-M11-S02. Est: 1h,CS-EP-11,CS-M11-S02,Highest,1,S6,"M11,mobile-client",M11
+Story,CS-M11-S03,C03 Home navigation tabs,Module M11. Story Points: 5,CS-EP-11,,Highest,5,S7,M11,M11
+Task,CS-M11-S03-T01,Home hero CTA formules,Sub-task of CS-M11-S03. Est: 3h,CS-EP-11,CS-M11-S03,Highest,3,S7,"M11,mobile-client",M11
+Task,CS-M11-S03-T02,Tab bar accueil réservations profil,Sub-task of CS-M11-S03. Est: 2h,CS-EP-11,CS-M11-S03,Highest,2,S7,"M11,mobile-client",M11
+Story,CS-M11-S04,Parcours booking C04-C07,Module M11. Story Points: 13,CS-EP-11,,Highest,13,S7-S8,M11,M11
+Task,CS-M11-S04-T01,Layout stepper routes booking,Sub-task of CS-M11-S04. Est: 2h,CS-EP-11,CS-M11-S04,Highest,2,S7-S8,"M11,mobile-client",M11
+Task,CS-M11-S04-T02,C04 formula liste offres,Sub-task of CS-M11-S04. Est: 2h,CS-EP-11,CS-M11-S04,Highest,2,S7-S8,"M11,mobile-client",M11
+Task,CS-M11-S04-T03,C05 config quote live,Sub-task of CS-M11-S04. Est: 3h,CS-EP-11,CS-M11-S04,Highest,3,S7-S8,"M11,mobile-client",M11
+Task,CS-M11-S04-T04,C06 adresse carte zone check,Sub-task of CS-M11-S04. Est: 3h,CS-EP-11,CS-M11-S04,Highest,3,S7-S8,"M11,mobile-client",M11
+Task,CS-M11-S04-T05,C07 créneau calendrier,Sub-task of CS-M11-S04. Est: 3h,CS-EP-11,CS-M11-S04,Highest,3,S7-S8,"M11,mobile-client",M11
+Task,CS-M11-S04-T06,Zustand booking draft,Sub-task of CS-M11-S04. Est: 2h,CS-EP-11,CS-M11-S04,Highest,2,S7-S8,"M11,mobile-client",M11
+Story,CS-M11-S05,C08 Paiement Stripe PaymentSheet,Module M11. Story Points: 8,CS-EP-11,,Highest,8,S8,M11,M11
+Task,CS-M11-S05-T01,Stripe react-native setup,Sub-task of CS-M11-S05. Est: 3h,CS-EP-11,CS-M11-S05,Highest,3,S8,"M11,mobile-client",M11
+Task,CS-M11-S05-T02,C08 récap CGV,Sub-task of CS-M11-S05. Est: 2h,CS-EP-11,CS-M11-S05,Highest,2,S8,"M11,mobile-client",M11
+Task,CS-M11-S05-T03,Flow booking PaymentSheet,Sub-task of CS-M11-S05. Est: 3h,CS-EP-11,CS-M11-S05,Highest,3,S8,"M11,mobile-client",M11
+Story,CS-M11-S06,C09 Confirmation,Module M11. Story Points: 2,CS-EP-11,,Highest,2,S8,M11,M11
+Task,CS-M11-S06-T01,Confirmation screen animation,Sub-task of CS-M11-S06. Est: 2h,CS-EP-11,CS-M11-S06,Highest,2,S8,"M11,mobile-client",M11
+Story,CS-M11-S07,C10 Suivi mission timeline,Module M11. Story Points: 8,CS-EP-11,,Highest,8,S8,M11,M11
+Task,CS-M11-S07-T01,Timeline component statuts,Sub-task of CS-M11-S07. Est: 3h,CS-EP-11,CS-M11-S07,Highest,3,S8,"M11,mobile-client",M11
+Task,CS-M11-S07-T02,Provider card accepted,Sub-task of CS-M11-S07. Est: 2h,CS-EP-11,CS-M11-S07,Highest,2,S8,"M11,mobile-client",M11
+Task,CS-M11-S07-T03,Polling ou push refresh,Sub-task of CS-M11-S07. Est: 3h,CS-EP-11,CS-M11-S07,Highest,3,S8,"M11,mobile-client",M11
+Story,CS-M11-S08,C11 Avis,Module M11. Story Points: 3,CS-EP-11,,High,3,S9,M11,M11
+Task,CS-M11-S08-T01,Rating stars tags submit,Sub-task of CS-M11-S08. Est: 3h,CS-EP-11,CS-M11-S08,High,3,S9,"M11,mobile-client",M11
+Story,CS-M11-S09,C12 Liste réservations,Module M11. Story Points: 3,CS-EP-11,,High,3,S9,M11,M11
+Task,CS-M11-S09-T01,Tabs à venir passées,Sub-task of CS-M11-S09. Est: 3h,CS-EP-11,CS-M11-S09,High,3,S9,"M11,mobile-client",M11
+Story,CS-M11-S10,C13 Profil adresses,Module M11. Story Points: 3,CS-EP-11,,High,3,S9,M11,M11
+Task,CS-M11-S10-T01,Profile addresses CRUD,Sub-task of CS-M11-S10. Est: 3h,CS-EP-11,CS-M11-S10,High,3,S9,"M11,mobile-client",M11
+Story,CS-M11-S11,Push notifications client,Module M11. Story Points: 3,CS-EP-11,,High,3,S9,M11,M11
+Task,CS-M11-S11-T01,Expo notifications register,Sub-task of CS-M11-S11. Est: 3h,CS-EP-11,CS-M11-S11,High,3,S9,"M11,mobile-client",M11
+Story,CS-M11-S12,Google Places autocomplete C06,Module M11. Story Points: 5,CS-EP-11,,Highest,5,S8,M11,M11
+Task,CS-M11-S12-T01,Places autocomplete integration,Sub-task of CS-M11-S12. Est: 5h,CS-EP-11,CS-M11-S12,Highest,5,S8,"M11,mobile-client",M11
+Story,CS-M12-S01,Setup Expo Router pro tabs,Module M12. Story Points: 3,CS-EP-12,,Highest,3,S7,M12,M12
+Task,CS-M12-S01-T01,Pro app layout tabs missions,Sub-task of CS-M12-S01. Est: 3h,CS-EP-12,CS-M12-S01,Highest,3,S7,"M12,mobile-pro",M12
+Story,CS-M12-S02,Auth P00 OTP,Module M12. Story Points: 3,CS-EP-12,,Highest,3,S7,M12,M12
+Task,CS-M12-S02-T01,Pro login OTP flow,Sub-task of CS-M12-S02. Est: 3h,CS-EP-12,CS-M12-S02,Highest,3,S7,"M12,mobile-pro",M12
+Story,CS-M12-S03,KYC wizard P01 7 steps,Module M12. Story Points: 13,CS-EP-12,,Highest,13,S8,M12,M12
+Task,CS-M12-S03-T01,Steps 1-2 société RC Pro upload,Sub-task of CS-M12-S03. Est: 3h,CS-EP-12,CS-M12-S03,Highest,3,S8,"M12,mobile-pro",M12
+Task,CS-M12-S03-T02,Steps 3-4 méthodes zones,Sub-task of CS-M12-S03. Est: 3h,CS-EP-12,CS-M12-S03,Highest,3,S8,"M12,mobile-pro",M12
+Task,CS-M12-S03-T03,Steps 5-6 capabilities dispo,Sub-task of CS-M12-S03. Est: 3h,CS-EP-12,CS-M12-S03,Highest,3,S8,"M12,mobile-pro",M12
+Task,CS-M12-S03-T04,Step 7 avatar submit,Sub-task of CS-M12-S03. Est: 2h,CS-EP-12,CS-M12-S03,Highest,2,S8,"M12,mobile-pro",M12
+Task,CS-M12-S03-T05,Pending screen blocage,Sub-task of CS-M12-S03. Est: 2h,CS-EP-12,CS-M12-S03,Highest,2,S8,"M12,mobile-pro",M12
+Story,CS-M12-S04,P02 Liste missions 3 tabs,Module M12. Story Points: 5,CS-EP-12,,Highest,5,S9,M12,M12
+Task,CS-M12-S04-T01,Mission cards list segments,Sub-task of CS-M12-S04. Est: 5h,CS-EP-12,CS-M12-S04,Highest,5,S9,"M12,mobile-pro",M12
+Story,CS-M12-S05,P03 Détail accept decline,Module M12. Story Points: 5,CS-EP-12,,Highest,5,S9,M12,M12
+Task,CS-M12-S05-T01,Detail timer accept decline,Sub-task of CS-M12-S05. Est: 5h,CS-EP-12,CS-M12-S05,Highest,5,S9,"M12,mobile-pro",M12
+Story,CS-M12-S06,P04 En route Maps tel,Module M12. Story Points: 5,CS-EP-12,,Highest,5,S9,M12,M12
+Task,CS-M12-S06-T01,Maps navigation call client,Sub-task of CS-M12-S06. Est: 5h,CS-EP-12,CS-M12-S06,Highest,5,S9,"M12,mobile-pro",M12
+Story,CS-M12-S07,P05 Checklist upload photos,Module M12. Story Points: 8,CS-EP-12,,Highest,8,S10,M12,M12
+Task,CS-M12-S07-T01,Checklist dynamic template,Sub-task of CS-M12-S07. Est: 3h,CS-EP-12,CS-M12-S07,Highest,3,S10,"M12,mobile-pro",M12
+Task,CS-M12-S07-T02,Photo upload presigned,Sub-task of CS-M12-S07. Est: 3h,CS-EP-12,CS-M12-S07,Highest,3,S10,"M12,mobile-pro",M12
+Task,CS-M12-S07-T03,Complete mission flow,Sub-task of CS-M12-S07. Est: 2h,CS-EP-12,CS-M12-S07,Highest,2,S10,"M12,mobile-pro",M12
+Story,CS-M12-S08,P08 Gains historique,Module M12. Story Points: 5,CS-EP-12,,High,5,S10,M12,M12
+Task,CS-M12-S08-T01,Earnings list API,Sub-task of CS-M12-S08. Est: 5h,CS-EP-12,CS-M12-S08,High,5,S10,"M12,mobile-pro",M12
+Story,CS-M12-S09,P07 Planning disponibilités,Module M12. Story Points: 5,CS-EP-12,,High,5,S10,M12,M12
+Task,CS-M12-S09-T01,Availability editor calendar,Sub-task of CS-M12-S09. Est: 5h,CS-EP-12,CS-M12-S09,High,5,S10,"M12,mobile-pro",M12
+Story,CS-M12-S10,Stripe Connect onboarding,Module M12. Story Points: 5,CS-EP-12,,Highest,5,S9,M12,M12
+Task,CS-M12-S10-T01,Open Account Link web browser,Sub-task of CS-M12-S10. Est: 5h,CS-EP-12,CS-M12-S10,Highest,5,S9,"M12,mobile-pro",M12
+Story,CS-M12-S11,Push nouvelle mission high,Module M12. Story Points: 3,CS-EP-12,,Highest,3,S10,M12,M12
+Task,CS-M12-S11-T01,High priority push handler,Sub-task of CS-M12-S11. Est: 3h,CS-EP-12,CS-M12-S11,Highest,3,S10,"M12,mobile-pro",M12
+Story,CS-M13-S01,Setup Next.js shadcn auth,Module M13. Story Points: 5,CS-EP-13,,Highest,5,S8,M13,M13
+Task,CS-M13-S01-T01,Next app router shadcn,Sub-task of CS-M13-S01. Est: 2h,CS-EP-13,CS-M13-S01,Highest,2,S8,"M13,admin",M13
+Task,CS-M13-S01-T02,Login middleware protect,Sub-task of CS-M13-S01. Est: 3h,CS-EP-13,CS-M13-S01,Highest,3,S8,"M13,admin",M13
+Story,CS-M13-S02,A02 Dashboard KPIs,Module M13. Story Points: 5,CS-EP-13,,High,5,S9,M13,M13
+Task,CS-M13-S02-T01,Dashboard charts API,Sub-task of CS-M13-S02. Est: 5h,CS-EP-13,CS-M13-S02,High,5,S9,"M13,admin",M13
+Story,CS-M13-S03,A03 Validation KYC pros,Module M13. Story Points: 5,CS-EP-13,,Highest,5,S9,M13,M13
+Task,CS-M13-S03-T01,DataTable pros pending,Sub-task of CS-M13-S03. Est: 2h,CS-EP-13,CS-M13-S03,Highest,2,S9,"M13,admin",M13
+Task,CS-M13-S03-T02,Document viewer,Sub-task of CS-M13-S03. Est: 2h,CS-EP-13,CS-M13-S03,Highest,2,S9,"M13,admin",M13
+Task,CS-M13-S03-T03,Approve reject actions,Sub-task of CS-M13-S03. Est: 1h,CS-EP-13,CS-M13-S03,Highest,1,S9,"M13,admin",M13
+Story,CS-M13-S04,A04 CRUD catalog,Module M13. Story Points: 8,CS-EP-13,,Highest,8,S9,M13,M13
+Task,CS-M13-S04-T01,Offers CRUD forms,Sub-task of CS-M13-S04. Est: 4h,CS-EP-13,CS-M13-S04,Highest,4,S9,"M13,admin",M13
+Task,CS-M13-S04-T02,Options CRUD,Sub-task of CS-M13-S04. Est: 4h,CS-EP-13,CS-M13-S04,Highest,4,S9,"M13,admin",M13
+Story,CS-M13-S05,A05 Zones pricing editor,Module M13. Story Points: 8,CS-EP-13,,Highest,8,S10,M13,M13
+Task,CS-M13-S05-T01,Zone list map editor,Sub-task of CS-M13-S05. Est: 5h,CS-EP-13,CS-M13-S05,Highest,5,S10,"M13,admin",M13
+Task,CS-M13-S05-T02,Zone pricing overrides,Sub-task of CS-M13-S05. Est: 3h,CS-EP-13,CS-M13-S05,Highest,3,S10,"M13,admin",M13
+Story,CS-M13-S06,A06 Bookings refund,Module M13. Story Points: 5,CS-EP-13,,High,5,S10,M13,M13
+Task,CS-M13-S06-T01,Bookings search detail refund,Sub-task of CS-M13-S06. Est: 5h,CS-EP-13,CS-M13-S06,High,5,S10,"M13,admin",M13
+Story,CS-M13-S07,A07 Litiges resolve,Module M13. Story Points: 5,CS-EP-13,,High,5,S10,M13,M13
+Task,CS-M13-S07-T01,Disputes queue resolve UI,Sub-task of CS-M13-S07. Est: 5h,CS-EP-13,CS-M13-S07,High,5,S10,"M13,admin",M13
+Story,CS-M13-S08,A09 Settings config,Module M13. Story Points: 3,CS-EP-13,,Highest,3,S10,M13,M13
+Task,CS-M13-S08-T01,Settings form commission timeouts,Sub-task of CS-M13-S08. Est: 3h,CS-EP-13,CS-M13-S08,Highest,3,S10,"M13,admin",M13
+Story,CS-M14-S01,Collection Bruno Postman API,Module M14. Story Points: 2,CS-EP-14,,High,2,S10,M14,M14
+Task,CS-M14-S01-T01,Export OpenAPI Bruno collection,Sub-task of CS-M14-S01. Est: 2h,CS-EP-14,CS-M14-S01,High,2,S10,"M14,infra",M14
+Story,CS-M14-S02,Tests E2E manuels SC-01 SC-06,Module M14. Story Points: 5,CS-EP-14,,Highest,5,S11,M14,M14
+Task,CS-M14-S02-T01,Execute SC-01 happy path client,Sub-task of CS-M14-S02. Est: 2h,CS-EP-14,CS-M14-S02,Highest,2,S11,"M14,infra",M14
+Task,CS-M14-S02-T02,Execute SC-02 pro clôture,Sub-task of CS-M14-S02. Est: 2h,CS-EP-14,CS-M14-S02,Highest,2,S11,"M14,infra",M14
+Task,CS-M14-S02-T03,SC-03 à SC-06 edge cases,Sub-task of CS-M14-S02. Est: 1h,CS-EP-14,CS-M14-S02,Highest,1,S11,"M14,infra",M14
+Story,CS-M14-S03,EAS build TestFlight APK,Module M14. Story Points: 3,CS-EP-14,,Highest,3,S11,M14,M14
+Task,CS-M14-S03-T01,EAS preview builds both apps,Sub-task of CS-M14-S03. Est: 3h,CS-EP-14,CS-M14-S03,Highest,3,S11,"M14,infra",M14
+Story,CS-M14-S04,Prod deploy smoke tests,Module M14. Story Points: 5,CS-EP-14,,Highest,5,S11,M14,M14
+Task,CS-M14-S04-T01,Prod migration deploy,Sub-task of CS-M14-S04. Est: 3h,CS-EP-14,CS-M14-S04,Highest,3,S11,"M14,infra",M14
+Task,CS-M14-S04-T02,Smoke test checklist,Sub-task of CS-M14-S04. Est: 2h,CS-EP-14,CS-M14-S04,Highest,2,S11,"M14,infra",M14
+Story,CS-M14-S05,App Store Play submission,Module M14. Story Points: 5,CS-EP-14,,Highest,5,S12,M14,M14
+Task,CS-M14-S05-T01,Store listings screenshots,Sub-task of CS-M14-S05. Est: 3h,CS-EP-14,CS-M14-S05,Highest,3,S12,"M14,infra",M14
+Task,CS-M14-S05-T02,Submit review demo accounts,Sub-task of CS-M14-S05. Est: 2h,CS-EP-14,CS-M14-S05,Highest,2,S12,"M14,infra",M14
+Story,CS-M14-S06,Runbook incident monitoring,Module M14. Story Points: 3,CS-EP-14,,High,3,S12,M14,M14
+Task,CS-M14-S06-T01,Alerting Sentry uptime runbook,Sub-task of CS-M14-S06. Est: 3h,CS-EP-14,CS-M14-S06,High,3,S12,"M14,infra",M14

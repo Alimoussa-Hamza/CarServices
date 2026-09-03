@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "CARSERVICE Pro",
+    "slug": "carservice-provider",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "scheme": "carservice-provider",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "fr.carservice.provider"
+    },
+    "android": {
+      "package": "fr.carservice.provider"
+    },
+    "plugins": [],
+  }
+}

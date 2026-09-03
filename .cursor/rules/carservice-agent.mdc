@@ -1,0 +1,35 @@
+---
+description: Agent CARSERVICE — standards dev, docs stack, résolution bugs. Toujours actif sur ce repo.
+alwaysApply: true
+---
+
+# CARSERVICE — Règles agent IA
+
+## Skill principal
+Lire et appliquer `.cursor/skills/carservice-dev/SKILL.md` pour tout développement ou debug.
+
+## Avant de coder
+1. `./tools/check-env.sh`
+2. Versions : `docs/tech-stack/versions.md`
+3. Story backlog : `docs/backlog-jira.md`
+
+## Standards
+- Doc métier : `docs/regles-de-gestion.md`
+- Code : `docs/standards-developpement.md`
+- API : `docs/api-contrat-v1.md`
+- Docs techno : `docs/tech-stack/README.md`
+
+## Bugs
+Suivre `.cursor/skills/carservice-dev/bug-resolution.md` — repro, root cause, fix minimal, test.
+
+## Tests obligatoires
+- Tout nouveau développement doit être accompagné de tests unitaires ou d'intégration adaptés au risque.
+- Mettre à jour les tests existants quand un comportement change.
+- Avant de cocher une tâche comme faite : lancer au minimum `pnpm test` et, si le code compile, `pnpm build`.
+- Si un test n'est pas ajouté, justifier explicitement pourquoi dans la réponse.
+
+## Interdit
+- Logique booking/pricing côté mobile
+- `any` non justifié
+- Secrets dans le repo
+- Migration Prisma editée après merge

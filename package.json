@@ -1,0 +1,31 @@
+{
+  "name": "carservice",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f",
+    "check-env": "./tools/check-env.sh",
+    "setup-dev": "./tools/setup-dev.sh"
+  },
+  "engines": {
+    "node": ">=20 <21",
+    "pnpm": ">=9 <10"
+  },
+  "packageManager": "pnpm@9.15.4",
+  "pnpm": {
+    "overrides": {
+      "@types/react": "~18.3.20",
+      "@types/react-dom": "~18.3.7"
+    }
+  },
+  "devDependencies": {
+    "turbo": "^2.5.4",
+    "typescript": "^5.8.3"
+  }
+}

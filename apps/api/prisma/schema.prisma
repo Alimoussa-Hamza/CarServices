@@ -1,0 +1,200 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  client
+  provider
+  admin
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  phone        String   @unique @db.VarChar(20)
+  email        String?  @unique @db.VarChar(255)
+  passwordHash String?  @map("password_hash") @db.VarChar(255)
+  role         UserRole
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  clientProfile   ClientProfile?
+  providerProfile ProviderProfile?
+  refreshTokens   RefreshToken[]
+  addresses       Address[]
+
+  @@map("users")
+}
+
+model ClientProfile {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @unique @map("user_id") @db.Uuid
+  firstName String?  @map("first_name") @db.VarChar(100)
+  lastName  String?  @map("last_name") @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("client_profiles")
+}
+
+model ProviderProfile {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @unique @map("user_id") @db.Uuid
+  companyName String?  @map("company_name") @db.VarChar(255)
+  siret       String?  @unique @db.VarChar(14)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  providerZones ProviderZone[]
+
+  @@map("provider_profiles")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @unique @map("token_hash") @db.VarChar(64)
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model Address {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String?  @map("user_id") @db.Uuid
+  label        String?  @db.VarChar(100)
+  street       String   @db.VarChar(255)
+  complement   String?  @db.VarChar(255)
+  city         String   @db.VarChar(100)
+  postalCode   String   @map("postal_code") @db.VarChar(10)
+  country      String   @default("FR") @db.Char(2)
+  lat          Decimal  @db.Decimal(10, 7)
+  lng          Decimal  @db.Decimal(10, 7)
+  instructions String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+model ServiceZone {
+  id                  String   @id @default(uuid()) @db.Uuid
+  name                String   @db.VarChar(100)
+  slug                String   @unique @db.VarChar(100)
+  polygon             Unsupported("geography(Polygon,4326)")
+  isActive            Boolean  @default(false) @map("is_active")
+  priceCoefficient    Decimal  @default(1.00) @map("price_coefficient") @db.Decimal(4, 2)
+  minBookingLeadHours Int      @default(2) @map("min_booking_lead_hours")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  providerZones ProviderZone[]
+  zonePricing   ZonePricing[]
+
+  @@map("service_zones")
+}
+
+model ProviderZone {
+  providerId String   @map("provider_id") @db.Uuid
+  zoneId     String   @map("zone_id") @db.Uuid
+  radiusKm   Decimal? @map("radius_km") @db.Decimal(5, 2)
+
+  provider ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  zone     ServiceZone     @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  @@id([providerId, zoneId])
+  @@map("provider_zones")
+}
+
+model ServiceCategory {
+  id          String  @id @default(uuid()) @db.Uuid
+  slug        String  @unique @db.VarChar(50)
+  name        String  @db.VarChar(100)
+  description String?
+  icon        String? @db.VarChar(100)
+  isEnabled   Boolean @default(false) @map("is_enabled")
+  sortOrder   Int     @default(0) @map("sort_order")
+
+  offers ServiceOffer[]
+
+  @@map("service_categories")
+}
+
+model ServiceOffer {
+  id                String  @id @default(uuid()) @db.Uuid
+  categoryId        String  @map("category_id") @db.Uuid
+  slug              String  @unique @db.VarChar(100)
+  name              String  @db.VarChar(150)
+  description       String?
+  basePriceCents    Int     @map("base_price_cents")
+  durationMinutes   Int     @map("duration_minutes")
+  formSchema        Json    @map("form_schema")
+  checklistTemplate Json    @map("checklist_template")
+  isActive          Boolean @default(true) @map("is_active")
+  sortOrder         Int     @default(0) @map("sort_order")
+
+  category    ServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  options     OfferOption[]
+  zonePricing ZonePricing[]
+
+  @@index([categoryId])
+  @@map("service_offers")
+}
+
+model OfferOption {
+  id                   String  @id @default(uuid()) @db.Uuid
+  offerId              String  @map("offer_id") @db.Uuid
+  slug                 String  @db.VarChar(100)
+  name                 String  @db.VarChar(150)
+  priceDeltaCents      Int     @default(0) @map("price_delta_cents")
+  durationDeltaMinutes Int     @default(0) @map("duration_delta_minutes")
+  isActive             Boolean @default(true) @map("is_active")
+
+  offer ServiceOffer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  @@unique([offerId, slug])
+  @@index([offerId])
+  @@map("offer_options")
+}
+
+model ZonePricing {
+  id                 String @id @default(uuid()) @db.Uuid
+  zoneId             String @map("zone_id") @db.Uuid
+  offerId            String @map("offer_id") @db.Uuid
+  priceOverrideCents Int?   @map("price_override_cents")
+  vehicleSurcharges  Json   @map("vehicle_surcharges")
+
+  zone  ServiceZone  @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  offer ServiceOffer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  @@unique([zoneId, offerId])
+  @@index([offerId])
+  @@map("zone_pricing")
+}
+
+model OutOfZoneLead {
+  id          String   @id @default(uuid()) @db.Uuid
+  email       String?  @db.VarChar(255)
+  phone       String?  @db.VarChar(20)
+  lat         Decimal  @db.Decimal(10, 7)
+  lng         Decimal  @db.Decimal(10, 7)
+  addressText String   @map("address_text")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("out_of_zone_leads")
+}

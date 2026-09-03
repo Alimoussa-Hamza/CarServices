@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "CARSERVICE Client",
+    "slug": "carservice-client",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "scheme": "carservice-client",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "fr.carservice.client"
+    },
+    "android": {
+      "package": "fr.carservice.client"
+    },
+    "plugins": [],
+  }
+}
