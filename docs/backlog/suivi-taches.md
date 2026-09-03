@@ -17,7 +17,7 @@
 | D — Tests & qualité | 9/9 | — terminé |
 | E — Catalogue & zones (M03) | 7/7 | — terminé |
 | F — Apps clientes | 3/6 | — en attente maquettes |
-| G — Backend Pros & KYC (M04) | 4/8 | CS-M04-S05 Zones intervention pro |
+| G — Backend Pros & KYC (M04) | 5/8 | CS-M04-S06 Stripe Connect onboarding link |
 
 ---
 
@@ -141,8 +141,15 @@
   - [x] Créneaux bloqués ponctuels avec `endAt > startAt`
   - [x] Tests shared-types + API + api-client
   - [x] Collection Postman mise à jour
-- [~] **CS-M04-S05** Zones intervention pro
-- [ ] **CS-M04-S06** Stripe Connect onboarding link
+- [x] **CS-M04-S05** Zones intervention pro
+  - [x] `GET /providers/zones`
+  - [x] `PUT /providers/zones`
+  - [x] Utilise `provider_zones` existant
+  - [x] RG-ZONE-02 : seules les zones plateforme actives sont conservées
+  - [x] Rayon optionnel par zone
+  - [x] Tests shared-types + API + api-client
+  - [x] Collection Postman mise à jour
+- [~] **CS-M04-S06** Stripe Connect onboarding link
 - [ ] **CS-M04-S07** Blocage missions si KYC non approved
 - [ ] **CS-M04-S08** Alerte expiration RC Pro
 

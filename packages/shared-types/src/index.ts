@@ -419,3 +419,47 @@ export const ProviderAvailabilityResponseSchema = z.object({
 export type ProviderAvailabilityResponse = z.infer<
   typeof ProviderAvailabilityResponseSchema
 >;
+
+export const ProviderZoneSchema = z.object({
+  zoneId: z.string().uuid(),
+  zoneSlug: z.string(),
+  zoneName: z.string(),
+  radiusKm: z.number().positive().max(100).nullable(),
+});
+export type ProviderZoneDto = z.infer<typeof ProviderZoneSchema>;
+
+export const ProviderZonesResponseSchema = z.object({
+  zones: z.array(ProviderZoneSchema),
+});
+export type ProviderZonesResponse = z.infer<
+  typeof ProviderZonesResponseSchema
+>;
+
+export const UpdateProviderZoneSchema = z.object({
+  zoneId: z.string().uuid(),
+  radiusKm: z.number().positive().max(100).nullable().optional(),
+});
+export type UpdateProviderZoneDto = z.infer<typeof UpdateProviderZoneSchema>;
+
+export const UpdateProviderZonesSchema = z
+  .object({
+    zones: z.array(UpdateProviderZoneSchema).min(1).max(20),
+  })
+  .superRefine((dto, ctx) => {
+    const zoneIds = new Set<string>();
+
+    dto.zones.forEach((zone, index) => {
+      if (zoneIds.has(zone.zoneId)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['zones', index, 'zoneId'],
+          message: 'Zone dupliquée.',
+        });
+      }
+
+      zoneIds.add(zone.zoneId);
+    });
+  });
+export type UpdateProviderZonesDto = z.infer<
+  typeof UpdateProviderZonesSchema
+>;

@@ -13,6 +13,7 @@ import {
   ProviderCapabilitiesResponseSchema,
   ProviderCapabilitySchema,
   ProviderProfileSchema,
+  ProviderZonesResponseSchema,
   SendOtpResponseSchema,
   SendOtpSchema,
   ServiceCategorySchema,
@@ -21,6 +22,7 @@ import {
   UpdateProviderAvailabilitySchema,
   UpdateProviderCapabilitiesSchema,
   UpdateProviderProfileSchema,
+  UpdateProviderZonesSchema,
   UserRoleSchema,
   VehicleTypeSchema,
   VerifyOtpSchema,
@@ -620,6 +622,57 @@ describe('ProviderAvailabilityResponseSchema', () => {
           },
         ],
       }).weeklySlots,
+    ).toHaveLength(1);
+  });
+});
+
+describe('UpdateProviderZonesSchema', () => {
+  const zoneId = '99999999-9999-4999-8999-999999999999';
+
+  it('valide une zone provider avec rayon optionnel', () => {
+    expect(
+      UpdateProviderZonesSchema.parse({
+        zones: [{ zoneId, radiusKm: 12.5 }],
+      }),
+    ).toEqual({ zones: [{ zoneId, radiusKm: 12.5 }] });
+  });
+
+  it('rejette une liste vide', () => {
+    expect(UpdateProviderZonesSchema.safeParse({ zones: [] }).success).toBe(
+      false,
+    );
+  });
+
+  it('rejette un rayon négatif', () => {
+    expect(
+      UpdateProviderZonesSchema.safeParse({
+        zones: [{ zoneId, radiusKm: -1 }],
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejette les doublons de zone', () => {
+    expect(
+      UpdateProviderZonesSchema.safeParse({
+        zones: [{ zoneId }, { zoneId }],
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe('ProviderZonesResponseSchema', () => {
+  it('valide la réponse zones provider', () => {
+    expect(
+      ProviderZonesResponseSchema.parse({
+        zones: [
+          {
+            zoneId: '99999999-9999-4999-8999-999999999999',
+            zoneSlug: 'lyon',
+            zoneName: 'Lyon',
+            radiusKm: null,
+          },
+        ],
+      }).zones,
     ).toHaveLength(1);
   });
 });

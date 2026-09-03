@@ -17,6 +17,8 @@ import {
   UpdateProviderCapabilitiesSchema,
   UpdateProviderProfileDto,
   UpdateProviderProfileSchema,
+  UpdateProviderZonesDto,
+  UpdateProviderZonesSchema,
 } from '@carservice/shared-types';
 import {
   AuthPayload,
@@ -87,5 +89,19 @@ export class ProvidersController {
     dto: UpdateProviderAvailabilityDto,
   ) {
     return this.providersService.updateAvailability(user.sub, dto);
+  }
+
+  @Get('zones')
+  listZones(@CurrentUser() user: AuthPayload) {
+    return this.providersService.listZones(user.sub);
+  }
+
+  @Put('zones')
+  updateZones(
+    @CurrentUser() user: AuthPayload,
+    @Body(new ZodValidationPipe(UpdateProviderZonesSchema))
+    dto: UpdateProviderZonesDto,
+  ) {
+    return this.providersService.updateZones(user.sub, dto);
   }
 }

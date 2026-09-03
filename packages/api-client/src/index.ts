@@ -8,6 +8,7 @@ import {
   ProviderAvailabilityResponseSchema,
   ProviderCapabilitiesResponseSchema,
   ProviderProfileSchema,
+  ProviderZonesResponseSchema,
   RefreshTokenDto,
   SendOtpDto,
   SendOtpResponseSchema,
@@ -17,6 +18,7 @@ import {
   UpdateProviderAvailabilityDto,
   UpdateProviderCapabilitiesDto,
   UpdateProviderProfileDto,
+  UpdateProviderZonesDto,
   VerifyOtpDto,
   ZoneCheckDto,
   ZoneCheckResponseSchema,
@@ -179,6 +181,15 @@ export const api = {
         method: 'PUT',
         body: JSON.stringify(dto),
       }).then((data) => ProviderAvailabilityResponseSchema.parse(data)),
+    zones: () =>
+      apiRequest('/api/v1/providers/zones').then((data) =>
+        ProviderZonesResponseSchema.parse(data),
+      ),
+    updateZones: (dto: UpdateProviderZonesDto) =>
+      apiRequest('/api/v1/providers/zones', {
+        method: 'PUT',
+        body: JSON.stringify(dto),
+      }).then((data) => ProviderZonesResponseSchema.parse(data)),
   },
 };
 
@@ -189,6 +200,7 @@ export type {
   UpdateProviderAvailabilityDto,
   UpdateProviderCapabilitiesDto,
   UpdateProviderProfileDto,
+  UpdateProviderZonesDto,
   RefreshTokenDto,
   SendOtpDto,
   VerifyOtpDto,

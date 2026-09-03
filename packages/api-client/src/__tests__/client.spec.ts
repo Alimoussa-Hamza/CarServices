@@ -631,5 +631,57 @@ describe('api-client', () => {
         },
       );
     });
+
+    it("récupère les zones d'intervention provider", async () => {
+      const response = {
+        zones: [
+          {
+            zoneId: '99999999-9999-4999-8999-999999999999',
+            zoneSlug: 'lyon',
+            zoneName: 'Lyon',
+            radiusKm: 12.5,
+          },
+        ],
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: response }));
+
+      await expect(api.providers.zones()).resolves.toEqual(response);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/providers/zones',
+        { headers: { 'Content-Type': 'application/json' } },
+      );
+    });
+
+    it("met à jour les zones d'intervention provider", async () => {
+      const dto = {
+        zones: [
+          {
+            zoneId: '99999999-9999-4999-8999-999999999999',
+            radiusKm: 12.5,
+          },
+        ],
+      };
+      const response = {
+        zones: [
+          {
+            zoneId: '99999999-9999-4999-8999-999999999999',
+            zoneSlug: 'lyon',
+            zoneName: 'Lyon',
+            radiusKm: 12.5,
+          },
+        ],
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: response }));
+
+      await expect(api.providers.updateZones(dto)).resolves.toEqual(response);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/providers/zones',
+        {
+          method: 'PUT',
+          body: JSON.stringify(dto),
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    });
   });
 });

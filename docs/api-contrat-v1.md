@@ -160,6 +160,8 @@ X-Request-Id: <uuid>             # optionnel client, sinon généré serveur
 | POST | `/providers/stripe/onboard` | provider | Lien onboarding Connect |
 | GET | `/providers/availability` | provider | Dispo hebdo |
 | PUT | `/providers/availability` | provider | Maj dispo |
+| GET | `/providers/zones` | provider | Zones d'intervention |
+| PUT | `/providers/zones` | provider | Maj zones d'intervention |
 | GET | `/providers/capabilities` | provider | Formules proposées |
 | PUT | `/providers/capabilities` | provider | Maj capabilities |
 
@@ -310,6 +312,38 @@ Règles : au moins une plage hebdomadaire, `endTime > startTime`, pas de chevauc
       "startAt": "2026-09-10T09:00:00.000Z",
       "endAt": "2026-09-10T12:00:00.000Z",
       "reason": "Congé"
+    }
+  ]
+}
+```
+
+### GET `/providers/zones`
+
+```json
+{
+  "data": {
+    "zones": [
+      {
+        "zoneId": "uuid",
+        "zoneSlug": "lyon",
+        "zoneName": "Lyon",
+        "radiusKm": 12.5
+      }
+    ]
+  }
+}
+```
+
+### PUT `/providers/zones`
+
+Règle : seules les zones plateforme actives sont conservées pour l'éligibilité matching.
+
+```json
+{
+  "zones": [
+    {
+      "zoneId": "uuid",
+      "radiusKm": 12.5
     }
   ]
 }

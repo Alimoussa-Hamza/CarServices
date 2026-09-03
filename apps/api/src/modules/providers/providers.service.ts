@@ -9,6 +9,7 @@ import {
   UpdateProviderAvailabilityDto,
   UpdateProviderCapabilitiesDto,
   UpdateProviderProfileDto,
+  UpdateProviderZonesDto,
 } from '@carservice/shared-types';
 import { PrismaService } from '../../prisma/prisma.service';
 
@@ -57,6 +58,15 @@ type ProviderBlockedSlotRecord = {
 type ProviderAvailabilityStateRecord = {
   availability: ProviderAvailabilityRecord[];
   blockedSlots: ProviderBlockedSlotRecord[];
+};
+
+type ProviderZoneRecord = {
+  zoneId: string;
+  radiusKm: unknown | null;
+  zone: {
+    slug: string;
+    name: string;
+  };
 };
 
 @Injectable()
@@ -282,6 +292,67 @@ export class ProvidersService {
     return { data: this.toAvailabilityDto(availability) };
   }
 
+  async listZones(userId: string) {
+    const profile = await this.prisma.providerProfile.upsert({
+      where: { userId },
+      update: {},
+      create: { userId },
+      include: {
+        providerZones: {
+          where: { zone: { isActive: true } },
+          include: { zone: true },
+        },
+      },
+    });
+
+    return { data: this.toProviderZonesDto(profile.providerZones) };
+  }
+
+  async updateZones(userId: string, dto: UpdateProviderZonesDto) {
+    const profile = await this.prisma.providerProfile.upsert({
+      where: { userId },
+      update: {},
+      create: { userId },
+    });
+    const zoneIds = dto.zones.map((zone) => zone.zoneId);
+    const activeZones = await this.prisma.serviceZone.findMany({
+      where: { id: { in: zoneIds }, isActive: true },
+    });
+
+    if (!activeZones.length) {
+      throw new BadRequestException({
+        code: 'NO_VALID_PROVIDER_ZONES',
+        message: "Aucune zone d'intervention active fournie.",
+        details: [],
+      });
+    }
+
+    const radiusByZoneId = new Map(
+      dto.zones.map((zone) => [zone.zoneId, zone.radiusKm ?? null]),
+    );
+
+    await this.prisma.$transaction([
+      this.prisma.providerZone.deleteMany({
+        where: { providerId: profile.id },
+      }),
+      this.prisma.providerZone.createMany({
+        data: activeZones.map((zone) => ({
+          providerId: profile.id,
+          zoneId: zone.id,
+          radiusKm: radiusByZoneId.get(zone.id) ?? null,
+        })),
+        skipDuplicates: true,
+      }),
+    ]);
+
+    const providerZones = await this.prisma.providerZone.findMany({
+      where: { providerId: profile.id, zone: { isActive: true } },
+      include: { zone: true },
+    });
+
+    return { data: this.toProviderZonesDto(providerZones) };
+  }
+
   private assertKycCanBeSubmitted(
     status: 'draft' | 'submitted' | 'approved' | 'rejected',
   ): void {
@@ -400,6 +471,22 @@ export class ProvidersService {
         endAt: slot.endAt.toISOString(),
         reason: slot.reason,
       })),
+    };
+  }
+
+  private toProviderZonesDto(providerZones: ProviderZoneRecord[]) {
+    return {
+      zones: providerZones
+        .map((providerZone) => ({
+          zoneId: providerZone.zoneId,
+          zoneSlug: providerZone.zone.slug,
+          zoneName: providerZone.zone.name,
+          radiusKm:
+            providerZone.radiusKm === null
+              ? null
+              : this.decimalToNumber(providerZone.radiusKm),
+        }))
+        .sort((left, right) => left.zoneName.localeCompare(right.zoneName)),
     };
   }
 

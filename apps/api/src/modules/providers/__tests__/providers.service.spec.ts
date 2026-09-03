@@ -79,6 +79,24 @@ const blockedSlot = {
   reason: 'Congé',
 };
 
+const serviceZone = {
+  id: '99999999-9999-4999-8999-999999999999',
+  name: 'Lyon',
+  slug: 'lyon',
+  polygon: null,
+  isActive: true,
+  priceCoefficient: { toNumber: () => 1 },
+  minBookingLeadHours: 2,
+  createdAt: new Date('2026-01-01T00:00:00.000Z'),
+};
+
+const providerZone = {
+  providerId: profile.id,
+  zoneId: serviceZone.id,
+  radiusKm: { toNumber: () => 12.5 },
+  zone: serviceZone,
+};
+
 function buildService() {
   const prisma = {
     providerProfile: {
@@ -87,6 +105,14 @@ function buildService() {
       findUniqueOrThrow: jest.fn(),
     },
     serviceOffer: {
+      findMany: jest.fn(),
+    },
+    serviceZone: {
+      findMany: jest.fn(),
+    },
+    providerZone: {
+      deleteMany: jest.fn(),
+      createMany: jest.fn(),
       findMany: jest.fn(),
     },
     providerCapability: {
@@ -598,6 +624,104 @@ describe('ProvidersService', () => {
             reason: 'Congé',
           },
         ],
+      });
+    });
+  });
+
+  describe('listZones', () => {
+    it('retourne les zones actives du provider', async () => {
+      const { service, prisma } = buildService();
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        providerZones: [providerZone],
+      });
+
+      await expect(service.listZones(profile.userId)).resolves.toEqual({
+        data: {
+          zones: [
+            {
+              zoneId: serviceZone.id,
+              zoneSlug: 'lyon',
+              zoneName: 'Lyon',
+              radiusKm: 12.5,
+            },
+          ],
+        },
+      });
+
+      expect(prisma.providerProfile.upsert).toHaveBeenCalledWith({
+        where: { userId: profile.userId },
+        update: {},
+        create: { userId: profile.userId },
+        include: {
+          providerZones: {
+            where: { zone: { isActive: true } },
+            include: { zone: true },
+          },
+        },
+      });
+    });
+  });
+
+  describe('updateZones', () => {
+    it('remplace les zones par les zones plateforme actives', async () => {
+      const { service, prisma } = buildService();
+      const inactiveZoneId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+      prisma.providerProfile.upsert.mockResolvedValue(profile);
+      prisma.serviceZone.findMany.mockResolvedValue([serviceZone]);
+      prisma.providerZone.deleteMany.mockResolvedValue({ count: 0 });
+      prisma.providerZone.createMany.mockResolvedValue({ count: 1 });
+      prisma.providerZone.findMany.mockResolvedValue([providerZone]);
+
+      await expect(
+        service.updateZones(profile.userId, {
+          zones: [
+            { zoneId: serviceZone.id, radiusKm: 12.5 },
+            { zoneId: inactiveZoneId, radiusKm: 20 },
+          ],
+        }),
+      ).resolves.toEqual({
+        data: {
+          zones: [
+            {
+              zoneId: serviceZone.id,
+              zoneSlug: 'lyon',
+              zoneName: 'Lyon',
+              radiusKm: 12.5,
+            },
+          ],
+        },
+      });
+
+      expect(prisma.serviceZone.findMany).toHaveBeenCalledWith({
+        where: { id: { in: [serviceZone.id, inactiveZoneId] }, isActive: true },
+      });
+      expect(prisma.providerZone.deleteMany).toHaveBeenCalledWith({
+        where: { providerId: profile.id },
+      });
+      expect(prisma.providerZone.createMany).toHaveBeenCalledWith({
+        data: [
+          {
+            providerId: profile.id,
+            zoneId: serviceZone.id,
+            radiusKm: 12.5,
+          },
+        ],
+        skipDuplicates: true,
+      });
+    });
+
+    it('rejette une liste sans zone active valide', async () => {
+      const { service, prisma } = buildService();
+      prisma.providerProfile.upsert.mockResolvedValue(profile);
+      prisma.serviceZone.findMany.mockResolvedValue([]);
+
+      await expect(
+        service.updateZones(profile.userId, {
+          zones: [{ zoneId: serviceZone.id }],
+        }),
+      ).rejects.toMatchObject({
+        response: { code: 'NO_VALID_PROVIDER_ZONES' },
       });
     });
   });

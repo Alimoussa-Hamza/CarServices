@@ -25,6 +25,10 @@
     {
       "key": "optionId",
       "value": "00000000-0000-4000-8000-000000000000"
+    },
+    {
+      "key": "zoneId",
+      "value": "00000000-0000-4000-8000-000000000000"
     }
   ],
   "item": [
@@ -447,6 +451,50 @@
               "raw": "{\n  \"weeklySlots\": [\n    {\n      \"dayOfWeek\": 1,\n      \"startTime\": \"09:00\",\n      \"endTime\": \"12:00\",\n      \"isActive\": true\n    },\n    {\n      \"dayOfWeek\": 1,\n      \"startTime\": \"14:00\",\n      \"endTime\": \"18:00\",\n      \"isActive\": true\n    }\n  ],\n  \"blockedSlots\": [\n    {\n      \"startAt\": \"2026-09-10T09:00:00.000Z\",\n      \"endAt\": \"2026-09-10T12:00:00.000Z\",\n      \"reason\": \"Congé\"\n    }\n  ]\n}"
             },
             "url": "{{baseUrl}}/providers/availability"
+          }
+        },
+        {
+          "name": "Get Provider Zones",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/providers/zones"
+          }
+        },
+        {
+          "name": "Update Provider Zones",
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"zones\": [\n    {\n      \"zoneId\": \"{{zoneId}}\",\n      \"radiusKm\": 12.5\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/providers/zones"
           }
         }
       ]
