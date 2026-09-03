@@ -1,0 +1,377 @@
+{
+  "info": {
+    "name": "CARSERVICE API v1",
+    "_postman_id": "0bde8b22-0591-49bb-b389-76b61b8b45d6",
+    "description": "Collection Postman maintenue avec le contrat API CARSERVICE. Mettre à jour à chaque ajout ou modification d'endpoint.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "offerId",
+      "value": "00000000-0000-4000-8000-000000000000"
+    },
+    {
+      "key": "optionId",
+      "value": "00000000-0000-4000-8000-000000000000"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Root",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}"
+          }
+        },
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health"
+          }
+        },
+        {
+          "name": "Readiness",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health/ready"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+33600000001\",\n  \"role\": \"provider\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/otp/send"
+          }
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+33600000001\",\n  \"code\": \"123456\",\n  \"acceptTerms\": true\n}"
+            },
+            "url": "{{baseUrl}}/auth/otp/verify"
+          }
+        },
+        {
+          "name": "Refresh",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/refresh"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/logout"
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/auth/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Catalog",
+      "item": [
+        {
+          "name": "List Categories",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/catalog/categories"
+          }
+        },
+        {
+          "name": "List Offers",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/catalog/offers?zone=lyon"
+          }
+        },
+        {
+          "name": "Get Offer",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/catalog/offers/{{offerId}}"
+          }
+        },
+        {
+          "name": "Quote",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"offerId\": \"{{offerId}}\",\n  \"vehicleType\": \"suv\",\n  \"optionIds\": [\"{{optionId}}\"],\n  \"zoneSlug\": \"lyon\",\n  \"dirtLevel\": \"normal\"\n}"
+            },
+            "url": "{{baseUrl}}/catalog/quote"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Zones",
+      "item": [
+        {
+          "name": "Check Coverage",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lat\": 45.764,\n  \"lng\": 4.8357,\n  \"postalCode\": \"69002\"\n}"
+            },
+            "url": "{{baseUrl}}/zones/check"
+          }
+        },
+        {
+          "name": "Create Out Of Zone Lead",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"client@example.com\",\n  \"phone\": \"+33600000002\",\n  \"lat\": 45.9,\n  \"lng\": 4.7,\n  \"addressText\": \"10 rue test, 69000 Lyon\"\n}"
+            },
+            "url": "{{baseUrl}}/zones/leads"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Providers",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/providers/me"
+          }
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"Clean Auto Lyon\",\n  \"siret\": \"12345678901234\",\n  \"bio\": \"Lavage écologique sans eau.\",\n  \"avatarUrl\": \"https://example.com/avatar.jpg\",\n  \"washMethods\": [\"waterless\"],\n  \"baseAddressId\": null\n}"
+            },
+            "url": "{{baseUrl}}/providers/me"
+          }
+        },
+        {
+          "name": "Submit KYC",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"siret\": \"12345678901234\",\n  \"washMethods\": [\"waterless\"],\n  \"documents\": [\n    {\n      \"docType\": \"rc_pro\",\n      \"fileUrl\": \"https://example.com/rc-pro.pdf\",\n      \"expiresAt\": \"2099-12-31\"\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/providers/kyc/submit"
+          }
+        },
+        {
+          "name": "Get KYC Status",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/providers/kyc/status"
+          }
+        },
+        {
+          "name": "Get Capabilities",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/providers/capabilities"
+          }
+        },
+        {
+          "name": "Update Capabilities",
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"offerIds\": [\"{{offerId}}\"]\n}"
+            },
+            "url": "{{baseUrl}}/providers/capabilities"
+          }
+        }
+      ]
+    }
+  ]
+}

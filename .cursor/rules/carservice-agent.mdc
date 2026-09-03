@@ -28,6 +28,9 @@ Suivre `.cursor/skills/carservice-dev/bug-resolution.md` — repro, root cause, 
 - Avant de cocher une tâche comme faite : lancer au minimum `pnpm test` et, si le code compile, `pnpm build`.
 - Si un test n'est pas ajouté, justifier explicitement pourquoi dans la réponse.
 
+## Postman
+- Toute création ou modification d'endpoint API doit mettre à jour `docs/postman/carservice.postman_collection.json`.
+
 ## Interdit
 - Logique booking/pricing côté mobile
 - `any` non justifié

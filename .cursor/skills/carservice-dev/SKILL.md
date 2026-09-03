@@ -37,8 +37,9 @@ Tu es l’agent de développement du projet **CARSERVICE** (marketplace lavage a
 3. Vérifier contrat API (ajouter endpoint si manquant → doc d’abord)
 4. Implémenter : shared-types → api → api-client → app consommatrice
 5. Tests obligatoires pour tout nouveau développement (unitaires ou intégration selon le risque)
-6. lint + typecheck + test
-7. PR Conventional Commits (scope: api|mobile-client|mobile-provider|admin)
+6. Mettre à jour `docs/postman/carservice.postman_collection.json` si un endpoint API est ajouté ou modifié
+7. lint + typecheck + test
+8. PR Conventional Commits (scope: api|mobile-client|mobile-provider|admin)
 ```
 
 ### Ordre implémentation cross-stack
@@ -109,6 +110,7 @@ Résumé :
 
 - Pricing ou transition statut booking côté client
 - Endpoint sans schema Zod shared-types
+- Endpoint API ajouté/modifié sans mise à jour Postman
 - Migration Prisma editée après merge
 - `console.log` en prod (utiliser Pino / Sentry)
 - Bypass KYC guard pour "test rapide" en staging public

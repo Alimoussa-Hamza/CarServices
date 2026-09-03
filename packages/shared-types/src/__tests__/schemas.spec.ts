@@ -9,12 +9,15 @@ import {
   KycStatusSchema,
   OtpRoleSchema,
   OutOfZoneLeadSchema,
+  ProviderCapabilitiesResponseSchema,
+  ProviderCapabilitySchema,
   ProviderProfileSchema,
   SendOtpResponseSchema,
   SendOtpSchema,
   ServiceCategorySchema,
   ServiceOfferSchema,
   SubmitKycSchema,
+  UpdateProviderCapabilitiesSchema,
   UpdateProviderProfileSchema,
   UserRoleSchema,
   VehicleTypeSchema,
@@ -462,6 +465,63 @@ describe('KycStatusResponseSchema', () => {
         ],
       }),
     ).toMatchObject({ status: 'submitted' });
+  });
+});
+
+describe('ProviderCapabilitySchema', () => {
+  const capability = {
+    offerId: '44444444-4444-4444-8444-444444444444',
+    offerSlug: 'wash-complete',
+    offerName: 'Lavage complet',
+    categorySlug: 'wash',
+    isActive: true,
+  };
+
+  it('valide une capability lavage MVP', () => {
+    expect(ProviderCapabilitySchema.parse(capability)).toEqual(capability);
+  });
+
+  it('rejette une capability hors catégorie wash', () => {
+    expect(
+      ProviderCapabilitySchema.safeParse({
+        ...capability,
+        categorySlug: 'battery',
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe('ProviderCapabilitiesResponseSchema', () => {
+  it('valide une liste de capabilities provider', () => {
+    expect(
+      ProviderCapabilitiesResponseSchema.parse({
+        capabilities: [
+          {
+            offerId: '44444444-4444-4444-8444-444444444444',
+            offerSlug: 'wash-complete',
+            offerName: 'Lavage complet',
+            categorySlug: 'wash',
+            isActive: true,
+          },
+        ],
+      }).capabilities,
+    ).toHaveLength(1);
+  });
+});
+
+describe('UpdateProviderCapabilitiesSchema', () => {
+  it('valide une mise à jour de capabilities par offerIds', () => {
+    expect(
+      UpdateProviderCapabilitiesSchema.parse({
+        offerIds: ['44444444-4444-4444-8444-444444444444'],
+      }),
+    ).toEqual({ offerIds: ['44444444-4444-4444-8444-444444444444'] });
+  });
+
+  it('rejette une liste vide', () => {
+    expect(
+      UpdateProviderCapabilitiesSchema.safeParse({ offerIds: [] }).success,
+    ).toBe(false);
   });
 });
 

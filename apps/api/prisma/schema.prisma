@@ -84,10 +84,24 @@ model ProviderProfile {
 
   user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   baseAddress   Address?              @relation("ProviderBaseAddress", fields: [baseAddressId], references: [id], onDelete: SetNull)
+  capabilities  ProviderCapability[]
   providerZones ProviderZone[]
   kycDocuments  ProviderKycDocument[]
 
   @@map("provider_profiles")
+}
+
+model ProviderCapability {
+  providerId String  @map("provider_id") @db.Uuid
+  offerId    String  @map("offer_id") @db.Uuid
+  isActive   Boolean @default(true) @map("is_active")
+
+  provider ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  offer    ServiceOffer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  @@id([providerId, offerId])
+  @@index([offerId])
+  @@map("provider_capabilities")
 }
 
 model ProviderKycDocument {
@@ -199,9 +213,10 @@ model ServiceOffer {
   isActive          Boolean @default(true) @map("is_active")
   sortOrder         Int     @default(0) @map("sort_order")
 
-  category    ServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  options     OfferOption[]
-  zonePricing ZonePricing[]
+  category             ServiceCategory      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  options              OfferOption[]
+  zonePricing          ZonePricing[]
+  providerCapabilities ProviderCapability[]
 
   @@index([categoryId])
   @@map("service_offers")

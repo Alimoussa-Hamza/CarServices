@@ -237,6 +237,34 @@ Règles appliquées : SIRET 14 chiffres, RC Pro obligatoire non expirée, au moi
 }
 ```
 
+### GET `/providers/capabilities`
+
+```json
+{
+  "data": {
+    "capabilities": [
+      {
+        "offerId": "uuid",
+        "offerSlug": "wash-complete",
+        "offerName": "Lavage complet",
+        "categorySlug": "wash",
+        "isActive": true
+      }
+    ]
+  }
+}
+```
+
+### PUT `/providers/capabilities`
+
+Les offres hors catégorie `wash` ou inactives sont ignorées en MVP.
+
+```json
+{
+  "offerIds": ["uuid"]
+}
+```
+
 ---
 
 ## Bookings

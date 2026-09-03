@@ -17,7 +17,7 @@
 | D — Tests & qualité | 9/9 | — terminé |
 | E — Catalogue & zones (M03) | 7/7 | — terminé |
 | F — Apps clientes | 3/6 | — en attente maquettes |
-| G — Backend Pros & KYC (M04) | 2/8 | CS-M04-S03 Capabilities |
+| G — Backend Pros & KYC (M04) | 3/8 | CS-M04-S04 Disponibilités hebdomadaires |
 
 ---
 
@@ -126,8 +126,14 @@
   - [x] State machine `draft/rejected -> submitted`, blocage `submitted/approved`
   - [x] `POST /providers/kyc/submit` et `GET /providers/kyc/status`
   - [x] Tests shared-types + API + api-client
-- [~] **CS-M04-S03** Capabilities (formules proposées)
-- [ ] **CS-M04-S04** Disponibilités hebdomadaires
+- [x] **CS-M04-S03** Capabilities (formules proposées)
+  - [x] Modèle Prisma `provider_capabilities`
+  - [x] `GET /providers/capabilities`
+  - [x] `PUT /providers/capabilities`
+  - [x] RG-KYC-05 : seules les offres actives `wash` sont conservées au MVP
+  - [x] Tests shared-types + API + api-client
+  - [x] Collection Postman créée/maintenue
+- [~] **CS-M04-S04** Disponibilités hebdomadaires
 - [ ] **CS-M04-S05** Zones intervention pro
 - [ ] **CS-M04-S06** Stripe Connect onboarding link
 - [ ] **CS-M04-S07** Blocage missions si KYC non approved

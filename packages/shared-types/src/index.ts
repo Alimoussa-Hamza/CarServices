@@ -273,3 +273,26 @@ export const KycStatusResponseSchema = z.object({
   documents: z.array(KycDocumentSchema),
 });
 export type KycStatusResponse = z.infer<typeof KycStatusResponseSchema>;
+
+export const ProviderCapabilitySchema = z.object({
+  offerId: z.string().uuid(),
+  offerSlug: z.string(),
+  offerName: z.string(),
+  categorySlug: z.literal('wash'),
+  isActive: z.boolean(),
+});
+export type ProviderCapabilityDto = z.infer<typeof ProviderCapabilitySchema>;
+
+export const ProviderCapabilitiesResponseSchema = z.object({
+  capabilities: z.array(ProviderCapabilitySchema),
+});
+export type ProviderCapabilitiesResponse = z.infer<
+  typeof ProviderCapabilitiesResponseSchema
+>;
+
+export const UpdateProviderCapabilitiesSchema = z.object({
+  offerIds: z.array(z.string().uuid()).min(1).max(50),
+});
+export type UpdateProviderCapabilitiesDto = z.infer<
+  typeof UpdateProviderCapabilitiesSchema
+>;

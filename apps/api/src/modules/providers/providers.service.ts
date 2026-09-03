@@ -6,6 +6,7 @@ import {
 import { KycStatus } from '@prisma/client';
 import {
   SubmitKycDto,
+  UpdateProviderCapabilitiesDto,
   UpdateProviderProfileDto,
 } from '@carservice/shared-types';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -22,6 +23,19 @@ type ProviderKycStatusRecord = {
   kycStatus: 'draft' | 'submitted' | 'approved' | 'rejected';
   kycRejectionReason: string | null;
   kycDocuments: KycDocumentRecord[];
+};
+
+type ProviderCapabilityRecord = {
+  offerId: string;
+  isActive: boolean;
+  offer: {
+    slug: string;
+    name: string;
+    sortOrder: number;
+    category: {
+      slug: string;
+    };
+  };
 };
 
 @Injectable()
@@ -122,6 +136,72 @@ export class ProvidersService {
     return { data: this.toKycStatusDto(profile) };
   }
 
+  async listCapabilities(userId: string) {
+    const profile = await this.prisma.providerProfile.upsert({
+      where: { userId },
+      update: {},
+      create: { userId },
+      include: {
+        capabilities: {
+          where: { isActive: true },
+          include: {
+            offer: { include: { category: true } },
+          },
+        },
+      },
+    });
+
+    return { data: this.toCapabilitiesDto(profile.capabilities) };
+  }
+
+  async updateCapabilities(userId: string, dto: UpdateProviderCapabilitiesDto) {
+    const uniqueOfferIds = [...new Set(dto.offerIds)];
+    const profile = await this.prisma.providerProfile.upsert({
+      where: { userId },
+      update: {},
+      create: { userId },
+    });
+    const washOffers = await this.prisma.serviceOffer.findMany({
+      where: {
+        id: { in: uniqueOfferIds },
+        isActive: true,
+        category: { slug: 'wash' },
+      },
+      include: { category: true },
+    });
+
+    if (!washOffers.length) {
+      throw new BadRequestException({
+        code: 'NO_VALID_CAPABILITIES',
+        message: 'Aucune formule lavage valide fournie.',
+        details: [],
+      });
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.providerCapability.deleteMany({
+        where: { providerId: profile.id },
+      }),
+      this.prisma.providerCapability.createMany({
+        data: washOffers.map((offer) => ({
+          providerId: profile.id,
+          offerId: offer.id,
+          isActive: true,
+        })),
+        skipDuplicates: true,
+      }),
+    ]);
+
+    const capabilities = await this.prisma.providerCapability.findMany({
+      where: { providerId: profile.id, isActive: true },
+      include: {
+        offer: { include: { category: true } },
+      },
+    });
+
+    return { data: this.toCapabilitiesDto(capabilities) };
+  }
+
   private assertKycCanBeSubmitted(
     status: 'draft' | 'submitted' | 'approved' | 'rejected',
   ): void {
@@ -209,6 +289,20 @@ export class ProvidersService {
 
   private dateToIsoDate(date: Date | null): string | null {
     return date?.toISOString().slice(0, 10) ?? null;
+  }
+
+  private toCapabilitiesDto(capabilities: ProviderCapabilityRecord[]) {
+    return {
+      capabilities: [...capabilities]
+        .sort((left, right) => left.offer.sortOrder - right.offer.sortOrder)
+        .map((capability) => ({
+          offerId: capability.offerId,
+          offerSlug: capability.offer.slug,
+          offerName: capability.offer.name,
+          categorySlug: 'wash' as const,
+          isActive: capability.isActive,
+        })),
+    };
   }
 
   private async translateProviderProfileErrors<T>(

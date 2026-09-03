@@ -506,5 +506,56 @@ describe('api-client', () => {
         { headers: { 'Content-Type': 'application/json' } },
       );
     });
+
+    it('récupère les capabilities provider', async () => {
+      const response = {
+        capabilities: [
+          {
+            offerId: '44444444-4444-4444-8444-444444444444',
+            offerSlug: 'wash-complete',
+            offerName: 'Lavage complet',
+            categorySlug: 'wash',
+            isActive: true,
+          },
+        ],
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: response }));
+
+      await expect(api.providers.capabilities()).resolves.toEqual(response);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/providers/capabilities',
+        { headers: { 'Content-Type': 'application/json' } },
+      );
+    });
+
+    it('met à jour les capabilities provider', async () => {
+      const dto = {
+        offerIds: ['44444444-4444-4444-8444-444444444444'],
+      };
+      const response = {
+        capabilities: [
+          {
+            offerId: '44444444-4444-4444-8444-444444444444',
+            offerSlug: 'wash-complete',
+            offerName: 'Lavage complet',
+            categorySlug: 'wash',
+            isActive: true,
+          },
+        ],
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: response }));
+
+      await expect(api.providers.updateCapabilities(dto)).resolves.toEqual(
+        response,
+      );
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/providers/capabilities',
+        {
+          method: 'PUT',
+          body: JSON.stringify(dto),
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    });
   });
 });

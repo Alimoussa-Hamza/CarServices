@@ -32,11 +32,49 @@ const kycDocument = {
   createdAt: new Date('2026-01-01T00:00:00.000Z'),
 };
 
+const washOffer = {
+  id: '44444444-4444-4444-8444-444444444444',
+  slug: 'wash-complete',
+  name: 'Lavage complet',
+  description: null,
+  basePriceCents: 7900,
+  durationMinutes: 90,
+  formSchema: {},
+  checklistTemplate: {},
+  isActive: true,
+  sortOrder: 2,
+  categoryId: '55555555-5555-4555-8555-555555555555',
+  category: {
+    id: '55555555-5555-4555-8555-555555555555',
+    slug: 'wash',
+    name: 'Lavage auto',
+    description: null,
+    icon: null,
+    isEnabled: true,
+    sortOrder: 0,
+  },
+};
+
+const washCapability = {
+  providerId: profile.id,
+  offerId: washOffer.id,
+  isActive: true,
+  offer: washOffer,
+};
+
 function buildService() {
   const prisma = {
     providerProfile: {
       upsert: jest.fn(),
       update: jest.fn(),
+    },
+    serviceOffer: {
+      findMany: jest.fn(),
+    },
+    providerCapability: {
+      deleteMany: jest.fn(),
+      createMany: jest.fn(),
+      findMany: jest.fn(),
     },
     providerKycDocument: {
       deleteMany: jest.fn(),
@@ -45,8 +83,12 @@ function buildService() {
   };
   const prismaWithTransaction = {
     ...prisma,
-    $transaction: jest.fn((callback: (tx: typeof prisma) => unknown) =>
-      callback(prisma),
+    $transaction: jest.fn(
+      (
+        action:
+          | Array<Promise<unknown>>
+          | ((tx: typeof prisma) => Promise<unknown>),
+      ) => (Array.isArray(action) ? Promise.all(action) : action(prisma)),
     ),
   };
 
@@ -313,6 +355,90 @@ describe('ProvidersService', () => {
             },
           ],
         },
+      });
+    });
+  });
+
+  describe('listCapabilities', () => {
+    it('retourne les capabilities actives triées par offre', async () => {
+      const { service, prisma } = buildService();
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        capabilities: [washCapability],
+      });
+
+      await expect(service.listCapabilities(profile.userId)).resolves.toEqual({
+        data: {
+          capabilities: [
+            {
+              offerId: washOffer.id,
+              offerSlug: 'wash-complete',
+              offerName: 'Lavage complet',
+              categorySlug: 'wash',
+              isActive: true,
+            },
+          ],
+        },
+      });
+    });
+  });
+
+  describe('updateCapabilities', () => {
+    it('ignore les offres non wash et remplace les capabilities valides', async () => {
+      const { service, prisma } = buildService();
+      const batteryOfferId = '66666666-6666-4666-8666-666666666666';
+      prisma.providerProfile.upsert.mockResolvedValue(profile);
+      prisma.serviceOffer.findMany.mockResolvedValue([washOffer]);
+      prisma.providerCapability.deleteMany.mockResolvedValue({ count: 0 });
+      prisma.providerCapability.createMany.mockResolvedValue({ count: 1 });
+      prisma.providerCapability.findMany.mockResolvedValue([washCapability]);
+
+      await expect(
+        service.updateCapabilities(profile.userId, {
+          offerIds: [washOffer.id, batteryOfferId],
+        }),
+      ).resolves.toEqual({
+        data: {
+          capabilities: [
+            {
+              offerId: washOffer.id,
+              offerSlug: 'wash-complete',
+              offerName: 'Lavage complet',
+              categorySlug: 'wash',
+              isActive: true,
+            },
+          ],
+        },
+      });
+
+      expect(prisma.serviceOffer.findMany).toHaveBeenCalledWith({
+        where: {
+          id: { in: [washOffer.id, batteryOfferId] },
+          isActive: true,
+          category: { slug: 'wash' },
+        },
+        include: { category: true },
+      });
+      expect(prisma.providerCapability.deleteMany).toHaveBeenCalledWith({
+        where: { providerId: profile.id },
+      });
+      expect(prisma.providerCapability.createMany).toHaveBeenCalledWith({
+        data: [{ providerId: profile.id, offerId: washOffer.id, isActive: true }],
+        skipDuplicates: true,
+      });
+    });
+
+    it('rejette une liste sans capability wash valide', async () => {
+      const { service, prisma } = buildService();
+      prisma.providerProfile.upsert.mockResolvedValue(profile);
+      prisma.serviceOffer.findMany.mockResolvedValue([]);
+
+      await expect(
+        service.updateCapabilities(profile.userId, {
+          offerIds: ['66666666-6666-4666-8666-666666666666'],
+        }),
+      ).rejects.toMatchObject({
+        response: { code: 'NO_VALID_CAPABILITIES' },
       });
     });
   });
