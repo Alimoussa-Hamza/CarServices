@@ -557,5 +557,79 @@ describe('api-client', () => {
         },
       );
     });
+
+    it('récupère les disponibilités provider', async () => {
+      const response = {
+        weeklySlots: [
+          {
+            id: '77777777-7777-4777-8777-777777777777',
+            dayOfWeek: 1,
+            startTime: '09:00',
+            endTime: '12:00',
+            isActive: true,
+          },
+        ],
+        blockedSlots: [],
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: response }));
+
+      await expect(api.providers.availability()).resolves.toEqual(response);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/providers/availability',
+        { headers: { 'Content-Type': 'application/json' } },
+      );
+    });
+
+    it('met à jour les disponibilités provider', async () => {
+      const dto = {
+        weeklySlots: [
+          {
+            dayOfWeek: 1,
+            startTime: '09:00',
+            endTime: '12:00',
+            isActive: true,
+          },
+        ],
+        blockedSlots: [
+          {
+            startAt: '2026-09-10T09:00:00.000Z',
+            endAt: '2026-09-10T12:00:00.000Z',
+            reason: 'Congé',
+          },
+        ],
+      };
+      const response = {
+        weeklySlots: [
+          {
+            id: '77777777-7777-4777-8777-777777777777',
+            dayOfWeek: 1,
+            startTime: '09:00',
+            endTime: '12:00',
+            isActive: true,
+          },
+        ],
+        blockedSlots: [
+          {
+            id: '88888888-8888-4888-8888-888888888888',
+            startAt: '2026-09-10T09:00:00.000Z',
+            endAt: '2026-09-10T12:00:00.000Z',
+            reason: 'Congé',
+          },
+        ],
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: response }));
+
+      await expect(api.providers.updateAvailability(dto)).resolves.toEqual(
+        response,
+      );
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/providers/availability',
+        {
+          method: 'PUT',
+          body: JSON.stringify(dto),
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    });
   });
 });

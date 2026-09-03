@@ -82,9 +82,11 @@ model ProviderProfile {
   createdAt          DateTime     @default(now()) @map("created_at")
   updatedAt          DateTime     @updatedAt @map("updated_at")
 
-  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  baseAddress   Address?              @relation("ProviderBaseAddress", fields: [baseAddressId], references: [id], onDelete: SetNull)
+  user          User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  baseAddress   Address?               @relation("ProviderBaseAddress", fields: [baseAddressId], references: [id], onDelete: SetNull)
   capabilities  ProviderCapability[]
+  availability  ProviderAvailability[]
+  blockedSlots  ProviderBlockedSlot[]
   providerZones ProviderZone[]
   kycDocuments  ProviderKycDocument[]
 
@@ -102,6 +104,33 @@ model ProviderCapability {
   @@id([providerId, offerId])
   @@index([offerId])
   @@map("provider_capabilities")
+}
+
+model ProviderAvailability {
+  id         String   @id @default(uuid()) @db.Uuid
+  providerId String   @map("provider_id") @db.Uuid
+  dayOfWeek  Int      @map("day_of_week") @db.SmallInt
+  startTime  DateTime @map("start_time") @db.Time(0)
+  endTime    DateTime @map("end_time") @db.Time(0)
+  isActive   Boolean  @default(true) @map("is_active")
+
+  provider ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([providerId, dayOfWeek])
+  @@map("provider_availability")
+}
+
+model ProviderBlockedSlot {
+  id         String   @id @default(uuid()) @db.Uuid
+  providerId String   @map("provider_id") @db.Uuid
+  startAt    DateTime @map("start_at")
+  endAt      DateTime @map("end_at")
+  reason     String?  @db.VarChar(255)
+
+  provider ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([providerId, startAt])
+  @@map("provider_blocked_slots")
 }
 
 model ProviderKycDocument {

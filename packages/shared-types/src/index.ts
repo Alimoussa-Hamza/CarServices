@@ -296,3 +296,126 @@ export const UpdateProviderCapabilitiesSchema = z.object({
 export type UpdateProviderCapabilitiesDto = z.infer<
   typeof UpdateProviderCapabilitiesSchema
 >;
+
+const TimeSchema = z.string().regex(/^\d{2}:\d{2}$/);
+
+function minutesFromTime(time: string): number {
+  const parts = time.split(':').map(Number);
+  const hours = parts[0] ?? 0;
+  const minutes = parts[1] ?? 0;
+  return hours * 60 + minutes;
+}
+
+export const ProviderAvailabilitySlotSchema = z.object({
+  id: z.string().uuid(),
+  dayOfWeek: z.number().int().min(0).max(6),
+  startTime: TimeSchema,
+  endTime: TimeSchema,
+  isActive: z.boolean(),
+});
+export type ProviderAvailabilitySlotDto = z.infer<
+  typeof ProviderAvailabilitySlotSchema
+>;
+
+export const ProviderBlockedSlotSchema = z.object({
+  id: z.string().uuid(),
+  startAt: z.string().datetime(),
+  endAt: z.string().datetime(),
+  reason: z.string().max(255).nullable(),
+});
+export type ProviderBlockedSlotDto = z.infer<
+  typeof ProviderBlockedSlotSchema
+>;
+
+export const UpdateProviderAvailabilitySlotSchema = z.object({
+  dayOfWeek: z.number().int().min(0).max(6),
+  startTime: TimeSchema,
+  endTime: TimeSchema,
+  isActive: z.boolean().default(true),
+});
+export type UpdateProviderAvailabilitySlotDto = z.infer<
+  typeof UpdateProviderAvailabilitySlotSchema
+>;
+
+export const UpdateProviderBlockedSlotSchema = z.object({
+  startAt: z.string().datetime(),
+  endAt: z.string().datetime(),
+  reason: z.string().max(255).nullable().optional(),
+});
+export type UpdateProviderBlockedSlotDto = z.infer<
+  typeof UpdateProviderBlockedSlotSchema
+>;
+
+export const UpdateProviderAvailabilitySchema = z
+  .object({
+    weeklySlots: z.array(UpdateProviderAvailabilitySlotSchema).min(1).max(50),
+    blockedSlots: z.array(UpdateProviderBlockedSlotSchema).max(100).default([]),
+  })
+  .superRefine((dto, ctx) => {
+    dto.weeklySlots.forEach((slot, index) => {
+      if (minutesFromTime(slot.endTime) <= minutesFromTime(slot.startTime)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['weeklySlots', index, 'endTime'],
+          message: 'endTime doit être après startTime.',
+        });
+      }
+    });
+
+    const activeSlotsByDay = new Map<number, typeof dto.weeklySlots>();
+    dto.weeklySlots
+      .filter((slot) => slot.isActive)
+      .forEach((slot) => {
+        activeSlotsByDay.set(slot.dayOfWeek, [
+          ...(activeSlotsByDay.get(slot.dayOfWeek) ?? []),
+          slot,
+        ]);
+      });
+
+    for (const [dayOfWeek, slots] of activeSlotsByDay.entries()) {
+      const sortedSlots = [...slots].sort(
+        (left, right) =>
+          minutesFromTime(left.startTime) - minutesFromTime(right.startTime),
+      );
+
+      for (let index = 1; index < sortedSlots.length; index += 1) {
+        const currentSlot = sortedSlots[index];
+        const previousSlot = sortedSlots[index - 1];
+        if (!currentSlot || !previousSlot) {
+          continue;
+        }
+
+        if (
+          minutesFromTime(currentSlot.startTime) <
+          minutesFromTime(previousSlot.endTime)
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['weeklySlots'],
+            message: `Chevauchement de disponibilité le jour ${dayOfWeek}.`,
+          });
+        }
+      }
+    }
+
+    dto.blockedSlots.forEach((slot, index) => {
+      if (new Date(slot.endAt).getTime() <= new Date(slot.startAt).getTime()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['blockedSlots', index, 'endAt'],
+          message: 'endAt doit être après startAt.',
+        });
+      }
+    });
+  });
+export type UpdateProviderAvailabilityDto = z.infer<
+  typeof UpdateProviderAvailabilitySchema
+>;
+
+export const ProviderAvailabilityResponseSchema = z.object({
+  weeklySlots: z.array(ProviderAvailabilitySlotSchema),
+  blockedSlots: z.array(ProviderBlockedSlotSchema),
+});
+export type ProviderAvailabilityResponse = z.infer<
+  typeof ProviderAvailabilityResponseSchema
+>;

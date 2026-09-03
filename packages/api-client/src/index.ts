@@ -5,6 +5,7 @@ import {
   HealthResponseSchema,
   KycStatusResponseSchema,
   OutOfZoneLeadDto,
+  ProviderAvailabilityResponseSchema,
   ProviderCapabilitiesResponseSchema,
   ProviderProfileSchema,
   RefreshTokenDto,
@@ -13,6 +14,7 @@ import {
   ServiceCategorySchema,
   ServiceOfferSchema,
   SubmitKycDto,
+  UpdateProviderAvailabilityDto,
   UpdateProviderCapabilitiesDto,
   UpdateProviderProfileDto,
   VerifyOtpDto,
@@ -168,6 +170,15 @@ export const api = {
         method: 'PUT',
         body: JSON.stringify(dto),
       }).then((data) => ProviderCapabilitiesResponseSchema.parse(data)),
+    availability: () =>
+      apiRequest('/api/v1/providers/availability').then((data) =>
+        ProviderAvailabilityResponseSchema.parse(data),
+      ),
+    updateAvailability: (dto: UpdateProviderAvailabilityDto) =>
+      apiRequest('/api/v1/providers/availability', {
+        method: 'PUT',
+        body: JSON.stringify(dto),
+      }).then((data) => ProviderAvailabilityResponseSchema.parse(data)),
   },
 };
 
@@ -175,6 +186,7 @@ export type {
   CatalogQuoteDto,
   OutOfZoneLeadDto,
   SubmitKycDto,
+  UpdateProviderAvailabilityDto,
   UpdateProviderCapabilitiesDto,
   UpdateProviderProfileDto,
   RefreshTokenDto,

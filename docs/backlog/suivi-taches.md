@@ -17,7 +17,7 @@
 | D — Tests & qualité | 9/9 | — terminé |
 | E — Catalogue & zones (M03) | 7/7 | — terminé |
 | F — Apps clientes | 3/6 | — en attente maquettes |
-| G — Backend Pros & KYC (M04) | 3/8 | CS-M04-S04 Disponibilités hebdomadaires |
+| G — Backend Pros & KYC (M04) | 4/8 | CS-M04-S05 Zones intervention pro |
 
 ---
 
@@ -133,8 +133,15 @@
   - [x] RG-KYC-05 : seules les offres actives `wash` sont conservées au MVP
   - [x] Tests shared-types + API + api-client
   - [x] Collection Postman créée/maintenue
-- [~] **CS-M04-S04** Disponibilités hebdomadaires
-- [ ] **CS-M04-S05** Zones intervention pro
+- [x] **CS-M04-S04** Disponibilités hebdomadaires
+  - [x] Modèles Prisma `provider_availability` et `provider_blocked_slots`
+  - [x] `GET /providers/availability`
+  - [x] `PUT /providers/availability`
+  - [x] Validation : au moins une plage, horaires cohérents, pas de chevauchement par jour
+  - [x] Créneaux bloqués ponctuels avec `endAt > startAt`
+  - [x] Tests shared-types + API + api-client
+  - [x] Collection Postman mise à jour
+- [~] **CS-M04-S05** Zones intervention pro
 - [ ] **CS-M04-S06** Stripe Connect onboarding link
 - [ ] **CS-M04-S07** Blocage missions si KYC non approved
 - [ ] **CS-M04-S08** Alerte expiration RC Pro

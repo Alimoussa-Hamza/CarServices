@@ -6,6 +6,7 @@ import {
 import { KycStatus } from '@prisma/client';
 import {
   SubmitKycDto,
+  UpdateProviderAvailabilityDto,
   UpdateProviderCapabilitiesDto,
   UpdateProviderProfileDto,
 } from '@carservice/shared-types';
@@ -36,6 +37,26 @@ type ProviderCapabilityRecord = {
       slug: string;
     };
   };
+};
+
+type ProviderAvailabilityRecord = {
+  id: string;
+  dayOfWeek: number;
+  startTime: Date;
+  endTime: Date;
+  isActive: boolean;
+};
+
+type ProviderBlockedSlotRecord = {
+  id: string;
+  startAt: Date;
+  endAt: Date;
+  reason: string | null;
+};
+
+type ProviderAvailabilityStateRecord = {
+  availability: ProviderAvailabilityRecord[];
+  blockedSlots: ProviderBlockedSlotRecord[];
 };
 
 @Injectable()
@@ -202,6 +223,65 @@ export class ProvidersService {
     return { data: this.toCapabilitiesDto(capabilities) };
   }
 
+  async getAvailability(userId: string) {
+    const profile = await this.prisma.providerProfile.upsert({
+      where: { userId },
+      update: {},
+      create: { userId },
+      include: this.availabilityInclude(),
+    });
+
+    return { data: this.toAvailabilityDto(profile) };
+  }
+
+  async updateAvailability(userId: string, dto: UpdateProviderAvailabilityDto) {
+    const profile = await this.prisma.providerProfile.upsert({
+      where: { userId },
+      update: {},
+      create: { userId },
+    });
+
+    const operations = [
+      this.prisma.providerAvailability.deleteMany({
+        where: { providerId: profile.id },
+      }),
+      this.prisma.providerBlockedSlot.deleteMany({
+        where: { providerId: profile.id },
+      }),
+      this.prisma.providerAvailability.createMany({
+        data: dto.weeklySlots.map((slot) => ({
+          providerId: profile.id,
+          dayOfWeek: slot.dayOfWeek,
+          startTime: this.dateFromTime(slot.startTime),
+          endTime: this.dateFromTime(slot.endTime),
+          isActive: slot.isActive,
+        })),
+      }),
+    ];
+
+    if (dto.blockedSlots.length) {
+      operations.push(
+        this.prisma.providerBlockedSlot.createMany({
+          data: dto.blockedSlots.map((slot) => ({
+            providerId: profile.id,
+            startAt: new Date(slot.startAt),
+            endAt: new Date(slot.endAt),
+            reason: slot.reason ?? null,
+          })),
+        }),
+      );
+    }
+
+    await this.prisma.$transaction(operations);
+
+    const availability = await this.prisma.providerProfile.findUniqueOrThrow({
+      where: { id: profile.id },
+      include: this.availabilityInclude(),
+    });
+
+    return { data: this.toAvailabilityDto(availability) };
+  }
+
   private assertKycCanBeSubmitted(
     status: 'draft' | 'submitted' | 'approved' | 'rejected',
   ): void {
@@ -303,6 +383,43 @@ export class ProvidersService {
           isActive: capability.isActive,
         })),
     };
+  }
+
+  private toAvailabilityDto(profile: ProviderAvailabilityStateRecord) {
+    return {
+      weeklySlots: profile.availability.map((slot) => ({
+        id: slot.id,
+        dayOfWeek: slot.dayOfWeek,
+        startTime: this.timeFromDate(slot.startTime),
+        endTime: this.timeFromDate(slot.endTime),
+        isActive: slot.isActive,
+      })),
+      blockedSlots: profile.blockedSlots.map((slot) => ({
+        id: slot.id,
+        startAt: slot.startAt.toISOString(),
+        endAt: slot.endAt.toISOString(),
+        reason: slot.reason,
+      })),
+    };
+  }
+
+  private availabilityInclude() {
+    return {
+      availability: {
+        orderBy: [{ dayOfWeek: 'asc' as const }, { startTime: 'asc' as const }],
+      },
+      blockedSlots: {
+        orderBy: { startAt: 'asc' as const },
+      },
+    };
+  }
+
+  private dateFromTime(time: string): Date {
+    return new Date(`1970-01-01T${time}:00.000Z`);
+  }
+
+  private timeFromDate(date: Date): string {
+    return date.toISOString().slice(11, 16);
   }
 
   private async translateProviderProfileErrors<T>(

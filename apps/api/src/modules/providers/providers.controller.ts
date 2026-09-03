@@ -11,6 +11,8 @@ import { UserRole } from '@prisma/client';
 import {
   SubmitKycDto,
   SubmitKycSchema,
+  UpdateProviderAvailabilityDto,
+  UpdateProviderAvailabilitySchema,
   UpdateProviderCapabilitiesDto,
   UpdateProviderCapabilitiesSchema,
   UpdateProviderProfileDto,
@@ -71,5 +73,19 @@ export class ProvidersController {
     dto: UpdateProviderCapabilitiesDto,
   ) {
     return this.providersService.updateCapabilities(user.sub, dto);
+  }
+
+  @Get('availability')
+  getAvailability(@CurrentUser() user: AuthPayload) {
+    return this.providersService.getAvailability(user.sub);
+  }
+
+  @Put('availability')
+  updateAvailability(
+    @CurrentUser() user: AuthPayload,
+    @Body(new ZodValidationPipe(UpdateProviderAvailabilitySchema))
+    dto: UpdateProviderAvailabilityDto,
+  ) {
+    return this.providersService.updateAvailability(user.sub, dto);
   }
 }

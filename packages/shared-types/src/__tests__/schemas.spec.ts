@@ -9,6 +9,7 @@ import {
   KycStatusSchema,
   OtpRoleSchema,
   OutOfZoneLeadSchema,
+  ProviderAvailabilityResponseSchema,
   ProviderCapabilitiesResponseSchema,
   ProviderCapabilitySchema,
   ProviderProfileSchema,
@@ -17,6 +18,7 @@ import {
   ServiceCategorySchema,
   ServiceOfferSchema,
   SubmitKycSchema,
+  UpdateProviderAvailabilitySchema,
   UpdateProviderCapabilitiesSchema,
   UpdateProviderProfileSchema,
   UserRoleSchema,
@@ -522,6 +524,103 @@ describe('UpdateProviderCapabilitiesSchema', () => {
     expect(
       UpdateProviderCapabilitiesSchema.safeParse({ offerIds: [] }).success,
     ).toBe(false);
+  });
+});
+
+describe('UpdateProviderAvailabilitySchema', () => {
+  const validDto = {
+    weeklySlots: [
+      {
+        dayOfWeek: 1,
+        startTime: '09:00',
+        endTime: '12:00',
+        isActive: true,
+      },
+      {
+        dayOfWeek: 1,
+        startTime: '14:00',
+        endTime: '18:00',
+        isActive: true,
+      },
+    ],
+    blockedSlots: [
+      {
+        startAt: '2026-09-10T09:00:00.000Z',
+        endAt: '2026-09-10T12:00:00.000Z',
+        reason: 'Congé',
+      },
+    ],
+  };
+
+  it('valide des disponibilités hebdomadaires et créneaux bloqués', () => {
+    expect(UpdateProviderAvailabilitySchema.parse(validDto)).toEqual(validDto);
+  });
+
+  it('rejette une liste de plages hebdomadaires vide', () => {
+    expect(
+      UpdateProviderAvailabilitySchema.safeParse({ weeklySlots: [] }).success,
+    ).toBe(false);
+  });
+
+  it('rejette une plage avec endTime avant startTime', () => {
+    expect(
+      UpdateProviderAvailabilitySchema.safeParse({
+        weeklySlots: [
+          { dayOfWeek: 2, startTime: '14:00', endTime: '09:00' },
+        ],
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejette deux plages actives qui se chevauchent le même jour', () => {
+    expect(
+      UpdateProviderAvailabilitySchema.safeParse({
+        weeklySlots: [
+          { dayOfWeek: 3, startTime: '09:00', endTime: '12:00' },
+          { dayOfWeek: 3, startTime: '11:30', endTime: '14:00' },
+        ],
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejette un créneau bloqué avec endAt avant startAt', () => {
+    expect(
+      UpdateProviderAvailabilitySchema.safeParse({
+        weeklySlots: [{ dayOfWeek: 4, startTime: '09:00', endTime: '12:00' }],
+        blockedSlots: [
+          {
+            startAt: '2026-09-10T12:00:00.000Z',
+            endAt: '2026-09-10T09:00:00.000Z',
+          },
+        ],
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe('ProviderAvailabilityResponseSchema', () => {
+  it('valide la réponse disponibilité provider', () => {
+    expect(
+      ProviderAvailabilityResponseSchema.parse({
+        weeklySlots: [
+          {
+            id: '77777777-7777-4777-8777-777777777777',
+            dayOfWeek: 1,
+            startTime: '09:00',
+            endTime: '12:00',
+            isActive: true,
+          },
+        ],
+        blockedSlots: [
+          {
+            id: '88888888-8888-4888-8888-888888888888',
+            startAt: '2026-09-10T09:00:00.000Z',
+            endAt: '2026-09-10T12:00:00.000Z',
+            reason: null,
+          },
+        ],
+      }).weeklySlots,
+    ).toHaveLength(1);
   });
 });
 

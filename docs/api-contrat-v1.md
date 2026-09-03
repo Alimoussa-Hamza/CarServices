@@ -265,6 +265,56 @@ Les offres hors catégorie `wash` ou inactives sont ignorées en MVP.
 }
 ```
 
+### GET `/providers/availability`
+
+```json
+{
+  "data": {
+    "weeklySlots": [
+      {
+        "id": "uuid",
+        "dayOfWeek": 1,
+        "startTime": "09:00",
+        "endTime": "12:00",
+        "isActive": true
+      }
+    ],
+    "blockedSlots": [
+      {
+        "id": "uuid",
+        "startAt": "2026-09-10T09:00:00.000Z",
+        "endAt": "2026-09-10T12:00:00.000Z",
+        "reason": "Congé"
+      }
+    ]
+  }
+}
+```
+
+### PUT `/providers/availability`
+
+Règles : au moins une plage hebdomadaire, `endTime > startTime`, pas de chevauchement de plages actives le même jour, et `endAt > startAt` pour les créneaux bloqués.
+
+```json
+{
+  "weeklySlots": [
+    {
+      "dayOfWeek": 1,
+      "startTime": "09:00",
+      "endTime": "12:00",
+      "isActive": true
+    }
+  ],
+  "blockedSlots": [
+    {
+      "startAt": "2026-09-10T09:00:00.000Z",
+      "endAt": "2026-09-10T12:00:00.000Z",
+      "reason": "Congé"
+    }
+  ]
+}
+```
+
 ---
 
 ## Bookings

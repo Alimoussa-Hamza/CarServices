@@ -62,11 +62,29 @@ const washCapability = {
   offer: washOffer,
 };
 
+const weeklySlot = {
+  id: '77777777-7777-4777-8777-777777777777',
+  providerId: profile.id,
+  dayOfWeek: 1,
+  startTime: new Date('1970-01-01T09:00:00.000Z'),
+  endTime: new Date('1970-01-01T12:00:00.000Z'),
+  isActive: true,
+};
+
+const blockedSlot = {
+  id: '88888888-8888-4888-8888-888888888888',
+  providerId: profile.id,
+  startAt: new Date('2026-09-10T09:00:00.000Z'),
+  endAt: new Date('2026-09-10T12:00:00.000Z'),
+  reason: 'Congé',
+};
+
 function buildService() {
   const prisma = {
     providerProfile: {
       upsert: jest.fn(),
       update: jest.fn(),
+      findUniqueOrThrow: jest.fn(),
     },
     serviceOffer: {
       findMany: jest.fn(),
@@ -77,6 +95,14 @@ function buildService() {
       findMany: jest.fn(),
     },
     providerKycDocument: {
+      deleteMany: jest.fn(),
+      createMany: jest.fn(),
+    },
+    providerAvailability: {
+      deleteMany: jest.fn(),
+      createMany: jest.fn(),
+    },
+    providerBlockedSlot: {
       deleteMany: jest.fn(),
       createMany: jest.fn(),
     },
@@ -439,6 +465,139 @@ describe('ProvidersService', () => {
         }),
       ).rejects.toMatchObject({
         response: { code: 'NO_VALID_CAPABILITIES' },
+      });
+    });
+  });
+
+  describe('getAvailability', () => {
+    it('retourne les plages hebdo et créneaux bloqués', async () => {
+      const { service, prisma } = buildService();
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        availability: [weeklySlot],
+        blockedSlots: [blockedSlot],
+      });
+
+      await expect(service.getAvailability(profile.userId)).resolves.toEqual({
+        data: {
+          weeklySlots: [
+            {
+              id: weeklySlot.id,
+              dayOfWeek: 1,
+              startTime: '09:00',
+              endTime: '12:00',
+              isActive: true,
+            },
+          ],
+          blockedSlots: [
+            {
+              id: blockedSlot.id,
+              startAt: '2026-09-10T09:00:00.000Z',
+              endAt: '2026-09-10T12:00:00.000Z',
+              reason: 'Congé',
+            },
+          ],
+        },
+      });
+
+      expect(prisma.providerProfile.upsert).toHaveBeenCalledWith({
+        where: { userId: profile.userId },
+        update: {},
+        create: { userId: profile.userId },
+        include: {
+          availability: {
+            orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
+          },
+          blockedSlots: {
+            orderBy: { startAt: 'asc' },
+          },
+        },
+      });
+    });
+  });
+
+  describe('updateAvailability', () => {
+    it('remplace les disponibilités hebdo et créneaux bloqués', async () => {
+      const { service, prisma } = buildService();
+      prisma.providerProfile.upsert.mockResolvedValue(profile);
+      prisma.providerAvailability.deleteMany.mockResolvedValue({ count: 0 });
+      prisma.providerBlockedSlot.deleteMany.mockResolvedValue({ count: 0 });
+      prisma.providerAvailability.createMany.mockResolvedValue({ count: 1 });
+      prisma.providerBlockedSlot.createMany.mockResolvedValue({ count: 1 });
+      prisma.providerProfile.findUniqueOrThrow.mockResolvedValue({
+        ...profile,
+        availability: [weeklySlot],
+        blockedSlots: [blockedSlot],
+      });
+
+      const dto = {
+        weeklySlots: [
+          {
+            dayOfWeek: 1,
+            startTime: '09:00',
+            endTime: '12:00',
+            isActive: true,
+          },
+        ],
+        blockedSlots: [
+          {
+            startAt: '2026-09-10T09:00:00.000Z',
+            endAt: '2026-09-10T12:00:00.000Z',
+            reason: 'Congé',
+          },
+        ],
+      };
+
+      await expect(
+        service.updateAvailability(profile.userId, dto),
+      ).resolves.toEqual({
+        data: {
+          weeklySlots: [
+            {
+              id: weeklySlot.id,
+              dayOfWeek: 1,
+              startTime: '09:00',
+              endTime: '12:00',
+              isActive: true,
+            },
+          ],
+          blockedSlots: [
+            {
+              id: blockedSlot.id,
+              startAt: '2026-09-10T09:00:00.000Z',
+              endAt: '2026-09-10T12:00:00.000Z',
+              reason: 'Congé',
+            },
+          ],
+        },
+      });
+
+      expect(prisma.providerAvailability.deleteMany).toHaveBeenCalledWith({
+        where: { providerId: profile.id },
+      });
+      expect(prisma.providerBlockedSlot.deleteMany).toHaveBeenCalledWith({
+        where: { providerId: profile.id },
+      });
+      expect(prisma.providerAvailability.createMany).toHaveBeenCalledWith({
+        data: [
+          {
+            providerId: profile.id,
+            dayOfWeek: 1,
+            startTime: new Date('1970-01-01T09:00:00.000Z'),
+            endTime: new Date('1970-01-01T12:00:00.000Z'),
+            isActive: true,
+          },
+        ],
+      });
+      expect(prisma.providerBlockedSlot.createMany).toHaveBeenCalledWith({
+        data: [
+          {
+            providerId: profile.id,
+            startAt: new Date('2026-09-10T09:00:00.000Z'),
+            endAt: new Date('2026-09-10T12:00:00.000Z'),
+            reason: 'Congé',
+          },
+        ],
       });
     });
   });
