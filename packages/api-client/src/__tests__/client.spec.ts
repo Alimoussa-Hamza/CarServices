@@ -1575,6 +1575,63 @@ describe('api-client', () => {
         api.admin.getBooking('77777777-7777-4777-8777-777777777777'),
       ).resolves.toMatchObject({ reference: 'CS-20260916-ABCD' });
     });
+
+    it('liste et résout un litige admin', async () => {
+      initApiClient({
+        baseUrl: 'http://api.test',
+        getAccessToken: jest.fn().mockResolvedValue('admin.jwt'),
+      });
+
+      const list = {
+        items: [
+          {
+            id: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+            bookingId: '77777777-7777-4777-8777-777777777777',
+            bookingReference: 'CS-20260916-ABCD',
+            openedBy: 'client' as const,
+            reason: 'quality' as const,
+            description: 'Prestation incomplète, traces partout.',
+            status: 'open' as const,
+            createdAt: '2026-09-16T12:00:00.000Z',
+            payoutFrozen: true,
+            client: {
+              firstName: 'Alice',
+              lastName: 'Martin',
+              phone: '+33601020304',
+            },
+            provider: {
+              id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+              companyName: 'Pro Wash',
+            },
+          },
+        ],
+        total: 1,
+        page: 1,
+        pageSize: 20,
+      };
+      fetchMock.mockResolvedValueOnce(mockFetchResponse({ data: list }));
+      await expect(api.admin.listDisputes()).resolves.toEqual(list);
+
+      const dispute = list.items[0]!;
+      const resolved = {
+        id: dispute.id,
+        bookingId: dispute.bookingId,
+        status: 'resolved_client' as const,
+        resolutionNotes: 'Remboursement intégral',
+        resolvedAt: '2026-09-16T14:00:00.000Z',
+        payoutFrozen: false,
+        paymentStatus: 'refunded' as const,
+        refundCents: 9500,
+        paymentAction: 'refunded' as const,
+      };
+      fetchMock.mockResolvedValueOnce(mockFetchResponse({ data: resolved }));
+      await expect(
+        api.admin.resolveDispute(dispute.id, {
+          decision: 'resolved_client',
+          notes: 'Remboursement intégral',
+        }),
+      ).resolves.toEqual(resolved);
+    });
   });
 
   describe('api.media', () => {

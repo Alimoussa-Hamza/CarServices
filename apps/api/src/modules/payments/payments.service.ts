@@ -548,6 +548,21 @@ export class PaymentsService {
     return updated.payoutFrozenAt ?? now;
   }
 
+  async unfreezePayout(
+    bookingId: string,
+    db: Prisma.TransactionClient | PrismaService = this.prisma,
+  ): Promise<void> {
+    const payment = await db.payment.findUnique({ where: { bookingId } });
+    if (!payment || !payment.payoutFrozenAt) {
+      return;
+    }
+
+    await db.payment.update({
+      where: { id: payment.id },
+      data: { payoutFrozenAt: null },
+    });
+  }
+
   private paymentIntentIdFromObject(
     object: Record<string, unknown>,
   ): string | null {

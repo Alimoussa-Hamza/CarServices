@@ -1501,6 +1501,90 @@ export const CreatedDisputeSchema = z.object({
 });
 export type CreatedDispute = z.infer<typeof CreatedDisputeSchema>;
 
+/** Admin disputes — CS-M10-S07 */
+export const AdminListDisputesQuerySchema = z.object({
+  status: z.preprocess((value) => {
+    if (value === undefined || value === null || value === '') {
+      return undefined;
+    }
+    if (Array.isArray(value)) {
+      return value;
+    }
+    if (typeof value === 'string') {
+      return value
+        .split(',')
+        .map((part) => part.trim())
+        .filter(Boolean);
+    }
+    return value;
+  }, z.array(DisputeStatusSchema).min(1).optional()),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(50).default(20),
+});
+export type AdminListDisputesQuery = z.infer<typeof AdminListDisputesQuerySchema>;
+
+export const AdminDisputeListItemSchema = z.object({
+  id: z.string().uuid(),
+  bookingId: z.string().uuid(),
+  bookingReference: BookingReferenceSchema,
+  openedBy: DisputeOpenedBySchema,
+  reason: DisputeReasonSchema,
+  description: z.string(),
+  status: DisputeStatusSchema,
+  createdAt: z.string().datetime(),
+  payoutFrozen: z.boolean(),
+  client: BookingDetailClientSchema,
+  provider: z.object({
+    id: z.string().uuid(),
+    companyName: z.string().nullable(),
+  }),
+});
+export type AdminDisputeListItem = z.infer<typeof AdminDisputeListItemSchema>;
+
+export const AdminDisputesListResponseSchema = z.object({
+  items: z.array(AdminDisputeListItemSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().min(1),
+  pageSize: z.number().int().min(1),
+});
+export type AdminDisputesListResponse = z.infer<
+  typeof AdminDisputesListResponseSchema
+>;
+
+export const AdminResolveDisputeDecisionSchema = z.enum([
+  'resolved_client',
+  'resolved_provider',
+  'resolved_split',
+]);
+export type AdminResolveDisputeDecision = z.infer<
+  typeof AdminResolveDisputeDecisionSchema
+>;
+
+export const AdminResolveDisputeSchema = z.object({
+  decision: AdminResolveDisputeDecisionSchema,
+  notes: z.string().trim().min(5).max(2000).optional(),
+});
+export type AdminResolveDisputeDto = z.infer<typeof AdminResolveDisputeSchema>;
+
+export const AdminResolvedDisputeSchema = z.object({
+  id: z.string().uuid(),
+  bookingId: z.string().uuid(),
+  status: AdminResolveDisputeDecisionSchema,
+  resolutionNotes: z.string().nullable(),
+  resolvedAt: z.string().datetime(),
+  payoutFrozen: z.boolean(),
+  paymentStatus: PaymentStatusSchema.nullable(),
+  refundCents: z.number().int().nonnegative(),
+  paymentAction: z.enum([
+    'canceled_authorization',
+    'refunded',
+    'partial_capture',
+    'noop',
+    'unfrozen',
+  ]),
+});
+export type AdminResolvedDispute = z.infer<typeof AdminResolvedDisputeSchema>;
+
 /** Formats Expo : ExponentPushToken[...] ou ExpoPushToken[...] */
 export const ExpoPushTokenSchema = z
   .string()

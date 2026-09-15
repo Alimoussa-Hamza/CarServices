@@ -1619,6 +1619,51 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
     );
   });
 
+  it('CS-M10-S07 admin disputes list + resolve_provider unfreeze', async () => {
+    const adminPhone = `+33694${suffix}`;
+    const adminToken = await loginAdmin(http, adminPhone, userIds, prisma);
+
+    const listed = await http()
+      .get('/api/v1/admin/disputes?page=1&pageSize=20')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+    const items = (
+      listed.body as Envelope<{
+        items: Array<{ id: string; bookingId: string; status: string }>;
+        total: number;
+      }>
+    ).data.items;
+    const open = items.find((row) => row.bookingId === bookingId);
+    expect(open).toBeTruthy();
+
+    const resolved = await http()
+      .patch(`/api/v1/admin/disputes/${open!.id}/resolve`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        decision: 'resolved_provider',
+        notes: 'Preuves insuffisantes côté client',
+      })
+      .expect(200);
+    expect(
+      (
+        resolved.body as Envelope<{
+          status: string;
+          payoutFrozen: boolean;
+          paymentAction: string;
+        }>
+      ).data,
+    ).toMatchObject({
+      status: 'resolved_provider',
+      payoutFrozen: false,
+      paymentAction: 'unfrozen',
+    });
+
+    const payment = await prisma.payment.findUniqueOrThrow({
+      where: { bookingId },
+    });
+    expect(payment.payoutFrozenAt).toBeNull();
+  });
+
   it('CS-M08-S03 GET /reviews/provider/:id public', async () => {
     const booking = await prisma.booking.findUniqueOrThrow({
       where: { id: bookingId },

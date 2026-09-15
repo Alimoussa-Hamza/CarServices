@@ -72,11 +72,13 @@ X-Request-Id: <uuid>             # optionnel client, sinon généré serveur
   "data": {
     "accessToken": "jwt...",
     "refreshToken": "jwt...",
-    "expiresIn": 900,
+    "expiresIn": 86400,
     "user": { "id": "uuid", "role": "client", "phone": "+336...", "email": null }
   }
 }
 ```
+
+> **TTL access :** `86400` (24 h) en local/test (`JWT_ACCESS_TTL_SECONDS`). En production : `900` (15 min).
 
 ### POST `/auth/admin/login`
 
@@ -91,7 +93,7 @@ Login back-office (CS-M10-S01). Réservé aux users `role=admin` avec `email` + 
   "data": {
     "accessToken": "jwt...",
     "refreshToken": "jwt...",
-    "expiresIn": 900,
+    "expiresIn": 86400,
     "user": {
       "id": "uuid",
       "role": "admin",
@@ -1149,6 +1151,46 @@ Query `GET /admin/bookings` :
 ```
 
 Erreurs : `BOOKING_NOT_FOUND` (404), `VALIDATION_ERROR` (400). Refund : voir `POST /admin/bookings/:id/refund`.
+
+### Admin disputes (CS-M10-S07)
+
+JWT **admin**. File A07 + résolution. Booking reste `disputed` (terminal). Effets paiement :
+
+| Décision | Effet |
+|----------|--------|
+| `resolved_client` | Refund/cancel auth (montant total) + unfreeze payout |
+| `resolved_provider` | Unfreeze payout (pro payé) |
+| `resolved_split` | Unfreeze payout (partage manuel documenté dans `notes`) |
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/admin/disputes` | File litiges (`status`, `page`, `pageSize`) — défaut `open,under_review` |
+| PATCH | `/admin/disputes/:id/resolve` | Décision admin |
+
+```json
+// PATCH /admin/disputes/:id/resolve
+{
+  "decision": "resolved_client",
+  "notes": "Remboursement intégral"
+}
+
+// Response 200
+{
+  "data": {
+    "id": "uuid",
+    "bookingId": "uuid",
+    "status": "resolved_client",
+    "resolutionNotes": "Remboursement intégral",
+    "resolvedAt": "2026-09-16T14:00:00.000Z",
+    "payoutFrozen": false,
+    "paymentStatus": "refunded",
+    "refundCents": 9500,
+    "paymentAction": "refunded"
+  }
+}
+```
+
+Erreurs : `DISPUTE_NOT_FOUND` (404), `DISPUTE_ALREADY_RESOLVED` (409), `PAYMENT_NOT_FOUND` / `PAYMENT_NOT_REFUNDABLE` (409), `VALIDATION_ERROR` (400).
 
 ### GET `/admin/dashboard`
 

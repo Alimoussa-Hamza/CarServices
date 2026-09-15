@@ -252,6 +252,16 @@ describe('E2E M10 Admin — gate module', () => {
     expect((missing.body as ErrorEnvelope).error.code).toBe('BOOKING_NOT_FOUND');
   });
 
+  it('disputes admin list vide OK', async () => {
+    const listed = await http()
+      .get('/api/v1/admin/disputes')
+      .set('Authorization', `Bearer ${tokens.admin}`)
+      .expect(200);
+    expect(
+      (listed.body as Envelope<{ items: unknown[]; page: number }>).data.page,
+    ).toBe(1);
+  });
+
   it('refuse accès admin aux non-admins', async () => {
     const denied = await http()
       .get('/api/v1/admin/dashboard')

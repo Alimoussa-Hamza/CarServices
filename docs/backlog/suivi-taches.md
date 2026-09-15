@@ -23,7 +23,7 @@
 | J — Médias & preuves (M07) | 4/4 | — terminé |
 | K — Avis & litiges (M08) | 4/4 | — terminé |
 | L — Notifications (M09) | 4/4 | — terminé |
-| M — Admin API (M10) | 6/8 | CS-M10-S07 resolve disputes |
+| M — Admin API (M10) | 7/8 | CS-M10-S08 config |
 | N — Mobile client (M11) | 0/12 | — en attente maquettes |
 | O — Mobile pro (M12) | 0/11 | — en attente maquettes |
 | P — Admin web (M13) | 0/8 | — après M10 |
@@ -346,7 +346,8 @@ Détail écrans → pistes **N** (M11) et **O** (M12).
   - [x] Zones polygone + soft `isActive` + upsert pricing offre/zone
 - [x] **CS-M10-S06** Admin bookings search + refund
   - [x] `GET /admin/bookings` + `GET /admin/bookings/:id` (refund déjà M06)
-- [ ] **CS-M10-S07** Resolve disputes
+- [x] **CS-M10-S07** Resolve disputes
+  - [x] `GET /admin/disputes` + `PATCH .../resolve` (client refund / pro / split)
 - [ ] **CS-M10-S08** PATCH `/admin/config` (commission, timeouts)
 
 ---

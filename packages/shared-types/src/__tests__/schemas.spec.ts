@@ -34,6 +34,8 @@ import {
   ProviderReviewsResponseSchema,
   CreateDisputeSchema,
   CreatedDisputeSchema,
+  AdminListDisputesQuerySchema,
+  AdminResolveDisputeSchema,
   RegisterPushTokenSchema,
   RegisteredPushTokenSchema,
   MEDIA_UPLOAD_TTL_SECONDS,
@@ -2111,6 +2113,30 @@ describe('CreateDisputeSchema / CreatedDisputeSchema', () => {
         createdAt: '2026-09-15T21:00:00.000Z',
       }),
     ).toMatchObject({ payoutFrozen: true, bookingStatus: 'disputed' });
+  });
+});
+
+describe('Admin disputes schemas (CS-M10-S07)', () => {
+  it('liste litiges avec défauts page', () => {
+    expect(AdminListDisputesQuerySchema.parse({})).toEqual({
+      page: 1,
+      pageSize: 20,
+    });
+  });
+
+  it('valide resolve client/pro/split', () => {
+    expect(
+      AdminResolveDisputeSchema.parse({
+        decision: 'resolved_client',
+        notes: 'Remboursement intégral',
+      }),
+    ).toEqual({
+      decision: 'resolved_client',
+      notes: 'Remboursement intégral',
+    });
+    expect(
+      AdminResolveDisputeSchema.safeParse({ decision: 'closed' }).success,
+    ).toBe(false);
   });
 });
 

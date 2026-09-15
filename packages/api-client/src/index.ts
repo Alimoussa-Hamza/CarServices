@@ -20,6 +20,10 @@ import {
   AdminListBookingsQuery,
   AdminBookingsListResponseSchema,
   AdminBookingDetailSchema,
+  AdminListDisputesQuery,
+  AdminDisputesListResponseSchema,
+  AdminResolveDisputeDto,
+  AdminResolvedDisputeSchema,
   AdminRefundBookingDto,
   AdminRefundResponseSchema,
   AuthTokensResponseSchema,
@@ -424,6 +428,27 @@ export const api = {
       apiRequest(`/api/v1/admin/bookings/${bookingId}`).then((data) =>
         AdminBookingDetailSchema.parse(data),
       ),
+    listDisputes: (query: Partial<AdminListDisputesQuery> = {}) => {
+      const params = new URLSearchParams();
+      if (query.status?.length) {
+        params.set('status', query.status.join(','));
+      }
+      if (query.page !== undefined) {
+        params.set('page', String(query.page));
+      }
+      if (query.pageSize !== undefined) {
+        params.set('pageSize', String(query.pageSize));
+      }
+      const qs = params.toString();
+      return apiRequest(`/api/v1/admin/disputes${qs ? `?${qs}` : ''}`).then(
+        (data) => AdminDisputesListResponseSchema.parse(data),
+      );
+    },
+    resolveDispute: (disputeId: string, dto: AdminResolveDisputeDto) =>
+      apiRequest(`/api/v1/admin/disputes/${disputeId}/resolve`, {
+        method: 'PATCH',
+        body: JSON.stringify(dto),
+      }).then((data) => AdminResolvedDisputeSchema.parse(data)),
     refundBooking: (bookingId: string, dto: AdminRefundBookingDto = {}) =>
       apiRequest(`/api/v1/admin/bookings/${bookingId}/refund`, {
         method: 'POST',

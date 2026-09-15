@@ -1307,6 +1307,50 @@
           }
         },
         {
+          "name": "List Admin Disputes",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/admin/disputes?page=1&pageSize=20"
+          }
+        },
+        {
+          "name": "Resolve Dispute",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"resolved_client\",\n  \"notes\": \"Remboursement intégral\"\n}"
+            },
+            "url": "{{baseUrl}}/admin/disputes/{{disputeId}}/resolve"
+          }
+        },
+        {
           "name": "List Admin Bookings",
           "request": {
             "method": "GET",
