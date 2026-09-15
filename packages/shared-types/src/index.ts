@@ -51,6 +51,41 @@ export const BOOKING_DISPUTE_WINDOW_HOURS = 48;
 /** Commission plateforme figée au booking (RG-PAY-03). */
 export const PLATFORM_COMMISSION_RATE = 0.2;
 
+export const PaymentStatusSchema = z.enum([
+  'authorized',
+  'captured',
+  'refunded',
+  'failed',
+]);
+export type PaymentStatus = z.infer<typeof PaymentStatusSchema>;
+
+export const PaymentSchema = z.object({
+  id: z.string().uuid(),
+  bookingId: z.string().uuid(),
+  stripePaymentIntentId: z.string().min(1).max(255),
+  amountCents: z.number().int().nonnegative(),
+  commissionCents: z.number().int().nonnegative(),
+  providerNetCents: z.number().int().nonnegative(),
+  currency: z.literal('EUR'),
+  status: PaymentStatusSchema,
+  capturedAt: z.string().datetime().nullable(),
+  refundedAt: z.string().datetime().nullable(),
+  createdAt: z.string().datetime(),
+});
+export type Payment = z.infer<typeof PaymentSchema>;
+
+/** Net pro = montant − commission% (RG-PAY-03). */
+export function computePaymentSplit(
+  amountCents: number,
+  commissionRate = PLATFORM_COMMISSION_RATE,
+): { commissionCents: number; providerNetCents: number } {
+  const commissionCents = Math.round(amountCents * commissionRate);
+  return {
+    commissionCents,
+    providerNetCents: amountCents - commissionCents,
+  };
+}
+
 /** Taille du broadcast matching (RG-MATCH-03, top 5–10). */
 export const MATCHING_BROADCAST_SIZE = 8;
 

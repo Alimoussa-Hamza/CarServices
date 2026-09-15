@@ -19,6 +19,7 @@
 | F — Apps clientes | 3/6 | — en attente maquettes |
 | G — Backend Pros & KYC (M04) | 8/8 | — terminé |
 | H — Bookings (M05) | 10/10 | — terminé |
+| I — Paiements Stripe (M06) | 1/6 | CS-M06-S02 PaymentIntent |
 
 ---
 
@@ -238,6 +239,21 @@
   - [x] Capacité zone = au moins 1 pro RG-MATCH-01 (dispo, rayon, conflits)
   - [x] Délai min `minBookingLeadHours` (masque J+0 trop tôt)
   - [x] Postman List Booking Slots + `api.bookings.slots`
+
+---
+
+## Piste I — Paiements Stripe · Module M06
+
+- [x] **CS-M06-S01** Schéma Prisma payments
+  - [x] Enum `PaymentStatus` : authorized / captured / refunded / failed
+  - [x] Table `payments` 1:1 booking, unique `stripe_payment_intent_id`
+  - [x] Split `commission_cents` / `provider_net_cents` (RG-PAY-03)
+  - [x] `computePaymentSplit` + alignement Prisma ↔ Zod
+- [ ] **CS-M06-S02** PaymentIntent manual capture à booking
+- [ ] **CS-M06-S03** Capture à completed + commission
+- [ ] **CS-M06-S04** Webhook Stripe idempotent
+- [ ] **CS-M06-S05** Refund admin + annulation auth
+- [ ] **CS-M06-S06** Sync stripe_account charges_enabled
 
 ---
 

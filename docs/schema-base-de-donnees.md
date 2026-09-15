@@ -297,10 +297,11 @@ platform_config
 |---------|------|-------------|
 | id | UUID | PK |
 | booking_id | UUID | FK → bookings, UNIQUE |
-| stripe_payment_intent_id | VARCHAR(255) | |
-| amount_cents | INT | |
-| commission_cents | INT | |
-| provider_net_cents | INT | |
+| stripe_payment_intent_id | VARCHAR(255) | UNIQUE |
+| amount_cents | INT | NOT NULL |
+| commission_cents | INT | NOT NULL (RG-PAY-03) |
+| provider_net_cents | INT | NOT NULL (RG-PAY-03) |
+| currency | CHAR(3) | DEFAULT `EUR` |
 | status | ENUM | `authorized`, `captured`, `refunded`, `failed` |
 | captured_at | TIMESTAMPTZ | nullable |
 | refunded_at | TIMESTAMPTZ | nullable |

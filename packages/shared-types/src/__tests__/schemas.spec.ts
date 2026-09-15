@@ -15,6 +15,9 @@ import {
   CANCEL_FREE_HOURS,
   CANCEL_LATE_HOURS,
   PLATFORM_COMMISSION_RATE,
+  PaymentStatusSchema,
+  PaymentSchema,
+  computePaymentSplit,
   BookingActorTypeSchema,
   BookingPhotoTypeSchema,
   BookingPhotoUploaderSchema,
@@ -257,6 +260,64 @@ describe('BOOKING_DISPUTE_WINDOW_HOURS', () => {
 describe('PLATFORM_COMMISSION_RATE', () => {
   it('fixe la commission plateforme à 20 % (RG-PAY-03)', () => {
     expect(PLATFORM_COMMISSION_RATE).toBe(0.2);
+  });
+});
+
+describe('PaymentStatusSchema', () => {
+  it('couvre authorized / captured / refunded / failed (RG-PAY)', () => {
+    expect(PaymentStatusSchema.options).toEqual([
+      'authorized',
+      'captured',
+      'refunded',
+      'failed',
+    ]);
+  });
+});
+
+describe('computePaymentSplit', () => {
+  it('calcule commission 20 % et net pro (RG-PAY-03)', () => {
+    expect(computePaymentSplit(9000)).toEqual({
+      commissionCents: 1800,
+      providerNetCents: 7200,
+    });
+  });
+});
+
+describe('PaymentSchema', () => {
+  it('valide un paiement authorized', () => {
+    expect(
+      PaymentSchema.parse({
+        id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        bookingId: '77777777-7777-4777-8777-777777777777',
+        stripePaymentIntentId: 'pi_mock_abc',
+        amountCents: 9000,
+        commissionCents: 1800,
+        providerNetCents: 7200,
+        currency: 'EUR',
+        status: 'authorized',
+        capturedAt: null,
+        refundedAt: null,
+        createdAt: '2026-09-15T10:00:00.000Z',
+      }),
+    ).toMatchObject({ status: 'authorized', providerNetCents: 7200 });
+  });
+
+  it('rejette un montant négatif', () => {
+    expect(
+      PaymentSchema.safeParse({
+        id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        bookingId: '77777777-7777-4777-8777-777777777777',
+        stripePaymentIntentId: 'pi_mock_abc',
+        amountCents: -1,
+        commissionCents: 0,
+        providerNetCents: 0,
+        currency: 'EUR',
+        status: 'authorized',
+        capturedAt: null,
+        refundedAt: null,
+        createdAt: '2026-09-15T10:00:00.000Z',
+      }).success,
+    ).toBe(false);
   });
 });
 

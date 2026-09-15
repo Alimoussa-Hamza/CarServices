@@ -3,6 +3,7 @@ import {
   BookingPhotoType,
   BookingPhotoUploader,
   BookingStatus,
+  PaymentStatus,
   VehicleType,
 } from '@prisma/client';
 import {
@@ -10,6 +11,7 @@ import {
   BookingPhotoTypeSchema,
   BookingPhotoUploaderSchema,
   BookingStatusSchema,
+  PaymentStatusSchema,
   VehicleTypeSchema,
 } from '@carservice/shared-types';
 
@@ -41,6 +43,12 @@ describe('Prisma booking schema', () => {
   it('aligne VehicleType sur shared-types', () => {
     expect(Object.values(VehicleType).sort()).toEqual(
       [...VehicleTypeSchema.options].sort(),
+    );
+  });
+
+  it('aligne PaymentStatus sur shared-types (RG-PAY)', () => {
+    expect(Object.values(PaymentStatus).sort()).toEqual(
+      [...PaymentStatusSchema.options].sort(),
     );
   });
 });
