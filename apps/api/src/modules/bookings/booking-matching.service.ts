@@ -157,6 +157,7 @@ export class BookingMatchingService {
     const providers = await this.prisma.providerProfile.findMany({
       where: {
         kycStatus: 'approved',
+        chargesEnabled: true,
         capabilities: {
           some: { offerId: input.offerId, isActive: true },
         },
@@ -238,6 +239,7 @@ export class BookingMatchingService {
     const providers = await this.prisma.providerProfile.findMany({
       where: {
         kycStatus: 'approved',
+        chargesEnabled: true,
         capabilities: {
           some: { offerId: input.offerId, isActive: true },
         },

@@ -403,6 +403,7 @@ describe('api-client', () => {
       ratingCount: 0,
       acceptanceRate: 100,
       stripeAccountId: null,
+      chargesEnabled: false,
       baseAddressId: null,
     };
 

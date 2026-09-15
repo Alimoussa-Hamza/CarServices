@@ -17,6 +17,7 @@ const profile = {
   ratingCount: 12,
   acceptanceRate: { toNumber: () => 98.5 },
   stripeAccountId: null,
+  chargesEnabled: false,
   baseAddressId: null,
   createdAt: new Date('2026-01-01T00:00:00.000Z'),
   updatedAt: new Date('2026-01-01T00:00:00.000Z'),
@@ -192,6 +193,7 @@ describe('ProvidersService', () => {
           ratingCount: 12,
           acceptanceRate: 98.5,
           stripeAccountId: null,
+          chargesEnabled: false,
           baseAddressId: null,
         },
       });
@@ -596,6 +598,7 @@ describe('ProvidersService', () => {
       prisma.providerProfile.upsert.mockResolvedValue({
         ...profile,
         kycStatus: 'approved',
+        chargesEnabled: true,
         kycDocuments: [kycDocument],
       });
 
@@ -622,6 +625,7 @@ describe('ProvidersService', () => {
       prisma.providerProfile.upsert.mockResolvedValue({
         ...profile,
         kycStatus: 'approved',
+        chargesEnabled: true,
         kycDocuments: [
           { ...kycDocument, expiresAt: new Date('2026-09-03T00:00:00.000Z') },
         ],
@@ -666,6 +670,25 @@ describe('ProvidersService', () => {
         response: {
           code: 'RC_PRO_EXPIRED',
           details: { expiresAt: '2026-09-02' },
+        },
+      });
+    });
+
+    it('bloque un provider approved sans charges_enabled Stripe', async () => {
+      const { service, prisma } = buildService();
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        kycStatus: 'approved',
+        chargesEnabled: false,
+        kycDocuments: [kycDocument],
+      });
+
+      await expect(
+        service.assertCanReceiveMissions(profile.userId, now),
+      ).rejects.toMatchObject({
+        response: {
+          code: 'STRIPE_CHARGES_DISABLED',
+          details: { chargesEnabled: false },
         },
       });
     });

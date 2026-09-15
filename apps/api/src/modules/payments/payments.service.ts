@@ -414,6 +414,11 @@ export class PaymentsService {
 
     if (event.type === 'charge.refunded' && paymentIntentId) {
       await this.markRefundedFromWebhook(paymentIntentId, now);
+      return;
+    }
+
+    if (event.type === 'account.updated') {
+      await this.syncChargesEnabled(object);
     }
   }
 
@@ -500,6 +505,21 @@ export class PaymentsService {
     await this.prisma.payment.update({
       where: { id: payment.id },
       data: { status: 'refunded', refundedAt: now },
+    });
+  }
+
+  private async syncChargesEnabled(object: Record<string, unknown>) {
+    const stripeAccountId =
+      typeof object.id === 'string' && object.id.startsWith('acct_')
+        ? object.id
+        : null;
+    if (!stripeAccountId || typeof object.charges_enabled !== 'boolean') {
+      return;
+    }
+
+    await this.prisma.providerProfile.updateMany({
+      where: { stripeAccountId },
+      data: { chargesEnabled: object.charges_enabled },
     });
   }
 

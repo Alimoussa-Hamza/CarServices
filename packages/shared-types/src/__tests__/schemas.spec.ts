@@ -1440,6 +1440,7 @@ describe('ProviderProfileSchema', () => {
     ratingCount: 12,
     acceptanceRate: 98.5,
     stripeAccountId: null,
+    chargesEnabled: false,
     baseAddressId: null,
   };
 
@@ -1500,6 +1501,16 @@ describe('StripeWebhookEventSchema', () => {
         data: { object: { id: 'pi_mock_abc' } },
       }),
     ).toMatchObject({ type: 'payment_intent.payment_failed' });
+  });
+
+  it('valide un event account.updated', () => {
+    expect(
+      StripeWebhookEventSchema.parse({
+        id: 'evt_mock_account_1',
+        type: 'account.updated',
+        data: { object: { id: 'acct_mock_pro', charges_enabled: true } },
+      }),
+    ).toMatchObject({ type: 'account.updated' });
   });
 
   it('rejette un event sans id', () => {

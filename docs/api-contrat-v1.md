@@ -185,6 +185,7 @@ X-Request-Id: <uuid>             # optionnel client, sinon généré serveur
     "ratingCount": 0,
     "acceptanceRate": 100,
     "stripeAccountId": null,
+    "chargesEnabled": false,
     "baseAddressId": null
   }
 }
@@ -268,7 +269,7 @@ Règles appliquées : SIRET 14 chiffres, RC Pro obligatoire non expirée, au moi
 
 Protégé par `KycApprovedGuard`. Réutilisable sur les futures routes missions (`GET /bookings/available`, accept/decline).
 
-Règles : `kycStatus === approved` et RC Pro présente non expirée (fin de journée UTC). Sinon 403.
+Règles : `kycStatus === approved`, RC Pro présente non expirée (fin de journée UTC), et `chargesEnabled === true` (CS-M06-S06). Sinon 403.
 
 ```json
 // Response 200
@@ -298,6 +299,17 @@ Règles : `kycStatus === approved` et RC Pro présente non expirée (fin de jour
     "code": "RC_PRO_EXPIRED",
     "message": "La RC Pro est expirée. Les missions sont bloquées.",
     "details": { "expiresAt": "2026-01-01" }
+  }
+}
+```
+
+```json
+// Response 403 — Stripe Connect charges_enabled false
+{
+  "error": {
+    "code": "STRIPE_CHARGES_DISABLED",
+    "message": "Le compte Stripe n'est pas encore habilité à encaisser.",
+    "details": { "chargesEnabled": false }
   }
 }
 ```
@@ -810,7 +822,7 @@ Traitement **idempotent** via table `stripe_events` (unique `stripe_event_id`). 
 | `payment_intent.succeeded` | Si `payments.status=authorized` → `captured` |
 | `payment_intent.payment_failed` | `payments.status=failed` ; booking `payment_authorized` / `pending_provider` → `expired` (RG-PAY-06) |
 | `charge.refunded` | `payments.status=refunded` |
-| `account.updated` | no-op (CS-M06-S06) |
+| `account.updated` | Sync `provider_profiles.charges_enabled` (CS-M06-S06) |
 
 Erreurs : `STRIPE_WEBHOOK_INVALID_SIGNATURE` (400), `VALIDATION_ERROR` (400).
 
@@ -878,6 +890,7 @@ Erreurs : `FORBIDDEN` (403), `BOOKING_NOT_FOUND` (404), `PAYMENT_NOT_FOUND` / `P
 | `INVALID_OPTIONS` | 400 | Option inactive ou hors offre |
 | `KYC_NOT_APPROVED` | 403 | Pro non validé (`draft` / `submitted` / `rejected`) |
 | `RC_PRO_EXPIRED` | 403 | RC Pro manquante ou expirée |
+| `STRIPE_CHARGES_DISABLED` | 403 | Compte Connect sans `charges_enabled` |
 | `BOOKING_INVALID_TRANSITION` | 409 | Transition statut interdite |
 | `BOOKING_DISPUTE_WINDOW_EXPIRED` | 409 | Litige hors délai 48 h |
 | `BOOKING_ALREADY_ACCEPTED` | 409 | Mission déjà prise |

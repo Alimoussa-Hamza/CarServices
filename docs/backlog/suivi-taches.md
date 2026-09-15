@@ -19,7 +19,7 @@
 | F — Apps clientes | 3/6 | — en attente maquettes |
 | G — Backend Pros & KYC (M04) | 8/8 | — terminé |
 | H — Bookings (M05) | 10/10 | — terminé |
-| I — Paiements Stripe (M06) | 5/6 | CS-M06-S06 charges_enabled |
+| I — Paiements Stripe (M06) | 6/6 | — terminé |
 
 ---
 
@@ -264,7 +264,9 @@
 - [x] **CS-M06-S05** Refund admin + annulation auth
   - [x] `POST /admin/bookings/:id/refund` — cancel PI si authorized, refund si captured
   - [x] Cancel client/pro libère l’auth (RG-PAY-05) / capture partielle des frais RG-CANCEL
-- [ ] **CS-M06-S06** Sync stripe_account charges_enabled
+- [x] **CS-M06-S06** Sync stripe_account charges_enabled
+  - [x] Webhook `account.updated` → `provider_profiles.charges_enabled`
+  - [x] Matching + missions bloqués si `charges_enabled=false` (`STRIPE_CHARGES_DISABLED`)
 
 ---
 

@@ -185,7 +185,7 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
 
     await prisma.providerProfile.updateMany({
       where: { user: { phone: { in: [phones.providerA, phones.providerB] } } },
-      data: { kycStatus: 'approved' },
+      data: { kycStatus: 'approved', chargesEnabled: true },
     });
 
     const eligibility = await http()
@@ -963,5 +963,63 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
       .send({})
       .expect(403);
     expect((forbidden.body as ErrorEnvelope).error.code).toBe('FORBIDDEN');
+  });
+
+  it('CS-M06-S06 account.updated synchronise charges_enabled', async () => {
+    const stripeAccountId = `acct_e2e_${suffix}`;
+    const provider = await prisma.user.findUniqueOrThrow({
+      where: { phone: phones.providerA },
+      include: { providerProfile: true },
+    });
+    await prisma.providerProfile.update({
+      where: { id: provider.providerProfile!.id },
+      data: { stripeAccountId, chargesEnabled: false },
+    });
+
+    const blocked = await http()
+      .get('/api/v1/providers/missions/eligibility')
+      .set('Authorization', `Bearer ${tokens.providerA}`)
+      .expect(403);
+    expect((blocked.body as ErrorEnvelope).error.code).toBe(
+      'STRIPE_CHARGES_DISABLED',
+    );
+
+    const webhook = await http()
+      .post('/api/v1/webhooks/stripe')
+      .send({
+        id: `evt_mock_${suffix}_account`,
+        type: 'account.updated',
+        data: { object: { id: stripeAccountId, charges_enabled: true } },
+      })
+      .expect(200);
+    expect(
+      (webhook.body as Envelope<{ received: boolean; duplicate: boolean }>)
+        .data,
+    ).toEqual({ received: true, duplicate: false });
+
+    const enabled = await prisma.providerProfile.findUniqueOrThrow({
+      where: { id: provider.providerProfile!.id },
+    });
+    expect(enabled.chargesEnabled).toBe(true);
+
+    const eligible = await http()
+      .get('/api/v1/providers/missions/eligibility')
+      .set('Authorization', `Bearer ${tokens.providerA}`)
+      .expect(200);
+    expect(
+      (eligible.body as Envelope<{ eligible: boolean }>).data.eligible,
+    ).toBe(true);
+
+    const me = await http()
+      .get('/api/v1/providers/me')
+      .set('Authorization', `Bearer ${tokens.providerA}`)
+      .expect(200);
+    expect(
+      (me.body as Envelope<{ chargesEnabled: boolean; stripeAccountId: string }>)
+        .data,
+    ).toMatchObject({
+      chargesEnabled: true,
+      stripeAccountId,
+    });
   });
 });

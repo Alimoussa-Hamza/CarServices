@@ -75,7 +75,8 @@ platform_config
 | rating_avg | DECIMAL(3,2) | DEFAULT 0 |
 | rating_count | INT | DEFAULT 0 |
 | acceptance_rate | DECIMAL(5,2) | DEFAULT 100 |
-| stripe_account_id | VARCHAR(255) | nullable |
+| stripe_account_id | VARCHAR(255) | nullable, UNIQUE |
+| charges_enabled | BOOLEAN | DEFAULT false |
 | base_address_id | UUID | FK → addresses |
 | created_at | TIMESTAMPTZ | NOT NULL |
 

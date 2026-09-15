@@ -322,6 +322,7 @@ export const ProviderProfileSchema = z.object({
   ratingCount: z.number().int().nonnegative(),
   acceptanceRate: z.number().min(0).max(100),
   stripeAccountId: z.string().nullable(),
+  chargesEnabled: z.boolean(),
   baseAddressId: z.string().uuid().nullable(),
 });
 export type ProviderProfileDto = z.infer<typeof ProviderProfileSchema>;

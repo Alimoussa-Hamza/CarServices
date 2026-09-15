@@ -230,6 +230,14 @@ export class ProvidersService {
         details: { expiresAt: this.dateToIsoDate(rcPro?.expiresAt ?? null) },
       });
     }
+
+    if (!profile.chargesEnabled) {
+      throw new ForbiddenException({
+        code: 'STRIPE_CHARGES_DISABLED',
+        message: "Le compte Stripe n'est pas encore habilité à encaisser.",
+        details: { chargesEnabled: false },
+      });
+    }
   }
 
   async listCapabilities(userId: string) {
@@ -476,6 +484,7 @@ export class ProvidersService {
     ratingCount: number;
     acceptanceRate: unknown;
     stripeAccountId: string | null;
+    chargesEnabled: boolean;
     baseAddressId: string | null;
   }) {
     return {
@@ -492,6 +501,7 @@ export class ProvidersService {
       ratingCount: profile.ratingCount,
       acceptanceRate: this.decimalToNumber(profile.acceptanceRate),
       stripeAccountId: profile.stripeAccountId,
+      chargesEnabled: profile.chargesEnabled,
       baseAddressId: profile.baseAddressId,
     };
   }

@@ -127,7 +127,8 @@ model ProviderProfile {
   ratingAvg          Decimal      @default(0) @map("rating_avg") @db.Decimal(3, 2)
   ratingCount        Int          @default(0) @map("rating_count")
   acceptanceRate     Decimal      @default(100) @map("acceptance_rate") @db.Decimal(5, 2)
-  stripeAccountId    String?      @map("stripe_account_id") @db.VarChar(255)
+  stripeAccountId    String?      @unique @map("stripe_account_id") @db.VarChar(255)
+  chargesEnabled     Boolean      @default(false) @map("charges_enabled")
   baseAddressId      String?      @map("base_address_id") @db.Uuid
   createdAt          DateTime     @default(now()) @map("created_at")
   updatedAt          DateTime     @updatedAt @map("updated_at")

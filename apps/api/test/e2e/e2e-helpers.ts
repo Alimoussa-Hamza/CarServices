@@ -186,7 +186,7 @@ export async function submitAndApproveKyc(
 
   await prisma.providerProfile.update({
     where: { userId: (await prisma.user.findUniqueOrThrow({ where: { phone } })).id },
-    data: { kycStatus: 'approved' },
+    data: { kycStatus: 'approved', chargesEnabled: true },
   });
 }
 

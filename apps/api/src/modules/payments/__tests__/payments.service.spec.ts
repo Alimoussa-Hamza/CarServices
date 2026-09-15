@@ -55,6 +55,9 @@ function buildService() {
       create: jest.fn().mockResolvedValue({}),
       delete: jest.fn(),
     },
+    providerProfile: {
+      updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+    },
     booking: {
       findUnique: jest.fn(),
       update: jest.fn(),
@@ -286,6 +289,43 @@ describe('PaymentsService.processStripeEvent', () => {
       where: { id: paymentId },
       data: { status: 'captured', capturedAt: now },
     });
+  });
+
+  it('synchronise charges_enabled sur account.updated', async () => {
+    const { service, prisma } = buildService();
+
+    await expect(
+      service.processStripeEvent(
+        {
+          id: 'evt_mock_account_updated_1',
+          type: 'account.updated',
+          data: {
+            object: { id: 'acct_mock_proA', charges_enabled: true },
+          },
+        },
+        now,
+      ),
+    ).resolves.toEqual({ duplicate: false });
+    expect(prisma.providerProfile.updateMany).toHaveBeenCalledWith({
+      where: { stripeAccountId: 'acct_mock_proA' },
+      data: { chargesEnabled: true },
+    });
+  });
+
+  it('ignore un account.updated sans charges_enabled booléen', async () => {
+    const { service, prisma } = buildService();
+
+    await expect(
+      service.processStripeEvent(
+        {
+          id: 'evt_mock_account_updated_noop',
+          type: 'account.updated',
+          data: { object: { id: 'acct_mock_proA' } },
+        },
+        now,
+      ),
+    ).resolves.toEqual({ duplicate: false });
+    expect(prisma.providerProfile.updateMany).not.toHaveBeenCalled();
   });
 });
 

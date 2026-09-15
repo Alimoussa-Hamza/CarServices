@@ -803,6 +803,29 @@
             },
             "url": "{{baseUrl}}/webhooks/stripe"
           }
+        },
+        {
+          "name": "Stripe Webhook account.updated",
+          "request": {
+            "method": "POST",
+            "description": "Sync charges_enabled du compte Connect (CS-M06-S06). Idempotent via stripe_events.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Stripe-Signature",
+                "value": "",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"evt_mock_account_1\",\n  \"type\": \"account.updated\",\n  \"data\": { \"object\": { \"id\": \"acct_mock_pro\", \"charges_enabled\": true } }\n}"
+            },
+            "url": "{{baseUrl}}/webhooks/stripe"
+          }
         }
       ]
     },

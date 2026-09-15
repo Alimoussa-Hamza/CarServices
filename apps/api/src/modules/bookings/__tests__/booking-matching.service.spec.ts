@@ -104,6 +104,14 @@ describe('BookingMatchingService', () => {
       expect(result).toHaveLength(1);
       expect(result[0]?.providerId).toBe(providerId);
       expect(result[0]?.score).toBeGreaterThan(0);
+      expect(prisma.providerProfile.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            kycStatus: 'approved',
+            chargesEnabled: true,
+          }),
+        }),
+      );
     });
 
     it('exclut une RC Pro expirée', async () => {
