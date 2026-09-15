@@ -22,6 +22,8 @@ import {
   ProviderReviewsResponseSchema,
   CreateDisputeDto,
   CreatedDisputeSchema,
+  RegisterPushTokenDto,
+  RegisteredPushTokenSchema,
   DeclineBookingDto,
   DeclinedBookingSchema,
   ListBookingsQuery,
@@ -336,6 +338,13 @@ export const api = {
         body: JSON.stringify(dto),
       }).then((data) => CreatedDisputeSchema.parse(data)),
   },
+  users: {
+    registerPushToken: (dto: RegisterPushTokenDto) =>
+      apiRequest('/api/v1/users/push-token', {
+        method: 'POST',
+        body: JSON.stringify(dto),
+      }).then((data) => RegisteredPushTokenSchema.parse(data)),
+  },
 };
 
 export type {
@@ -347,6 +356,7 @@ export type {
   CreateReviewDto,
   ListProviderReviewsQuery,
   CreateDisputeDto,
+  RegisterPushTokenDto,
   DeclineBookingDto,
   PatchBookingStatusDto,
   CancelBookingDto,

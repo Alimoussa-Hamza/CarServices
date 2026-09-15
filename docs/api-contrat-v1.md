@@ -915,6 +915,35 @@ Erreurs : `VALIDATION_ERROR` (400), `FORBIDDEN` (403), `BOOKING_NOT_FOUND` (404)
 
 ---
 
+## Notifications
+
+| Method | Path | Rôle | Description |
+|--------|------|------|-------------|
+| POST | `/users/push-token` | client/provider | Enregistrer Expo push token |
+
+### POST `/users/push-token`
+
+JWT **client** ou **provider**. Upsert par `token` (réassigne à l’utilisateur courant si le token existait). Formats acceptés : `ExponentPushToken[...]`, `ExpoPushToken[...]`.
+
+```json
+// Request
+{ "token": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", "platform": "ios" }
+
+// Response 201
+{
+  "data": {
+    "id": "uuid",
+    "token": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]",
+    "platform": "ios",
+    "updatedAt": "..."
+  }
+}
+```
+
+Erreurs : `VALIDATION_ERROR` (400), `UNAUTHORIZED` (401), `FORBIDDEN` (403).
+
+---
+
 ## Payments (webhooks)
 
 | Method | Path | Description |

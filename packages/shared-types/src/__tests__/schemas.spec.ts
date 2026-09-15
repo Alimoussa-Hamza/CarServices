@@ -31,6 +31,8 @@ import {
   ProviderReviewsResponseSchema,
   CreateDisputeSchema,
   CreatedDisputeSchema,
+  RegisterPushTokenSchema,
+  RegisteredPushTokenSchema,
   MEDIA_UPLOAD_TTL_SECONDS,
   MEDIA_MAX_PHOTO_BYTES,
   MediaUploadUrlResponseSchema,
@@ -1805,5 +1807,43 @@ describe('CreateDisputeSchema / CreatedDisputeSchema', () => {
         createdAt: '2026-09-15T21:00:00.000Z',
       }),
     ).toMatchObject({ payoutFrozen: true, bookingStatus: 'disputed' });
+  });
+});
+
+describe('RegisterPushTokenSchema / RegisteredPushTokenSchema', () => {
+  it('valide un token Expo ios', () => {
+    expect(
+      RegisterPushTokenSchema.parse({
+        token: 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
+        platform: 'ios',
+      }),
+    ).toMatchObject({ platform: 'ios' });
+  });
+
+  it('accepte ExpoPushToken sans platform', () => {
+    expect(
+      RegisterPushTokenSchema.parse({
+        token: 'ExpoPushToken[yyyyyyyyyyyyyyyyyyyyyy]',
+      }),
+    ).toMatchObject({ token: 'ExpoPushToken[yyyyyyyyyyyyyyyyyyyyyy]' });
+  });
+
+  it('refuse un token mal formé', () => {
+    expect(
+      RegisterPushTokenSchema.safeParse({
+        token: 'not-a-push-token',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('valide la réponse d’enregistrement', () => {
+    expect(
+      RegisteredPushTokenSchema.parse({
+        id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        token: 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
+        platform: 'android',
+        updatedAt: '2026-09-15T22:00:00.000Z',
+      }),
+    ).toMatchObject({ platform: 'android' });
   });
 });

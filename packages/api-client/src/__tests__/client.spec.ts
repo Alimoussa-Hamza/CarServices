@@ -1427,4 +1427,41 @@ describe('api-client', () => {
       );
     });
   });
+
+  describe('api.users', () => {
+    it('enregistre un Expo push token', async () => {
+      const payload = {
+        id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        token: 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
+        platform: 'ios',
+        updatedAt: '2026-09-15T22:00:00.000Z',
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: payload }));
+      initApiClient({
+        baseUrl: 'http://api.test',
+        getAccessToken: jest.fn().mockResolvedValue('client.jwt'),
+      });
+
+      await expect(
+        api.users.registerPushToken({
+          token: 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
+          platform: 'ios',
+        }),
+      ).resolves.toEqual(payload);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/users/push-token',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer client.jwt',
+          },
+          body: JSON.stringify({
+            token: 'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]',
+            platform: 'ios',
+          }),
+        },
+      );
+    });
+  });
 });

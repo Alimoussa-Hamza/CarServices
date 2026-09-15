@@ -117,6 +117,7 @@ model User {
   refreshTokens        RefreshToken[]
   addresses            Address[]
   verifiedKycDocuments ProviderKycDocument[] @relation("VerifiedKycDocuments")
+  pushTokens           PushToken[]
 
   @@map("users")
 }
@@ -544,4 +545,18 @@ model Dispute {
 
   @@index([status, createdAt])
   @@map("disputes")
+}
+
+model PushToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  token     String   @unique @db.VarChar(255)
+  platform  String?  @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_tokens")
 }

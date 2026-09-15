@@ -22,6 +22,7 @@
 | I — Paiements Stripe (M06) | 6/6 | — terminé |
 | J — Médias & preuves (M07) | 4/4 | — terminé |
 | K — Avis & litiges (M08) | 4/4 | — terminé |
+| L — Notifications (M09) | 1/4 | CS-M09-S02 worker push |
 
 ---
 
@@ -306,6 +307,16 @@
 - [x] **CS-M08-S04** Fenêtre 72h avis / 48h litige
   - [x] `REVIEW_WINDOW_EXPIRED` (72 h) + `BOOKING_DISPUTE_WINDOW_EXPIRED` (48 h)
 - [x] Gate fin M08 — `test/e2e/m08-reviews-disputes.e2e-spec.ts`
+
+---
+
+## Piste L — Notifications · Module M09
+
+- [x] **CS-M09-S01** Enregistrement expo push token
+  - [x] Table `push_tokens` + POST `/users/push-token` (upsert)
+- [ ] **CS-M09-S02** Worker send-push (Expo API)
+- [ ] **CS-M09-S03** SMS + email templates booking
+- [ ] **CS-M09-S04** Events : pro trouvé, en route, terminé, nouvelle mission
 
 ---
 

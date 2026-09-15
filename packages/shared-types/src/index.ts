@@ -1173,3 +1173,30 @@ export const CreatedDisputeSchema = z.object({
   createdAt: z.string().datetime(),
 });
 export type CreatedDispute = z.infer<typeof CreatedDisputeSchema>;
+
+/** Formats Expo : ExponentPushToken[...] ou ExpoPushToken[...] */
+export const ExpoPushTokenSchema = z
+  .string()
+  .trim()
+  .regex(
+    /^(ExponentPushToken|ExpoPushToken)\[[A-Za-z0-9_-]+\]$/,
+    'Token Expo push invalide.',
+  );
+export type ExpoPushToken = z.infer<typeof ExpoPushTokenSchema>;
+
+export const PushPlatformSchema = z.enum(['ios', 'android']);
+export type PushPlatform = z.infer<typeof PushPlatformSchema>;
+
+export const RegisterPushTokenSchema = z.object({
+  token: ExpoPushTokenSchema,
+  platform: PushPlatformSchema.optional(),
+});
+export type RegisterPushTokenDto = z.infer<typeof RegisterPushTokenSchema>;
+
+export const RegisteredPushTokenSchema = z.object({
+  id: z.string().uuid(),
+  token: ExpoPushTokenSchema,
+  platform: PushPlatformSchema.nullable(),
+  updatedAt: z.string().datetime(),
+});
+export type RegisteredPushToken = z.infer<typeof RegisteredPushTokenSchema>;

@@ -1521,4 +1521,43 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
       'BOOKING_DISPUTE_WINDOW_EXPIRED',
     );
   });
+
+  it('CS-M09-S01 POST /users/push-token enregistre le token Expo', async () => {
+    const token = `ExponentPushToken[e2e${suffix}xxxxxxxxxxxxxx]`;
+    const registered = await http()
+      .post('/api/v1/users/push-token')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({ token, platform: 'ios' })
+      .expect(201);
+    expect(
+      (
+        registered.body as Envelope<{
+          token: string;
+          platform: string | null;
+        }>
+      ).data,
+    ).toMatchObject({ token, platform: 'ios' });
+
+    const again = await http()
+      .post('/api/v1/users/push-token')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({ token, platform: 'android' })
+      .expect(201);
+    expect(
+      (again.body as Envelope<{ platform: string | null }>).data.platform,
+    ).toBe('android');
+
+    const rows = await prisma.pushToken.findMany({ where: { token } });
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.platform).toBe('android');
+
+    const invalid = await http()
+      .post('/api/v1/users/push-token')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({ token: 'not-a-token' })
+      .expect(400);
+    expect((invalid.body as ErrorEnvelope).error.code).toBe(
+      'VALIDATION_ERROR',
+    );
+  });
 });

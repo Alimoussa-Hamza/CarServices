@@ -914,6 +914,39 @@
       ]
     },
     {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Register Push Token",
+          "request": {
+            "method": "POST",
+            "description": "JWT client ou provider. Upsert Expo push token (ExponentPushToken / ExpoPushToken).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]\",\n  \"platform\": \"ios\"\n}"
+            },
+            "url": "{{baseUrl}}/users/push-token"
+          }
+        }
+      ]
+    },
+    {
       "name": "Webhooks",
       "item": [
         {
