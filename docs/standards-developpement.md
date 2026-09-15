@@ -669,7 +669,8 @@ export async function apiRequest<T>(
 | Sujet | Règle |
 |-------|-------|
 | Secrets | `.env` gitignored ; `.env.example` documenté |
-| JWT | Access 15 min · Refresh 7 jours · rotation |
+| JWT | Access **24 h** en local/test (`JWT_ACCESS_TTL_SECONDS=86400`) · **15 min** en prod · Refresh 7 jours · rotation |
+
 | OTP | Rate limit 5/min · expiration 5 min |
 | Upload | Signed URL TTL 15 min · MIME whitelist image/*, application/pdf |
 | Logs | Jamais logger PAN, OTP, tokens, IBAN |

@@ -39,7 +39,8 @@ Les conventions de code sont dans [standards-developpement.md](../standards-deve
 
 ### `auth`
 - OTP send/verify (rate limit Redis)
-- JWT access (15 min) + refresh (7 j)
+- JWT access (**24 h** en local/test via `JWT_ACCESS_TTL_SECONDS=86400`) + refresh (7 j)
+
 - Guards : JwtAuthGuard, RolesGuard
 
 ### `catalog`

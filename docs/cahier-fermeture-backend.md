@@ -57,11 +57,13 @@ Les modules **M02–M10** livrent le cœur métier. Il manque encore :
 
 ## 4. Definition of Done (module)
 
-- [ ] Stories S01–S06 cochées + Postman + shared-types + api-client
-- [ ] `m15-backend-closure.e2e-spec.ts` vert
-- [ ] Pyramide : unit shared-types / api / api-client + `test:e2e` + build
-- [ ] `./tools/smoke-api.sh` vert en local
-- [ ] Commits Conventional Commits poussés sur `main`
+- [x] Stories S01–S06 cochées + Postman + shared-types + api-client
+- [x] `m15-backend-closure.e2e-spec.ts` vert
+- [x] Pyramide : unit shared-types / api / api-client + `test:e2e` + build
+- [x] `./tools/smoke-api.sh` + `tools/load-k6.js` documentés
+- [x] Commits Conventional Commits poussés sur `main`
+
+> Smoke HTTP et k6 restent manuels locaux (API up). Job CI `e2e-api` couvre la gate M15.
 
 ## 5. Stories
 

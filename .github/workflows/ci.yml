@@ -70,3 +70,68 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+  e2e-api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: quality
+
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: carservice
+          POSTGRES_PASSWORD: carservice
+          POSTGRES_DB: carservice
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U carservice -d carservice"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://carservice:carservice@localhost:5432/carservice?schema=public
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: ci-jwt-secret-change-me-min-32-chars
+      JWT_REFRESH_SECRET: ci-refresh-secret-change-me-min-32
+      OTP_PEPPER: ci-otp-pepper-change-me-min-32-chars
+      PLATFORM_COMMISSION_RATE: '0.20'
+      MATCHING_BROADCAST_SIZE: '8'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm --filter @carservice/api prisma:generate
+
+      - name: Migrate + seed
+        run: |
+          pnpm --filter @carservice/api exec prisma migrate deploy
+          pnpm --filter @carservice/api prisma:seed
+
+      - name: E2E API
+        run: pnpm --filter @carservice/api test:e2e

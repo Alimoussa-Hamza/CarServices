@@ -314,9 +314,11 @@ export class AuthService {
 
   private async issueTokens(user: User) {
     const payload: AuthPayload = { sub: user.id, role: user.role };
-    const accessExpiresIn = this.config.get<number>('JWT_ACCESS_TTL_SECONDS') ?? 900;
+    const accessExpiresIn =
+      Number(this.config.get<string | number>('JWT_ACCESS_TTL_SECONDS')) || 900;
     const refreshExpiresIn =
-      this.config.get<number>('JWT_REFRESH_TTL_SECONDS') ?? 604800;
+      Number(this.config.get<string | number>('JWT_REFRESH_TTL_SECONDS')) ||
+      604800;
 
     const accessToken = this.jwtService.sign(payload, {
       expiresIn: accessExpiresIn,

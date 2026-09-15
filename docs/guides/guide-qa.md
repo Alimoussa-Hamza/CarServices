@@ -1,6 +1,7 @@
 # Guide QA & Tests — CARSERVICE
 
-> **Phase :** pré-développement · Stratégie tests, plans, critères qualité
+> **Phase :** opérationnelle · Stratégie tests, plans, critères qualité  
+> **Référentiel API détaillé :** [docs/qa/](../qa/README.md) (cahier · matrice · procédures)
 
 ---
 
@@ -16,7 +17,9 @@
         └─────────┘
 ```
 
-**MVP focus :** unit + intégration API. E2E HTTP (`supertest`, DB réelle) à **chaque fin de module** (`apps/api/test/e2e/mxx-*.e2e-spec.ts`). E2E mobile Maestro = phase 2.
+**MVP focus :** unit + intégration API. E2E HTTP (`supertest`, DB réelle) à **chaque fin de module** (`apps/api/test/e2e/mxx-*.e2e-spec.ts`). Smoke staging : `./tools/smoke-api.sh`. E2E mobile Maestro = phase 2.
+
+Cas de tests nommés (TC-*) et couverture endpoint : [cahier-de-tests-api.md](../qa/cahier-de-tests-api.md) · [matrice-couverture-api.md](../qa/matrice-couverture-api.md).
 
 ---
 
@@ -134,7 +137,13 @@
 | POST /bookings | < 800 ms |
 | GET /bookings/:id | < 150 ms |
 
-Load test phase 2 : k6 — 50 RPS simulate.
+Load test phase 2 : k6 — 50 RPS simulate (`tools/load-k6.js`, warn si hors seuil).
+
+```bash
+# API démarrée + seed
+k6 run tools/load-k6.js
+API_URL=http://localhost:3000/api/v1 k6 run tools/load-k6.js
+```
 
 ---
 
@@ -164,13 +173,15 @@ Story done si :
 | Outil | Usage |
 |-------|-------|
 | Jest | Unit/API |
-| Supertest | HTTP API |
+| Supertest | HTTP API E2E (`apps/api/test/e2e`) |
+| `tools/smoke-api.sh` | Smoke staging/local post-deploy |
+| `docs/qa/` | Cahier TC + matrice couverture |
 | React Native Testing Library | Mobile components |
 | Maestro | Mobile E2E (phase 2) |
 | Stripe CLI | Webhook local test |
 | Postman/Bruno | Collection API manuelle |
 
-Collection Bruno : exporter depuis contrat API v1.
+Collection Postman : `docs/postman/carservice.postman_collection.json`.
 
 ---
 

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { SentryModule } from '@sentry/nestjs/setup';
 import { LoggerModule } from 'nestjs-pino';
@@ -23,8 +23,6 @@ import { ClientsModule } from './modules/clients/clients.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 const isProd = process.env.NODE_ENV === 'production';
-const throttleTtlMs = Number(process.env.THROTTLE_TTL_MS ?? 60_000);
-const throttleLimit = Number(process.env.THROTTLE_LIMIT ?? 100);
 
 @Module({
   imports: [
@@ -55,12 +53,15 @@ const throttleLimit = Number(process.env.THROTTLE_LIMIT ?? 100);
         },
       },
     }),
-    ThrottlerModule.forRoot([
-      {
-        ttl: throttleTtlMs,
-        limit: throttleLimit,
-      },
-    ]),
+    ThrottlerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => [
+        {
+          ttl: Number(config.get('THROTTLE_TTL_MS') ?? 60_000),
+          limit: Number(config.get('THROTTLE_LIMIT') ?? 100),
+        },
+      ],
+    }),
     PrismaModule,
     RedisModule,
     HealthModule,

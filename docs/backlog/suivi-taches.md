@@ -11,7 +11,7 @@
 
 | Piste | Avancement | Tâche en cours |
 |-------|-----------|----------------|
-| A — Fondations & infra | 6/7 | Sentry (CS-M00-S05) |
+| A — Fondations & infra | 7/7 | — terminé (staging cloud hors scope) |
 | B — Packages partagés | 3/3 | — terminé |
 | C — Auth & Users (M02) | 6/6 | — terminé |
 | D — Tests & qualité | 9/9 | — terminé |
@@ -28,7 +28,7 @@
 | O — Mobile pro (M12) | 0/11 | — en attente maquettes |
 | P — Admin web (M13) | 0/8 | — après M10 |
 | Q — QA & launch (M14) | 0/6 | — fin de parcours |
-| R — Fermeture backend (M15) | 5/6 | CS-M15-S06 QA + k6 |
+| R — Fermeture backend (M15) | 6/6 | Gate M15 verte |
 
 ---
 
@@ -40,8 +40,8 @@
 - [x] **CS-M00-S06** `.env.example` racine + par app
 - [x] Scripts environnement — `tools/check-env.sh`, `tools/setup-dev.sh`
 - [x] Script test auth — `tools/test-auth.sh`
-- [ ] **CS-M00-S05** Sentry API + mobile
-- [ ] **CS-M00-S04** Environnement staging (API déployée)
+- [x] **CS-M00-S05** Sentry API + logging Pino (mobile Sentry = hors scope M15)
+- [ ] **CS-M00-S04** Environnement staging (API déployée) — hors fermeture backend MVP
 
 ---
 
@@ -426,8 +426,9 @@ Cahier : [cahier-fermeture-backend.md](../cahier-fermeture-backend.md)
   - [x] `instrument.ts` conditionnel + nestjs-pino (redact PII)
 - [x] **CS-M15-S05** Helmet + Throttler Nest
   - [x] helmet + ThrottlerGuard 100/min + SkipThrottle health/webhooks
-- [ ] **CS-M15-S06** Pack QA + smoke + charge k6
-- [ ] Gate fin M15 — `test/e2e/m15-backend-closure.e2e-spec.ts`
+- [x] **CS-M15-S06** Pack QA + smoke + charge k6
+  - [x] `docs/qa/` · `tools/smoke-api.sh` · `tools/load-k6.js` · gates m02–m04
+- [x] Gate fin M15 — `test/e2e/m15-backend-closure.e2e-spec.ts`
 
 ---
 
