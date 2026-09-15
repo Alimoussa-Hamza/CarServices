@@ -21,7 +21,7 @@
 | H — Bookings (M05) | 10/10 | — terminé |
 | I — Paiements Stripe (M06) | 6/6 | — terminé |
 | J — Médias & preuves (M07) | 4/4 | — terminé |
-| K — Avis & litiges (M08) | 1/4 | CS-M08-S02 disputes |
+| K — Avis & litiges (M08) | 2/4 | CS-M08-S03 GET reviews |
 
 ---
 
@@ -298,7 +298,9 @@
 - [x] **CS-M08-S01** POST `/reviews` + calcul rating pro
   - [x] Table `reviews` (1 avis / booking) + `rating_avg` / `rating_count`
   - [x] RG-QUAL-02/04 — moyenne avis non masqués, booking `completed`
-- [ ] **CS-M08-S02** POST `/disputes` + freeze payout
+- [x] **CS-M08-S02** POST `/disputes` + freeze payout
+  - [x] Table `disputes` + `payments.payout_frozen_at`
+  - [x] Fenêtre 48 h + `completed` → `disputed` (RG-DISPUTE-01/03)
 - [ ] **CS-M08-S03** GET reviews public pro
 - [ ] **CS-M08-S04** Fenêtre 72h avis / 48h litige
 

@@ -80,6 +80,28 @@ enum PaymentStatus {
   failed
 }
 
+enum DisputeOpenedBy {
+  client
+  provider
+}
+
+enum DisputeReason {
+  quality
+  delay
+  damage
+  no_show
+  other
+}
+
+enum DisputeStatus {
+  open
+  under_review
+  resolved_client
+  resolved_provider
+  resolved_split
+  closed
+}
+
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   phone        String   @unique @db.VarChar(20)
@@ -110,6 +132,7 @@ model ClientProfile {
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   bookings Booking[]
   reviews  Review[]
+  disputes Dispute[]
 
   @@map("client_profiles")
 }
@@ -144,6 +167,7 @@ model ProviderProfile {
   bookings      Booking[]
   broadcasts    BookingBroadcast[]
   reviews       Review[]
+  disputes      Dispute[]
 
   @@map("provider_profiles")
 }
@@ -378,6 +402,7 @@ model Booking {
   broadcasts BookingBroadcast[]
   payment    Payment?
   review     Review?
+  dispute    Dispute?
 
   @@index([clientId, status])
   @@index([providerId, status])
@@ -461,6 +486,7 @@ model Payment {
   status                PaymentStatus
   capturedAt            DateTime?     @map("captured_at")
   refundedAt            DateTime?     @map("refunded_at")
+  payoutFrozenAt        DateTime?     @map("payout_frozen_at")
   createdAt             DateTime      @default(now()) @map("created_at")
 
   booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
@@ -496,4 +522,26 @@ model Review {
 
   @@index([providerId, isHidden])
   @@map("reviews")
+}
+
+model Dispute {
+  id               String           @id @default(uuid()) @db.Uuid
+  bookingId        String           @unique @map("booking_id") @db.Uuid
+  openedBy         DisputeOpenedBy  @map("opened_by")
+  reason           DisputeReason
+  description      String
+  status           DisputeStatus    @default(open)
+  resolutionNotes  String?          @map("resolution_notes")
+  resolvedBy       String?          @map("resolved_by") @db.Uuid
+  resolvedAt       DateTime?        @map("resolved_at")
+  createdAt        DateTime         @default(now()) @map("created_at")
+  clientId         String           @map("client_id") @db.Uuid
+  providerId       String           @map("provider_id") @db.Uuid
+
+  booking  Booking         @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  client   ClientProfile   @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  provider ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Restrict)
+
+  @@index([status, createdAt])
+  @@map("disputes")
 }

@@ -24,6 +24,7 @@ const authorizedPayment = {
   status: 'authorized' as const,
   capturedAt: null,
   refundedAt: null,
+  payoutFrozenAt: null,
 };
 
 function buildService() {
@@ -412,6 +413,48 @@ describe('PaymentsService.releaseOrRefund / adminRefund', () => {
     expect(prisma.booking.update).toHaveBeenCalledWith({
       where: { id: bookingId },
       data: { status: 'cancelled_by_admin' },
+    });
+  });
+});
+
+describe('PaymentsService.freezePayout', () => {
+  it('pose payoutFrozenAt si le paiement n’est pas encore gelé', async () => {
+    const { service, prisma } = buildService();
+    prisma.payment.findUnique.mockResolvedValue({
+      ...authorizedPayment,
+      status: 'captured',
+    });
+    prisma.payment.update.mockResolvedValue({
+      ...authorizedPayment,
+      status: 'captured',
+      payoutFrozenAt: now,
+    });
+
+    await expect(service.freezePayout(bookingId, now)).resolves.toEqual(now);
+    expect(prisma.payment.update).toHaveBeenCalledWith({
+      where: { id: paymentId },
+      data: { payoutFrozenAt: now },
+    });
+  });
+
+  it('est idempotent si déjà gelé', async () => {
+    const { service, prisma } = buildService();
+    prisma.payment.findUnique.mockResolvedValue({
+      ...authorizedPayment,
+      status: 'captured',
+      payoutFrozenAt: now,
+    });
+
+    await expect(service.freezePayout(bookingId, now)).resolves.toEqual(now);
+    expect(prisma.payment.update).not.toHaveBeenCalled();
+  });
+
+  it('lève PAYMENT_NOT_FOUND si aucun paiement', async () => {
+    const { service, prisma } = buildService();
+    prisma.payment.findUnique.mockResolvedValue(null);
+
+    await expect(service.freezePayout(bookingId, now)).rejects.toMatchObject({
+      response: { code: 'PAYMENT_NOT_FOUND' },
     });
   });
 });

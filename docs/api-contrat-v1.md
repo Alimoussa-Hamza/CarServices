@@ -858,6 +858,33 @@ Erreurs : `VALIDATION_ERROR` (400), `REVIEW_BOOKING_NOT_COMPLETED` (400), `FORBI
 | POST | `/disputes` | client/provider | Ouvrir litige |
 | GET | `/disputes/:id` | auth | Détail |
 
+### POST `/disputes`
+
+JWT **client** (propriétaire) ou **pro assigné**. Booking `completed` uniquement, fenêtre **48 h** (`BOOKING_DISPUTE_WINDOW_HOURS`, RG-DISPUTE-01). 1 litige / booking. Passe le booking en `disputed` et pose `payments.payout_frozen_at` (RG-DISPUTE-03, pas de refund). Motifs : `quality`, `delay`, `damage`, `no_show`, `other`.
+
+```json
+// Request
+{ "bookingId": "uuid", "reason": "quality", "description": "Prestation incomplète…" }
+
+// Response 201
+{
+  "data": {
+    "id": "uuid",
+    "bookingId": "uuid",
+    "openedBy": "client",
+    "reason": "quality",
+    "description": "…",
+    "status": "open",
+    "bookingStatus": "disputed",
+    "payoutFrozen": true,
+    "payoutFrozenAt": "...",
+    "createdAt": "..."
+  }
+}
+```
+
+Erreurs : `VALIDATION_ERROR` (400), `FORBIDDEN` (403), `BOOKING_NOT_FOUND` (404), `BOOKING_INVALID_TRANSITION` (409), `BOOKING_DISPUTE_WINDOW_EXPIRED` (409), `DISPUTE_ALREADY_EXISTS` (409), `BOOKING_NOT_ASSIGNED` (409), `PAYMENT_NOT_FOUND` (409).
+
 ---
 
 ## Payments (webhooks)
@@ -960,6 +987,7 @@ Erreurs : `FORBIDDEN` (403), `BOOKING_NOT_FOUND` (404), `PAYMENT_NOT_FOUND` / `P
 | `BOOKING_DISPUTE_WINDOW_EXPIRED` | 409 | Litige hors délai 48 h |
 | `REVIEW_BOOKING_NOT_COMPLETED` | 400 | Avis hors mission `completed` |
 | `REVIEW_ALREADY_EXISTS` | 409 | Un avis existe déjà pour ce booking |
+| `DISPUTE_ALREADY_EXISTS` | 409 | Un litige existe déjà pour ce booking |
 | `BOOKING_ALREADY_ACCEPTED` | 409 | Mission déjà prise |
 | `BOOKING_NOT_OFFERED` | 403 | Mission hors broadcast du pro |
 | `CAPABILITY_REQUIRED` | 403 | Offre hors capabilities du pro |

@@ -1302,4 +1302,82 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
       ).data,
     ).toMatchObject({ ratingAvg: 5, ratingCount: 1 });
   });
+
+  it('CS-M08-S02 POST /disputes gèle le payout', async () => {
+    const opened = await http()
+      .post('/api/v1/disputes')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({
+        bookingId,
+        reason: 'quality',
+        description: 'Prestation incomplète, traces partout.',
+      })
+      .expect(201);
+    expect(
+      (
+        opened.body as Envelope<{
+          bookingStatus: string;
+          payoutFrozen: boolean;
+          status: string;
+        }>
+      ).data,
+    ).toMatchObject({
+      bookingStatus: 'disputed',
+      payoutFrozen: true,
+      status: 'open',
+    });
+
+    const detail = await http()
+      .get(`/api/v1/bookings/${bookingId}`)
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .expect(200);
+    expect(
+      (detail.body as Envelope<{ status: string }>).data.status,
+    ).toBe('disputed');
+
+    const payment = await prisma.payment.findUniqueOrThrow({
+      where: { bookingId },
+    });
+    expect(payment.payoutFrozenAt).not.toBeNull();
+
+    const duplicate = await http()
+      .post('/api/v1/disputes')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({
+        bookingId,
+        reason: 'delay',
+        description: 'Toujours en attente du prestataire.',
+      })
+      .expect(409);
+    expect((duplicate.body as ErrorEnvelope).error.code).toBe(
+      'DISPUTE_ALREADY_EXISTS',
+    );
+
+    const pending = await http()
+      .post('/api/v1/bookings')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({
+        offerId,
+        vehicleType: 'suv',
+        optionIds: [],
+        addressId: clientAddressId,
+        slotStart: futureSlotIso(14),
+      })
+      .expect(201);
+    const pendingId = (
+      pending.body as Envelope<{ booking: { id: string } }>
+    ).data.booking.id;
+    const tooEarly = await http()
+      .post('/api/v1/disputes')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({
+        bookingId: pendingId,
+        reason: 'no_show',
+        description: 'Le prestataire ne s\'est pas présenté.',
+      })
+      .expect(409);
+    expect((tooEarly.body as ErrorEnvelope).error.code).toBe(
+      'BOOKING_NOT_ASSIGNED',
+    );
+  });
 });

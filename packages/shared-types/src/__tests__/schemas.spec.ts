@@ -27,6 +27,8 @@ import {
   CreateMediaUploadUrlSchema,
   CreateReviewSchema,
   CreatedReviewSchema,
+  CreateDisputeSchema,
+  CreatedDisputeSchema,
   MEDIA_UPLOAD_TTL_SECONDS,
   MEDIA_MAX_PHOTO_BYTES,
   MediaUploadUrlResponseSchema,
@@ -315,6 +317,7 @@ describe('PaymentSchema', () => {
         status: 'authorized',
         capturedAt: null,
         refundedAt: null,
+        payoutFrozenAt: null,
         createdAt: '2026-09-15T10:00:00.000Z',
       }),
     ).toMatchObject({ status: 'authorized', providerNetCents: 7200 });
@@ -333,6 +336,7 @@ describe('PaymentSchema', () => {
         status: 'authorized',
         capturedAt: null,
         refundedAt: null,
+        payoutFrozenAt: null,
         createdAt: '2026-09-15T10:00:00.000Z',
       }).success,
     ).toBe(false);
@@ -1705,5 +1709,54 @@ describe('CreateReviewSchema / CreatedReviewSchema', () => {
         provider: { ratingAvg: 5, ratingCount: 1 },
       }),
     ).toMatchObject({ provider: { ratingCount: 1 } });
+  });
+});
+
+describe('CreateDisputeSchema / CreatedDisputeSchema', () => {
+  it('valide un litige qualité', () => {
+    expect(
+      CreateDisputeSchema.parse({
+        bookingId: '77777777-7777-4777-8777-777777777777',
+        reason: 'quality',
+        description: 'Prestation incomplète, traces partout.',
+      }),
+    ).toMatchObject({ reason: 'quality' });
+  });
+
+  it('refuse une description trop courte', () => {
+    expect(
+      CreateDisputeSchema.safeParse({
+        bookingId: '77777777-7777-4777-8777-777777777777',
+        reason: 'delay',
+        description: 'Trop tard',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('refuse un motif inconnu', () => {
+    expect(
+      CreateDisputeSchema.safeParse({
+        bookingId: '77777777-7777-4777-8777-777777777777',
+        reason: 'unknown',
+        description: 'Prestation incomplète, traces partout.',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('valide la réponse de création', () => {
+    expect(
+      CreatedDisputeSchema.parse({
+        id: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+        bookingId: '77777777-7777-4777-8777-777777777777',
+        openedBy: 'client',
+        reason: 'quality',
+        description: 'Prestation incomplète, traces partout.',
+        status: 'open',
+        bookingStatus: 'disputed',
+        payoutFrozen: true,
+        payoutFrozenAt: '2026-09-15T21:00:00.000Z',
+        createdAt: '2026-09-15T21:00:00.000Z',
+      }),
+    ).toMatchObject({ payoutFrozen: true, bookingStatus: 'disputed' });
   });
 });

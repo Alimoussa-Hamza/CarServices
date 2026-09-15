@@ -70,6 +70,7 @@ export const PaymentSchema = z.object({
   status: PaymentStatusSchema,
   capturedAt: z.string().datetime().nullable(),
   refundedAt: z.string().datetime().nullable(),
+  payoutFrozenAt: z.string().datetime().nullable(),
   createdAt: z.string().datetime(),
 });
 export type Payment = z.infer<typeof PaymentSchema>;
@@ -1097,3 +1098,46 @@ export const CreatedReviewSchema = z.object({
   }),
 });
 export type CreatedReview = z.infer<typeof CreatedReviewSchema>;
+
+export const DisputeReasonSchema = z.enum([
+  'quality',
+  'delay',
+  'damage',
+  'no_show',
+  'other',
+]);
+export type DisputeReason = z.infer<typeof DisputeReasonSchema>;
+
+export const DisputeStatusSchema = z.enum([
+  'open',
+  'under_review',
+  'resolved_client',
+  'resolved_provider',
+  'resolved_split',
+  'closed',
+]);
+export type DisputeStatus = z.infer<typeof DisputeStatusSchema>;
+
+export const DisputeOpenedBySchema = z.enum(['client', 'provider']);
+export type DisputeOpenedBy = z.infer<typeof DisputeOpenedBySchema>;
+
+export const CreateDisputeSchema = z.object({
+  bookingId: z.string().uuid(),
+  reason: DisputeReasonSchema,
+  description: z.string().trim().min(10).max(2000),
+});
+export type CreateDisputeDto = z.infer<typeof CreateDisputeSchema>;
+
+export const CreatedDisputeSchema = z.object({
+  id: z.string().uuid(),
+  bookingId: z.string().uuid(),
+  openedBy: DisputeOpenedBySchema,
+  reason: DisputeReasonSchema,
+  description: z.string(),
+  status: DisputeStatusSchema,
+  bookingStatus: z.literal('disputed'),
+  payoutFrozen: z.literal(true),
+  payoutFrozenAt: z.string().datetime(),
+  createdAt: z.string().datetime(),
+});
+export type CreatedDispute = z.infer<typeof CreatedDisputeSchema>;

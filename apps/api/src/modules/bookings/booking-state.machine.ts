@@ -81,7 +81,7 @@ const TRANSITION_RULES: readonly TransitionRule[] = [
 
   { from: 'in_progress', to: 'completed', actors: ['provider', 'admin'] },
 
-  { from: 'completed', to: 'disputed', actors: ['client', 'admin'] },
+  { from: 'completed', to: 'disputed', actors: ['client', 'provider', 'admin'] },
 ];
 
 const TERMINAL_STATUSES: readonly BookingStatus[] = [
@@ -97,7 +97,7 @@ const TERMINAL_STATUSES: readonly BookingStatus[] = [
 export class BookingStateMachine {
   /**
    * Indique si `actor` peut passer de `from` à `to` (RG-BOOK-01).
-   * Pour `completed` → `disputed`, le client est limité à 48 h si `completedAt` est fourni.
+   * Pour `completed` → `disputed`, client et pro sont limités à 48 h si `completedAt` est fourni.
    */
   canTransition(
     from: BookingStatus,
@@ -109,7 +109,7 @@ export class BookingStateMachine {
       return false;
     }
 
-    if (to === 'disputed' && actor === 'client') {
+    if (to === 'disputed' && (actor === 'client' || actor === 'provider')) {
       return this.isDisputeWindowOpen(context);
     }
 
@@ -136,7 +136,7 @@ export class BookingStateMachine {
 
     if (
       to === 'disputed' &&
-      actor === 'client' &&
+      (actor === 'client' || actor === 'provider') &&
       !this.isDisputeWindowOpen(context)
     ) {
       throw new ConflictException({

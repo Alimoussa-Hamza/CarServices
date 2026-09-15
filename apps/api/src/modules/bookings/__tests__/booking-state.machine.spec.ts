@@ -62,6 +62,7 @@ const EXPECTED_TRANSITIONS: ReadonlyArray<
   ['in_progress', 'completed', 'admin'],
 
   ['completed', 'disputed', 'client'],
+  ['completed', 'disputed', 'provider'],
   ['completed', 'disputed', 'admin'],
 ];
 
@@ -206,6 +207,24 @@ describe('BookingStateMachine', () => {
     it('refuse le client après 48 h', () => {
       expect(
         machine.canTransition('completed', 'disputed', 'client', {
+          completedAt,
+          now: new Date('2026-09-15T10:00:01.000Z'),
+        }),
+      ).toBe(false);
+    });
+
+    it('autorise le pro assigné dans la fenêtre de 48 h', () => {
+      expect(
+        machine.canTransition('completed', 'disputed', 'provider', {
+          completedAt,
+          now: new Date('2026-09-15T09:59:59.000Z'),
+        }),
+      ).toBe(true);
+    });
+
+    it('refuse le pro après 48 h', () => {
+      expect(
+        machine.canTransition('completed', 'disputed', 'provider', {
           completedAt,
           now: new Date('2026-09-15T10:00:01.000Z'),
         }),

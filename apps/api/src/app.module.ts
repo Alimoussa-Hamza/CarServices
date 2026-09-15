@@ -10,6 +10,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { ProvidersModule } from './modules/providers/providers.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
+import { DisputesModule } from './modules/disputes/disputes.module';
 import { ZonesModule } from './modules/zones/zones.module';
 import { PrismaModule } from './prisma/prisma.module';
 
@@ -26,6 +27,7 @@ import { PrismaModule } from './prisma/prisma.module';
     MediaModule,
     PaymentsModule,
     ReviewsModule,
+    DisputesModule,
     BookingsModule,
   ],
   controllers: [AppController],

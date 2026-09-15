@@ -873,6 +873,39 @@
       ]
     },
     {
+      "name": "Disputes",
+      "item": [
+        {
+          "name": "Create Dispute",
+          "request": {
+            "method": "POST",
+            "description": "JWT client ou pro assigné. Booking completed, fenêtre 48 h. Freeze payout (RG-DISPUTE-01/03). 1 litige / mission.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingId\": \"{{bookingId}}\",\n  \"reason\": \"quality\",\n  \"description\": \"Prestation incomplète, traces partout.\"\n}"
+            },
+            "url": "{{baseUrl}}/disputes"
+          }
+        }
+      ]
+    },
+    {
       "name": "Webhooks",
       "item": [
         {

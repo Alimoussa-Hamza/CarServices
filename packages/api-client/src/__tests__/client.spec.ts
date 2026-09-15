@@ -1343,4 +1343,49 @@ describe('api-client', () => {
       });
     });
   });
+
+  describe('api.disputes', () => {
+    it('ouvre un litige et gèle le payout', async () => {
+      const payload = {
+        id: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+        bookingId: '77777777-7777-4777-8777-777777777777',
+        openedBy: 'client',
+        reason: 'quality',
+        description: 'Prestation incomplète, traces partout.',
+        status: 'open',
+        bookingStatus: 'disputed',
+        payoutFrozen: true,
+        payoutFrozenAt: '2026-09-15T21:00:00.000Z',
+        createdAt: '2026-09-15T21:00:00.000Z',
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: payload }));
+      initApiClient({
+        baseUrl: 'http://api.test',
+        getAccessToken: jest.fn().mockResolvedValue('client.jwt'),
+      });
+
+      await expect(
+        api.disputes.create({
+          bookingId: '77777777-7777-4777-8777-777777777777',
+          reason: 'quality',
+          description: 'Prestation incomplète, traces partout.',
+        }),
+      ).resolves.toEqual(payload);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/disputes',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer client.jwt',
+          },
+          body: JSON.stringify({
+            bookingId: '77777777-7777-4777-8777-777777777777',
+            reason: 'quality',
+            description: 'Prestation incomplète, traces partout.',
+          }),
+        },
+      );
+    });
+  });
 });

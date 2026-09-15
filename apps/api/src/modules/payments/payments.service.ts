@@ -523,6 +523,31 @@ export class PaymentsService {
     });
   }
 
+  async freezePayout(
+    bookingId: string,
+    now = new Date(),
+    db: Prisma.TransactionClient | PrismaService = this.prisma,
+  ): Promise<Date> {
+    const payment = await db.payment.findUnique({ where: { bookingId } });
+    if (!payment) {
+      throw new ConflictException({
+        code: 'PAYMENT_NOT_FOUND',
+        message: 'Aucun paiement à geler pour cette réservation.',
+        details: [],
+      });
+    }
+
+    if (payment.payoutFrozenAt) {
+      return payment.payoutFrozenAt;
+    }
+
+    const updated = await db.payment.update({
+      where: { id: payment.id },
+      data: { payoutFrozenAt: now },
+    });
+    return updated.payoutFrozenAt ?? now;
+  }
+
   private paymentIntentIdFromObject(
     object: Record<string, unknown>,
   ): string | null {
