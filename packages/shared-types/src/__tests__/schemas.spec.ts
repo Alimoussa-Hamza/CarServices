@@ -23,6 +23,7 @@ import {
   StripeWebhookEventSchema,
   AdminRefundBookingSchema,
   AdminRefundResponseSchema,
+  AdminListBookingsQuerySchema,
   AdminDashboardSchema,
   ConfirmMediaUploadSchema,
   ConfirmedMediaUploadSchema,
@@ -1800,6 +1801,31 @@ describe('AdminRefundBookingSchema / AdminRefundResponseSchema', () => {
         action: 'canceled_authorization',
       }),
     ).toMatchObject({ action: 'canceled_authorization' });
+  });
+});
+
+describe('AdminListBookingsQuerySchema', () => {
+  it('applique page/pageSize par défaut', () => {
+    expect(AdminListBookingsQuerySchema.parse({})).toEqual({
+      page: 1,
+      pageSize: 20,
+    });
+  });
+
+  it('parse status CSV et q', () => {
+    expect(
+      AdminListBookingsQuerySchema.parse({
+        q: 'CS-2026',
+        status: 'accepted,completed',
+        page: '2',
+        pageSize: '10',
+      }),
+    ).toEqual({
+      q: 'CS-2026',
+      status: ['accepted', 'completed'],
+      page: 2,
+      pageSize: 10,
+    });
   });
 });
 

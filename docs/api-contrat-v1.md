@@ -1110,6 +1110,46 @@ JWT **admin**. Polygone GeoJSON-like `{ lat, lng }[]` (≥ 3 points, ring auto-f
 
 Erreurs : `ZONE_NOT_FOUND` / `OFFER_NOT_FOUND` (404), `ZONE_SLUG_TAKEN` (409), `VALIDATION_ERROR` (400).
 
+### Admin bookings search + refund (CS-M10-S06)
+
+JWT **admin**. Refund déjà livré (M06). Liste + détail pour A06.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/admin/bookings` | Recherche paginée (`q`, `status`, `page`, `pageSize`) |
+| GET | `/admin/bookings/:id` | Détail (adresse, client, timeline, paiement) |
+| POST | `/admin/bookings/:id/refund` | Remboursement / cancel auth (RG-PAY-05) |
+
+Query `GET /admin/bookings` :
+- `q` — référence, téléphone client ou nom société pro (contains, case-insensitive)
+- `status` — CSV de statuts RG-BOOK (défaut : tous sauf `draft`)
+- `page` / `pageSize` — défaut `1` / `20` (max 50)
+
+```json
+// Response 200 GET /admin/bookings
+{
+  "data": {
+    "items": [
+      {
+        "id": "uuid",
+        "reference": "CS-20260916-ABCD",
+        "status": "accepted",
+        "paymentStatus": "authorized",
+        "client": { "firstName": "Alice", "lastName": "Martin", "phone": "+33601020304" },
+        "provider": { "id": "uuid", "companyName": "Pro Wash" },
+        "totalCents": 9500,
+        "currency": "EUR"
+      }
+    ],
+    "total": 1,
+    "page": 1,
+    "pageSize": 20
+  }
+}
+```
+
+Erreurs : `BOOKING_NOT_FOUND` (404), `VALIDATION_ERROR` (400). Refund : voir `POST /admin/bookings/:id/refund`.
+
 ### GET `/admin/dashboard`
 
 JWT **admin**. KPIs A02 (CS-M10-S02), fenêtres UTC :

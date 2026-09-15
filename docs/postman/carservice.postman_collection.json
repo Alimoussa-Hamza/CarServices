@@ -1307,6 +1307,40 @@
           }
         },
         {
+          "name": "List Admin Bookings",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/admin/bookings?q=CS-&status=accepted&page=1&pageSize=20"
+          }
+        },
+        {
+          "name": "Get Admin Booking",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/admin/bookings/{{bookingId}}"
+          }
+        },
+        {
           "name": "Refund Booking",
           "request": {
             "method": "POST",

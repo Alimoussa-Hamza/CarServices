@@ -3,6 +3,8 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { AuthModule } from '../auth/auth.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { AdminBookingsController } from './admin-bookings.controller';
+import { AdminBookingsService } from './admin-bookings.service';
 import { AdminCatalogController } from './admin-catalog.controller';
 import { AdminCatalogService } from './admin-catalog.service';
 import { AdminDashboardService } from './admin-dashboard.service';
@@ -17,12 +19,14 @@ import { AdminController } from './admin.controller';
     AdminController,
     AdminCatalogController,
     AdminZonesController,
+    AdminBookingsController,
   ],
   providers: [
     AdminDashboardService,
     AdminKycService,
     AdminCatalogService,
     AdminZonesService,
+    AdminBookingsService,
     JwtAuthGuard,
     RolesGuard,
   ],
@@ -31,6 +35,7 @@ import { AdminController } from './admin.controller';
     AdminKycService,
     AdminCatalogService,
     AdminZonesService,
+    AdminBookingsService,
   ],
 })
 export class AdminModule {}

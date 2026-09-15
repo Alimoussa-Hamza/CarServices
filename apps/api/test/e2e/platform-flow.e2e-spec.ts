@@ -1166,6 +1166,68 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
     expect((forbidden.body as ErrorEnvelope).error.code).toBe('FORBIDDEN');
   });
 
+  it('CS-M10-S06 admin bookings list + search + detail', async () => {
+    const adminPhone = `+33693${suffix}`;
+    const adminToken = await loginAdmin(http, adminPhone, userIds, prisma);
+
+    const created = await http()
+      .post('/api/v1/bookings')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({
+        offerId,
+        vehicleType: 'suv',
+        optionIds: [],
+        addressId: clientAddressId,
+        slotStart: futureSlotIso(11),
+      })
+      .expect(201);
+    const createdPayload = (
+      created.body as Envelope<{
+        booking: { id: string; reference: string };
+      }>
+    ).data;
+
+    const listed = await http()
+      .get(
+        `/api/v1/admin/bookings?q=${encodeURIComponent(createdPayload.booking.reference)}&page=1&pageSize=10`,
+      )
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+    const listData = (
+      listed.body as Envelope<{
+        items: Array<{ id: string; reference: string }>;
+        total: number;
+        page: number;
+      }>
+    ).data;
+    expect(listData.page).toBe(1);
+    expect(
+      listData.items.some((row) => row.id === createdPayload.booking.id),
+    ).toBe(true);
+
+    const detail = await http()
+      .get(`/api/v1/admin/bookings/${createdPayload.booking.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+    expect(
+      (
+        detail.body as Envelope<{
+          reference: string;
+          payment: { status: string } | null;
+        }>
+      ).data,
+    ).toMatchObject({
+      reference: createdPayload.booking.reference,
+      payment: { status: 'authorized' },
+    });
+
+    await http()
+      .post(`/api/v1/admin/bookings/${createdPayload.booking.id}/refund`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ reason: 'Cleanup S06' })
+      .expect(200);
+  });
+
   it('CS-M06-S06 account.updated synchronise charges_enabled', async () => {
     const stripeAccountId = `acct_e2e_${suffix}`;
     const provider = await prisma.user.findUniqueOrThrow({

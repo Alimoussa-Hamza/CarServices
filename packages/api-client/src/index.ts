@@ -17,6 +17,9 @@ import {
   AdminUpsertZonePricingDto,
   AdminZoneSchema,
   AdminZonePricingSchema,
+  AdminListBookingsQuery,
+  AdminBookingsListResponseSchema,
+  AdminBookingDetailSchema,
   AdminRefundBookingDto,
   AdminRefundResponseSchema,
   AuthTokensResponseSchema,
@@ -398,6 +401,29 @@ export const api = {
         method: 'PUT',
         body: JSON.stringify(dto),
       }).then((data) => AdminZonePricingSchema.parse(data)),
+    listBookings: (query: Partial<AdminListBookingsQuery> = {}) => {
+      const params = new URLSearchParams();
+      if (query.q) {
+        params.set('q', query.q);
+      }
+      if (query.status?.length) {
+        params.set('status', query.status.join(','));
+      }
+      if (query.page !== undefined) {
+        params.set('page', String(query.page));
+      }
+      if (query.pageSize !== undefined) {
+        params.set('pageSize', String(query.pageSize));
+      }
+      const qs = params.toString();
+      return apiRequest(`/api/v1/admin/bookings${qs ? `?${qs}` : ''}`).then(
+        (data) => AdminBookingsListResponseSchema.parse(data),
+      );
+    },
+    getBooking: (bookingId: string) =>
+      apiRequest(`/api/v1/admin/bookings/${bookingId}`).then((data) =>
+        AdminBookingDetailSchema.parse(data),
+      ),
     refundBooking: (bookingId: string, dto: AdminRefundBookingDto = {}) =>
       apiRequest(`/api/v1/admin/bookings/${bookingId}/refund`, {
         method: 'POST',

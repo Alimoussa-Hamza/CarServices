@@ -229,6 +229,29 @@ describe('E2E M10 Admin — gate module', () => {
     ).toBe(true);
   });
 
+  it('bookings admin list + detail (search vide OK)', async () => {
+    const listed = await http()
+      .get('/api/v1/admin/bookings?page=1&pageSize=5')
+      .set('Authorization', `Bearer ${tokens.admin}`)
+      .expect(200);
+    const payload = (
+      listed.body as Envelope<{
+        items: unknown[];
+        total: number;
+        page: number;
+        pageSize: number;
+      }>
+    ).data;
+    expect(payload).toMatchObject({ page: 1, pageSize: 5 });
+    expect(Array.isArray(payload.items)).toBe(true);
+
+    const missing = await http()
+      .get('/api/v1/admin/bookings/00000000-0000-4000-8000-000000000001')
+      .set('Authorization', `Bearer ${tokens.admin}`)
+      .expect(404);
+    expect((missing.body as ErrorEnvelope).error.code).toBe('BOOKING_NOT_FOUND');
+  });
+
   it('refuse accès admin aux non-admins', async () => {
     const denied = await http()
       .get('/api/v1/admin/dashboard')

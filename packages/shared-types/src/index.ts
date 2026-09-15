@@ -1207,6 +1207,66 @@ export const AdminRefundResponseSchema = z.object({
 });
 export type AdminRefundResponse = z.infer<typeof AdminRefundResponseSchema>;
 
+/** Admin bookings search — CS-M10-S06 */
+export const AdminListBookingsQuerySchema = z.object({
+  q: z.string().trim().min(1).max(100).optional(),
+  status: z.preprocess((value) => {
+    if (value === undefined || value === null || value === '') {
+      return undefined;
+    }
+    if (Array.isArray(value)) {
+      return value;
+    }
+    if (typeof value === 'string') {
+      return value
+        .split(',')
+        .map((part) => part.trim())
+        .filter(Boolean);
+    }
+    return value;
+  }, z.array(BookingStatusSchema).min(1).optional()),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(50).default(20),
+});
+export type AdminListBookingsQuery = z.infer<typeof AdminListBookingsQuerySchema>;
+
+export const AdminBookingListItemSchema = BookingListItemSchema.extend({
+  paymentStatus: PaymentStatusSchema.nullable(),
+  client: BookingDetailClientSchema,
+  provider: z
+    .object({
+      id: z.string().uuid(),
+      companyName: z.string().nullable(),
+    })
+    .nullable(),
+  createdAt: z.string().datetime(),
+});
+export type AdminBookingListItem = z.infer<typeof AdminBookingListItemSchema>;
+
+export const AdminBookingsListResponseSchema = z.object({
+  items: z.array(AdminBookingListItemSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().min(1),
+  pageSize: z.number().int().min(1),
+});
+export type AdminBookingsListResponse = z.infer<
+  typeof AdminBookingsListResponseSchema
+>;
+
+export const AdminBookingDetailSchema = BookingDetailSchema.extend({
+  paymentStatus: PaymentStatusSchema.nullable(),
+  payment: z
+    .object({
+      amountCents: z.number().int().nonnegative(),
+      commissionCents: z.number().int().nonnegative(),
+      providerNetCents: z.number().int().nonnegative(),
+      status: PaymentStatusSchema,
+      stripePaymentIntentId: z.string().min(1),
+    })
+    .nullable(),
+});
+export type AdminBookingDetail = z.infer<typeof AdminBookingDetailSchema>;
+
 /** KPIs back-office A02 — GET /admin/dashboard (CS-M10-S02). */
 export const AdminDashboardGmvDaySchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),

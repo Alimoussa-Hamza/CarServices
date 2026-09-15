@@ -1482,6 +1482,99 @@ describe('api-client', () => {
         },
       );
     });
+
+    it('liste et détail bookings admin', async () => {
+      initApiClient({
+        baseUrl: 'http://api.test',
+        getAccessToken: jest.fn().mockResolvedValue('admin.jwt'),
+      });
+
+      const list = {
+        items: [
+          {
+            id: '77777777-7777-4777-8777-777777777777',
+            reference: 'CS-20260916-ABCD',
+            status: 'accepted' as const,
+            slotStart: '2026-09-20T10:00:00.000Z',
+            slotEnd: '2026-09-20T11:30:00.000Z',
+            offerName: 'Lavage complet',
+            vehicleType: 'suv' as const,
+            totalCents: 9500,
+            currency: 'EUR' as const,
+            zone: { slug: 'lyon', name: 'Lyon' },
+            addressSnapshot: {
+              street: '1 rue de la République',
+              complement: null,
+              city: 'Lyon',
+              postalCode: '69001',
+              country: 'FR',
+              lat: 45.764,
+              lng: 4.8357,
+              instructions: null,
+            },
+            paymentStatus: 'authorized' as const,
+            client: {
+              firstName: 'Alice',
+              lastName: 'Martin',
+              phone: '+33601020304',
+            },
+            provider: {
+              id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+              companyName: 'Pro Wash',
+            },
+            createdAt: '2026-09-16T08:00:00.000Z',
+          },
+        ],
+        total: 1,
+        page: 1,
+        pageSize: 20,
+      };
+      fetchMock.mockResolvedValueOnce(mockFetchResponse({ data: list }));
+      await expect(
+        api.admin.listBookings({ q: 'CS-2026', status: ['accepted'] }),
+      ).resolves.toEqual(list);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/admin/bookings?q=CS-2026&status=accepted',
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: 'Bearer admin.jwt',
+          }),
+        }),
+      );
+
+      const detail = {
+        ...list.items[0],
+        clientComment: null,
+        providerNotes: null,
+        pricingSnapshot: {
+          base: 8500,
+          vehicleSurcharge: 1000,
+          options: [],
+          serviceFee: 0,
+          totalCents: 9500,
+          currency: 'EUR' as const,
+        },
+        timeline: [],
+        photos: [],
+        provider: {
+          companyName: 'Pro Wash',
+          avatarUrl: null,
+          ratingAvg: 4.5,
+          washMethods: ['waterless' as const],
+        },
+        payment: {
+          amountCents: 9500,
+          commissionCents: 1900,
+          providerNetCents: 7600,
+          status: 'authorized' as const,
+          stripePaymentIntentId: 'pi_mock_1',
+        },
+      };
+      fetchMock.mockResolvedValueOnce(mockFetchResponse({ data: detail }));
+      await expect(
+        api.admin.getBooking('77777777-7777-4777-8777-777777777777'),
+      ).resolves.toMatchObject({ reference: 'CS-20260916-ABCD' });
+    });
   });
 
   describe('api.media', () => {
