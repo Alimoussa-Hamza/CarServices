@@ -463,6 +463,47 @@ describe('api-client', () => {
     });
   });
 
+  describe('api.clients', () => {
+    it('lit, met à jour et anonymise le profil client', async () => {
+      initApiClient({
+        baseUrl: 'http://api.test',
+        getAccessToken: jest.fn().mockResolvedValue('client.jwt'),
+      });
+      const profile = {
+        id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+        userId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        firstName: 'Ada',
+        lastName: 'Lovelace',
+        phone: '+33601020304',
+        email: null,
+        createdAt: '2026-09-16T10:00:00.000Z',
+        updatedAt: '2026-09-16T10:00:00.000Z',
+      };
+      fetchMock.mockResolvedValueOnce(mockFetchResponse({ data: profile }));
+      await expect(api.clients.me()).resolves.toMatchObject({
+        firstName: 'Ada',
+      });
+      fetchMock.mockResolvedValueOnce(
+        mockFetchResponse({ data: { ...profile, lastName: 'Byron' } }),
+      );
+      await expect(
+        api.clients.updateMe({ lastName: 'Byron' }),
+      ).resolves.toMatchObject({ lastName: 'Byron' });
+      fetchMock.mockResolvedValueOnce(
+        mockFetchResponse({
+          data: {
+            userId: profile.userId,
+            deleted: true,
+            anonymizedAt: '2026-09-16T12:00:00.000Z',
+          },
+        }),
+      );
+      await expect(api.clients.deleteMe()).resolves.toMatchObject({
+        deleted: true,
+      });
+    });
+  });
+
   describe('api.providers', () => {
     const providerProfile = {
       id: '11111111-1111-4111-8111-111111111111',

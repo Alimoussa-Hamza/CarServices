@@ -85,6 +85,9 @@ import {
   AddressSchema,
   CreateAddressInput,
   UpdateAddressDto,
+  ClientProfileSchema,
+  UpdateClientProfileDto,
+  DeletedClientAccountSchema,
 } from '@carservice/shared-types';
 
 export class ApiError extends Error {
@@ -231,6 +234,21 @@ export const api = {
       apiRequest<{ id: string; deleted: true }>(
         `/api/v1/addresses/${addressId}`,
         { method: 'DELETE' },
+      ),
+  },
+  clients: {
+    me: () =>
+      apiRequest('/api/v1/clients/me').then((data) =>
+        ClientProfileSchema.parse(data),
+      ),
+    updateMe: (dto: UpdateClientProfileDto) =>
+      apiRequest('/api/v1/clients/me', {
+        method: 'PATCH',
+        body: JSON.stringify(dto),
+      }).then((data) => ClientProfileSchema.parse(data)),
+    deleteMe: () =>
+      apiRequest('/api/v1/clients/me', { method: 'DELETE' }).then((data) =>
+        DeletedClientAccountSchema.parse(data),
       ),
   },
   providers: {

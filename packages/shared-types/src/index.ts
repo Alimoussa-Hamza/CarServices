@@ -199,6 +199,34 @@ export const UpdateAddressSchema = z
   );
 export type UpdateAddressDto = z.infer<typeof UpdateAddressSchema>;
 
+/** Client profile — CS-M15-S02 */
+export const ClientProfileSchema = z.object({
+  id: z.string().uuid(),
+  userId: z.string().uuid(),
+  firstName: z.string().nullable(),
+  lastName: z.string().nullable(),
+  phone: z.string(),
+  email: z.string().email().nullable(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+export type ClientProfile = z.infer<typeof ClientProfileSchema>;
+
+export const UpdateClientProfileSchema = z
+  .object({
+    firstName: z.string().trim().min(1).max(100).nullable().optional(),
+    lastName: z.string().trim().min(1).max(100).nullable().optional(),
+  })
+  .refine((dto) => Object.keys(dto).length > 0, 'Aucun champ à mettre à jour.');
+export type UpdateClientProfileDto = z.infer<typeof UpdateClientProfileSchema>;
+
+export const DeletedClientAccountSchema = z.object({
+  userId: z.string().uuid(),
+  deleted: z.literal(true),
+  anonymizedAt: z.string().datetime(),
+});
+export type DeletedClientAccount = z.infer<typeof DeletedClientAccountSchema>;
+
 export const PricingSnapshotSchema = z.object({
   base: z.number().int().nonnegative(),
   vehicleSurcharge: z.number().int().nonnegative(),

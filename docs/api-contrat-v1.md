@@ -196,6 +196,34 @@ JWT **client**. Ownership `userId`.
 
 Erreurs : `ADDRESS_NOT_FOUND` (404), `ADDRESS_IN_USE` (409 si base pro), `VALIDATION_ERROR` (400).
 
+### Client profile (CS-M15-S02)
+
+JWT **client**. RG-SEC-03 sur `DELETE`.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/clients/me` | Profil (firstName, lastName, phone, email) |
+| PATCH | `/clients/me` | Update partiel firstName / lastName |
+| DELETE | `/clients/me` | Soft-delete + anonymisation |
+
+```json
+// PATCH /clients/me
+{ "firstName": "Ada", "lastName": "Lovelace" }
+
+// DELETE /clients/me — Response 200
+{
+  "data": {
+    "userId": "uuid",
+    "deleted": true,
+    "anonymizedAt": "2026-09-16T12:00:00.000Z"
+  }
+}
+```
+
+Effets `DELETE` : `users.isActive=false`, phone/email anonymisés, refresh tokens révoqués, push tokens supprimés, `addresses.userId` nullifié ; bookings historiques conservés.
+
+Erreurs : `CLIENT_NOT_FOUND` (404), `ACCOUNT_ALREADY_DELETED` (404), `FORBIDDEN` (403), `VALIDATION_ERROR` (400).
+
 ### POST `/zones/leads`
 
 ```json

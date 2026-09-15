@@ -3,6 +3,9 @@ import {
   AddressSchema,
   CreateAddressSchema,
   UpdateAddressSchema,
+  ClientProfileSchema,
+  UpdateClientProfileSchema,
+  DeletedClientAccountSchema,
   AuthTokensResponseSchema,
   AdminLoginSchema,
   BOOKING_DISPUTE_WINDOW_HOURS,
@@ -865,6 +868,34 @@ describe('CreateAddressSchema / UpdateAddressSchema', () => {
         updatedAt: '2026-09-16T10:00:00.000Z',
       }),
     ).toMatchObject({ postalCode: '69002' });
+  });
+});
+
+describe('ClientProfileSchema / UpdateClientProfileSchema', () => {
+  it('valide le profil et refuse un patch vide', () => {
+    expect(
+      ClientProfileSchema.parse({
+        id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+        userId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        firstName: 'Ada',
+        lastName: null,
+        phone: '+33601020304',
+        email: null,
+        createdAt: '2026-09-16T10:00:00.000Z',
+        updatedAt: '2026-09-16T10:00:00.000Z',
+      }),
+    ).toMatchObject({ firstName: 'Ada' });
+    expect(UpdateClientProfileSchema.safeParse({}).success).toBe(false);
+    expect(
+      UpdateClientProfileSchema.parse({ firstName: 'Ada', lastName: null }),
+    ).toMatchObject({ firstName: 'Ada', lastName: null });
+    expect(
+      DeletedClientAccountSchema.parse({
+        userId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        deleted: true,
+        anonymizedAt: '2026-09-16T12:00:00.000Z',
+      }),
+    ).toMatchObject({ deleted: true });
   });
 });
 
