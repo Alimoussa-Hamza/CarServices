@@ -28,7 +28,7 @@
 | O — Mobile pro (M12) | 0/11 | — en attente maquettes |
 | P — Admin web (M13) | 0/8 | — après M10 |
 | Q — QA & launch (M14) | 0/6 | — fin de parcours |
-| R — Fermeture backend (M15) | 4/6 | CS-M15-S05 Helmet + Throttler |
+| R — Fermeture backend (M15) | 5/6 | CS-M15-S06 QA + k6 |
 
 ---
 
@@ -424,7 +424,8 @@ Cahier : [cahier-fermeture-backend.md](../cahier-fermeture-backend.md)
   - [x] GET/PATCH `/admin/users` + révocation tokens
 - [x] **CS-M15-S04** Sentry + logging Pino (API)
   - [x] `instrument.ts` conditionnel + nestjs-pino (redact PII)
-- [ ] **CS-M15-S05** Helmet + Throttler Nest
+- [x] **CS-M15-S05** Helmet + Throttler Nest
+  - [x] helmet + ThrottlerGuard 100/min + SkipThrottle health/webhooks
 - [ ] **CS-M15-S06** Pack QA + smoke + charge k6
 - [ ] Gate fin M15 — `test/e2e/m15-backend-closure.e2e-spec.ts`
 

@@ -7,10 +7,12 @@ import {
   Req,
 } from '@nestjs/common';
 import type { RawBodyRequest } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import type { Request } from 'express';
 import { PaymentsQueueService } from './payments-queue.service';
 import { StripeService } from './stripe.service';
 
+@SkipThrottle()
 @Controller('webhooks')
 export class PaymentsWebhookController {
   constructor(

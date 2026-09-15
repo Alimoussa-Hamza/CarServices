@@ -11,6 +11,11 @@ export async function createE2eApp(): Promise<{
   app: INestApplication;
   prisma: PrismaService;
 }> {
+  // TTL access 24h pour enchaîner les scénarios sans re-login
+  process.env.JWT_ACCESS_TTL_SECONDS ??= '86400';
+  // Suite e2e dense : éviter 429 du throttle global (prod = 100/min)
+  process.env.THROTTLE_LIMIT ??= '10000';
+
   const moduleRef = await Test.createTestingModule({
     imports: [AppModule],
   })

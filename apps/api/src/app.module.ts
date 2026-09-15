@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { SentryModule } from '@sentry/nestjs/setup';
 import { LoggerModule } from 'nestjs-pino';
 import { AppController } from './app.controller';
@@ -21,6 +23,8 @@ import { ClientsModule } from './modules/clients/clients.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 const isProd = process.env.NODE_ENV === 'production';
+const throttleTtlMs = Number(process.env.THROTTLE_TTL_MS ?? 60_000);
+const throttleLimit = Number(process.env.THROTTLE_LIMIT ?? 100);
 
 @Module({
   imports: [
@@ -51,6 +55,12 @@ const isProd = process.env.NODE_ENV === 'production';
         },
       },
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: throttleTtlMs,
+        limit: throttleLimit,
+      },
+    ]),
     PrismaModule,
     RedisModule,
     HealthModule,
@@ -69,5 +79,11 @@ const isProd = process.env.NODE_ENV === 'production';
     AdminModule,
   ],
   controllers: [AppController],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
