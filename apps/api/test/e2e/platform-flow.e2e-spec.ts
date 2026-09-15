@@ -7,6 +7,7 @@ import {
   MatchingQueueService,
   matchingJobId,
 } from '../../src/modules/bookings/matching-queue.service';
+import { NotificationsQueueService } from '../../src/modules/notifications/notifications-queue.service';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { createE2eApp } from './e2e-app';
 import {
@@ -26,6 +27,7 @@ import {
 describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
+  let notificationsQueue: NotificationsQueueService;
   let http: () => ReturnType<typeof request>;
 
   const suffix = `${Date.now()}`.slice(-6);
@@ -49,6 +51,7 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
   beforeAll(async () => {
     ({ app, prisma } = await createE2eApp());
     http = () => request(app.getHttpServer());
+    notificationsQueue = app.get(NotificationsQueueService);
 
     const catalog = await loadCatalogSeed(prisma);
     zoneId = catalog.zoneId;
@@ -1559,5 +1562,20 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
     expect((invalid.body as ErrorEnvelope).error.code).toBe(
       'VALIDATION_ERROR',
     );
+  });
+
+  it('CS-M09-S02 worker send-push mocke Expo sans token API', async () => {
+    const client = await prisma.user.findUniqueOrThrow({
+      where: { phone: phones.client },
+      select: { id: true },
+    });
+    const result = await notificationsQueue.enqueuePush({
+      userId: client.id,
+      title: 'Mission',
+      body: 'Push e2e M09-S02',
+      data: { type: 'booking.reminder' },
+      dedupeKey: `e2e-m09-s02-${suffix}`,
+    });
+    expect(result).toMatchObject({ queued: false, sent: 1 });
   });
 });

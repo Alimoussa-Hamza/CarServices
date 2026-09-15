@@ -920,7 +920,7 @@
           "name": "Register Push Token",
           "request": {
             "method": "POST",
-            "description": "JWT client ou provider. Upsert Expo push token (ExponentPushToken / ExpoPushToken).",
+            "description": "JWT client ou provider. Upsert Expo push token. Worker BullMQ send-push (M09-S02) utilise ces tokens.",
             "auth": {
               "type": "bearer",
               "bearer": [

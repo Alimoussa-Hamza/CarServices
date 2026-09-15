@@ -22,7 +22,12 @@
 | I — Paiements Stripe (M06) | 6/6 | — terminé |
 | J — Médias & preuves (M07) | 4/4 | — terminé |
 | K — Avis & litiges (M08) | 4/4 | — terminé |
-| L — Notifications (M09) | 1/4 | CS-M09-S02 worker push |
+| L — Notifications (M09) | 2/4 | CS-M09-S03 SMS/email |
+| M — Admin API (M10) | 0/8 | CS-M10-S01 auth admin |
+| N — Mobile client (M11) | 0/12 | — en attente maquettes |
+| O — Mobile pro (M12) | 0/11 | — en attente maquettes |
+| P — Admin web (M13) | 0/8 | — après M10 |
+| Q — QA & launch (M14) | 0/6 | — fin de parcours |
 
 ---
 
@@ -107,14 +112,14 @@
 
 ---
 
-## Piste F — Apps clientes
+## Piste F — Apps clientes (socle)
 
 - [x] Socle `apps/admin` — Next.js 15, page statut API
 - [x] Socle `apps/mobile-client` — Expo SDK 52, écran statut API
 - [x] Socle `apps/mobile-provider` — Expo SDK 52, écran statut API
-- [ ] **CS-M11-S02** Écran login OTP client (en attente maquettes fournies)
-- [ ] **CS-M12-S01** Setup navigation app pro
 - [ ] Migration vers Expo Router (bloquée : conflit `@types/react` 18/19 dans le monorepo)
+
+Détail écrans → pistes **N** (M11) et **O** (M12).
 
 ---
 
@@ -314,9 +319,85 @@
 
 - [x] **CS-M09-S01** Enregistrement expo push token
   - [x] Table `push_tokens` + POST `/users/push-token` (upsert)
-- [ ] **CS-M09-S02** Worker send-push (Expo API)
+- [x] **CS-M09-S02** Worker send-push (Expo API)
+  - [x] Queue BullMQ `notifications` + job `send-push`
+  - [x] Appel Expo Push API (mock local sans `EXPO_ACCESS_TOKEN`)
 - [ ] **CS-M09-S03** SMS + email templates booking
+  - [ ] Templates email (Brevo)
+  - [ ] Templates SMS
+  - [ ] Queue notifications multi-canal
 - [ ] **CS-M09-S04** Events : pro trouvé, en route, terminé, nouvelle mission
+  - [ ] Triggers sur changements de statut booking
+
+---
+
+## Piste M — Admin API · Module M10
+
+- [ ] **CS-M10-S01** Auth admin (email + role)
+- [ ] **CS-M10-S02** GET `/admin/dashboard` KPIs
+- [ ] **CS-M10-S03** Approve/reject KYC
+- [ ] **CS-M10-S04** CRUD catalog admin
+- [ ] **CS-M10-S05** CRUD zones + pricing
+- [ ] **CS-M10-S06** Admin bookings search + refund
+- [ ] **CS-M10-S07** Resolve disputes
+- [ ] **CS-M10-S08** PATCH `/admin/config` (commission, timeouts)
+
+---
+
+## Piste N — Mobile client · Module M11
+
+- [ ] **CS-M11-S01** Setup Expo Router + design tokens
+- [ ] **CS-M11-S02** Écrans auth C01 (OTP) — en attente maquettes
+- [ ] **CS-M11-S03** C03 Home + navigation tabs
+- [ ] **CS-M11-S04** Parcours booking C04–C07 (formule→créneau)
+- [ ] **CS-M11-S05** C08 Paiement Stripe PaymentSheet
+- [ ] **CS-M11-S06** C09 Confirmation
+- [ ] **CS-M11-S07** C10 Suivi mission (timeline)
+- [ ] **CS-M11-S08** C11 Avis
+- [ ] **CS-M11-S09** C12 Liste réservations
+- [ ] **CS-M11-S10** C13 Profil + adresses
+- [ ] **CS-M11-S11** Push notifications client
+- [ ] **CS-M11-S12** Google Places autocomplete C06
+
+---
+
+## Piste O — Mobile pro · Module M12
+
+- [ ] **CS-M12-S01** Setup Expo Router pro + tabs — en attente maquettes
+- [ ] **CS-M12-S02** Auth P00 OTP
+- [ ] **CS-M12-S03** KYC wizard P01 (7 steps)
+- [ ] **CS-M12-S04** P02 Liste missions (3 tabs)
+- [ ] **CS-M12-S05** P03 Détail + accept/decline
+- [ ] **CS-M12-S06** P04 En route + Maps + tel client
+- [ ] **CS-M12-S07** P05 Checklist + upload photos
+- [ ] **CS-M12-S08** P08 Gains / historique
+- [ ] **CS-M12-S09** P07 Planning disponibilités
+- [ ] **CS-M12-S10** Stripe Connect onboarding in-app
+- [ ] **CS-M12-S11** Push nouvelle mission (high priority)
+
+---
+
+## Piste P — Admin web · Module M13
+
+- [ ] **CS-M13-S01** Setup Next.js + shadcn + auth
+- [ ] **CS-M13-S02** A02 Dashboard KPIs
+- [ ] **CS-M13-S03** A03 Validation KYC pros
+- [ ] **CS-M13-S04** A04 CRUD catalog
+- [ ] **CS-M13-S05** A05 Zones + pricing editor
+- [ ] **CS-M13-S06** A06 Bookings list + detail + refund
+- [ ] **CS-M13-S07** A07 Litiges file + resolve
+- [ ] **CS-M13-S08** A09 Settings config plateforme
+
+---
+
+## Piste Q — QA & launch · Module M14
+
+- [ ] **CS-M14-S01** Collection Bruno/Postman API
+- [ ] **CS-M14-S02** Tests E2E manuels SC-01 à SC-06
+- [ ] **CS-M14-S03** EAS build preview TestFlight + APK
+- [ ] **CS-M14-S04** Prod deploy + smoke tests
+- [ ] **CS-M14-S05** App Store + Play Store submission
+- [ ] **CS-M14-S06** Runbook incident + monitoring alertes
 
 ---
 

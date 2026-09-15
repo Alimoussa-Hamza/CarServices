@@ -942,6 +942,8 @@ JWT **client** ou **provider**. Upsert par `token` (réassigne à l’utilisateu
 
 Erreurs : `VALIDATION_ERROR` (400), `UNAUTHORIZED` (401), `FORBIDDEN` (403).
 
+Worker **send-push** (BullMQ queue `notifications`, job `send-push`) : lit les `push_tokens` de l’utilisateur et envoie via Expo Push API. Sans `EXPO_ACCESS_TOKEN` → mock console (local/CI). Branché sur les events métier en M09-S04.
+
 ---
 
 ## Payments (webhooks)
