@@ -967,3 +967,73 @@ export const AdminRefundResponseSchema = z.object({
   ]),
 });
 export type AdminRefundResponse = z.infer<typeof AdminRefundResponseSchema>;
+
+export const MEDIA_UPLOAD_TTL_SECONDS = 900;
+export const MEDIA_MAX_PHOTO_BYTES = 10 * 1024 * 1024;
+export const MEDIA_MAX_DOCUMENT_BYTES = 5 * 1024 * 1024;
+export const MediaMimeTypeSchema = z.enum([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'application/pdf',
+]);
+export type MediaMimeType = z.infer<typeof MediaMimeTypeSchema>;
+export const MediaUploadContextSchema = z.enum([
+  'booking_photo',
+  'kyc_document',
+]);
+export type MediaUploadContext = z.infer<typeof MediaUploadContextSchema>;
+
+export const CreateMediaUploadUrlSchema = z
+  .object({
+    mimeType: MediaMimeTypeSchema,
+    context: MediaUploadContextSchema,
+    bookingId: z.string().uuid().optional(),
+    photoType: BookingPhotoTypeSchema.optional(),
+    sizeBytes: z.number().int().positive().optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.context === 'booking_photo') {
+      if (!value.bookingId) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['bookingId'],
+          message: 'bookingId requis pour une photo de mission.',
+        });
+      }
+      if (!value.photoType) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['photoType'],
+          message: 'photoType requis pour une photo de mission.',
+        });
+      }
+      if (value.mimeType === 'application/pdf') {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['mimeType'],
+          message: 'Les photos de mission doivent être jpeg, png ou webp.',
+        });
+      }
+    }
+
+    const maxBytes =
+      value.mimeType === 'application/pdf'
+        ? MEDIA_MAX_DOCUMENT_BYTES
+        : MEDIA_MAX_PHOTO_BYTES;
+    if (value.sizeBytes && value.sizeBytes > maxBytes) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['sizeBytes'],
+        message: `Fichier trop volumineux (max ${maxBytes} octets).`,
+      });
+    }
+  });
+export type CreateMediaUploadUrlDto = z.infer<typeof CreateMediaUploadUrlSchema>;
+
+export const MediaUploadUrlResponseSchema = z.object({
+  uploadUrl: z.string().url(),
+  fileKey: z.string().min(1).max(500),
+  expiresAt: z.string().datetime(),
+});
+export type MediaUploadUrlResponse = z.infer<typeof MediaUploadUrlResponseSchema>;

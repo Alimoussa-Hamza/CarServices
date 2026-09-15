@@ -1223,4 +1223,44 @@ describe('api-client', () => {
       );
     });
   });
+
+  describe('api.media', () => {
+    it('demande une URL d’upload presignée', async () => {
+      const payload = {
+        uploadUrl: 'https://cdn.carservice.test/mock-upload/key',
+        fileKey: 'bookings/77777777-7777-4777-8777-777777777777/before/id.jpg',
+        expiresAt: '2026-09-15T10:15:00.000Z',
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: payload }));
+      initApiClient({
+        baseUrl: 'http://api.test',
+        getAccessToken: jest.fn().mockResolvedValue('client.jwt'),
+      });
+
+      await expect(
+        api.media.createUploadUrl({
+          mimeType: 'image/jpeg',
+          context: 'booking_photo',
+          bookingId: '77777777-7777-4777-8777-777777777777',
+          photoType: 'before',
+        }),
+      ).resolves.toEqual(payload);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/media/upload-url',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer client.jwt',
+          },
+          body: JSON.stringify({
+            mimeType: 'image/jpeg',
+            context: 'booking_photo',
+            bookingId: '77777777-7777-4777-8777-777777777777',
+            photoType: 'before',
+          }),
+        },
+      );
+    });
+  });
 });

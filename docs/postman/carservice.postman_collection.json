@@ -779,6 +779,39 @@
       ]
     },
     {
+      "name": "Media",
+      "item": [
+        {
+          "name": "Create Upload URL",
+          "request": {
+            "method": "POST",
+            "description": "JWT. PUT presignée TTL 15 min (RG photos). Sans S3: mock cdn.carservice.test. booking_photo exige bookingId + photoType.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mimeType\": \"image/jpeg\",\n  \"context\": \"booking_photo\",\n  \"bookingId\": \"{{bookingId}}\",\n  \"photoType\": \"before\"\n}"
+            },
+            "url": "{{baseUrl}}/media/upload-url"
+          }
+        }
+      ]
+    },
+    {
       "name": "Webhooks",
       "item": [
         {

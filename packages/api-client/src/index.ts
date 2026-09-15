@@ -13,9 +13,11 @@ import {
   CancelledBookingSchema,
   CreateBookingDto,
   CreateBookingResponseSchema,
+  CreateMediaUploadUrlDto,
   DeclineBookingDto,
   DeclinedBookingSchema,
   ListBookingsQuery,
+  MediaUploadUrlResponseSchema,
   PatchBookingStatusDto,
   SlotPickerRequest,
   SlotPickerResponseSchema,
@@ -284,12 +286,20 @@ export const api = {
         body: JSON.stringify(dto),
       }).then((data) => AdminRefundResponseSchema.parse(data)),
   },
+  media: {
+    createUploadUrl: (dto: CreateMediaUploadUrlDto) =>
+      apiRequest('/api/v1/media/upload-url', {
+        method: 'POST',
+        body: JSON.stringify(dto),
+      }).then((data) => MediaUploadUrlResponseSchema.parse(data)),
+  },
 };
 
 export type {
   AdminRefundBookingDto,
   CatalogQuoteDto,
   CreateBookingDto,
+  CreateMediaUploadUrlDto,
   DeclineBookingDto,
   PatchBookingStatusDto,
   CancelBookingDto,

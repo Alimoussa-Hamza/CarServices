@@ -21,6 +21,10 @@ import {
   StripeWebhookEventSchema,
   AdminRefundBookingSchema,
   AdminRefundResponseSchema,
+  CreateMediaUploadUrlSchema,
+  MEDIA_UPLOAD_TTL_SECONDS,
+  MEDIA_MAX_PHOTO_BYTES,
+  MediaUploadUrlResponseSchema,
   BookingActorTypeSchema,
   BookingPhotoTypeSchema,
   BookingPhotoUploaderSchema,
@@ -1539,5 +1543,65 @@ describe('AdminRefundBookingSchema / AdminRefundResponseSchema', () => {
         action: 'canceled_authorization',
       }),
     ).toMatchObject({ action: 'canceled_authorization' });
+  });
+});
+
+describe('CreateMediaUploadUrlSchema / MediaUploadUrlResponseSchema', () => {
+  it('valide une photo de mission', () => {
+    expect(
+      CreateMediaUploadUrlSchema.parse({
+        mimeType: 'image/jpeg',
+        context: 'booking_photo',
+        bookingId: '77777777-7777-4777-8777-777777777777',
+        photoType: 'before',
+      }),
+    ).toMatchObject({ context: 'booking_photo', photoType: 'before' });
+  });
+
+  it('fixe le TTL presign à 15 min', () => {
+    expect(MEDIA_UPLOAD_TTL_SECONDS).toBe(900);
+    expect(MEDIA_MAX_PHOTO_BYTES).toBe(10 * 1024 * 1024);
+  });
+
+  it('exige bookingId et photoType pour booking_photo', () => {
+    expect(
+      CreateMediaUploadUrlSchema.safeParse({
+        mimeType: 'image/png',
+        context: 'booking_photo',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('refuse un PDF pour une photo de mission', () => {
+    expect(
+      CreateMediaUploadUrlSchema.safeParse({
+        mimeType: 'application/pdf',
+        context: 'booking_photo',
+        bookingId: '77777777-7777-4777-8777-777777777777',
+        photoType: 'before',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('refuse une photo trop lourde', () => {
+    expect(
+      CreateMediaUploadUrlSchema.safeParse({
+        mimeType: 'image/jpeg',
+        context: 'booking_photo',
+        bookingId: '77777777-7777-4777-8777-777777777777',
+        photoType: 'before',
+        sizeBytes: MEDIA_MAX_PHOTO_BYTES + 1,
+      }).success,
+    ).toBe(false);
+  });
+
+  it('valide la réponse upload-url', () => {
+    expect(
+      MediaUploadUrlResponseSchema.parse({
+        uploadUrl: 'https://cdn.carservice.test/mock-upload/key',
+        fileKey: 'bookings/b/before/id.jpg',
+        expiresAt: '2026-09-15T10:15:00.000Z',
+      }),
+    ).toMatchObject({ fileKey: 'bookings/b/before/id.jpg' });
   });
 });

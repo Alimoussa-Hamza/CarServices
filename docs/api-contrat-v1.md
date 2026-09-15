@@ -755,7 +755,7 @@ Handlers idempotents, retry 3×. Worker désactivé si `NODE_ENV=test` (sauf `MA
 
 ## Media
 
-Object storage **S3-compatible** (Scaleway Object Storage ou Cloudflare R2). Config Nest `MediaModule` / `S3Service` : `S3_ENDPOINT`, `S3_BUCKET`, `S3_REGION` (défaut `fr-par`), `S3_ACCESS_KEY`, `S3_SECRET_KEY`. Sans clés valides : **mock local** (CS-M07-S01) — les endpoints d’upload arrivent en CS-M07-S02.
+Object storage **S3-compatible** (Scaleway Object Storage ou Cloudflare R2). Config Nest `MediaModule` / `S3Service` : `S3_ENDPOINT`, `S3_BUCKET`, `S3_REGION` (défaut `fr-par`), `S3_ACCESS_KEY`, `S3_SECRET_KEY`. Sans clés valides : **mock local** (`https://cdn.carservice.test/mock-upload/…`).
 
 | Method | Path | Rôle | Description |
 |--------|------|------|-------------|
@@ -764,13 +764,17 @@ Object storage **S3-compatible** (Scaleway Object Storage ou Cloudflare R2). Con
 
 ### POST `/media/upload-url`
 
+JWT. Génère une URL **PUT presignée** (TTL 15 min). MIME whitelist : `image/jpeg`, `image/png`, `image/webp`, `application/pdf`. Max 10 Mo photo / 5 Mo PDF (`sizeBytes` optionnel). `booking_photo` exige `bookingId` + `photoType` et un accès à la mission (client propriétaire, pro assigné, admin). `kyc_document` : rôle provider uniquement.
+
 ```json
 // Request
 { "mimeType": "image/jpeg", "context": "booking_photo", "bookingId": "uuid", "photoType": "before" }
 
-// Response
-{ "data": { "uploadUrl": "https://...", "fileKey": "...", "expiresAt": "..." } }
+// Response 200
+{ "data": { "uploadUrl": "https://...", "fileKey": "bookings/{id}/before/{uuid}.jpg", "expiresAt": "..." } }
 ```
+
+Erreurs : `VALIDATION_ERROR` (400), `FORBIDDEN` (403), `BOOKING_NOT_FOUND` (404).
 
 ---
 

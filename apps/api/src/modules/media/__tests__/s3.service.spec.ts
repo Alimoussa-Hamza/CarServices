@@ -81,4 +81,13 @@ describe('S3Service', () => {
 
     expect(service.storageConfig()?.forcePathStyle).toBe(false);
   });
+
+  it('réutilise le même client S3', () => {
+    const { service } = buildService(validEnv);
+    const first = service.getClient();
+    const second = service.getClient();
+
+    expect(first).toBe(second);
+    first?.destroy();
+  });
 });

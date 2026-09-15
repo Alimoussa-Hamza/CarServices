@@ -1022,4 +1022,59 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
       stripeAccountId,
     });
   });
+
+  it('CS-M07-S02 POST /media/upload-url mock local', async () => {
+    const created = await http()
+      .post('/api/v1/bookings')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({
+        offerId,
+        vehicleType: 'suv',
+        optionIds: [],
+        addressId: clientAddressId,
+        slotStart: futureSlotIso(11),
+      })
+      .expect(201);
+    const bookingId = (
+      created.body as Envelope<{ booking: { id: string } }>
+    ).data.booking.id;
+
+    const uploaded = await http()
+      .post('/api/v1/media/upload-url')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({
+        mimeType: 'image/jpeg',
+        context: 'booking_photo',
+        bookingId,
+        photoType: 'before',
+      })
+      .expect(200);
+    expect(
+      (
+        uploaded.body as Envelope<{
+          uploadUrl: string;
+          fileKey: string;
+        }>
+      ).data,
+    ).toMatchObject({
+      uploadUrl: expect.stringContaining('cdn.carservice.test/mock-upload/'),
+      fileKey: expect.stringMatching(
+        new RegExp(`^bookings/${bookingId}/before/.+\\.jpg$`),
+      ),
+    });
+
+    const forbiddenMime = await http()
+      .post('/api/v1/media/upload-url')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({
+        mimeType: 'application/pdf',
+        context: 'booking_photo',
+        bookingId,
+        photoType: 'before',
+      })
+      .expect(400);
+    expect((forbiddenMime.body as ErrorEnvelope).error.code).toBe(
+      'VALIDATION_ERROR',
+    );
+  });
 });

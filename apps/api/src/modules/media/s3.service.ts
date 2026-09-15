@@ -15,6 +15,8 @@ export type ObjectStorageConfig = {
 
 @Injectable()
 export class S3Service {
+  private cachedClient: S3Client | null | undefined;
+
   constructor(private readonly config: ConfigService) {}
 
   storageConfig(): ObjectStorageConfig | null {
@@ -68,5 +70,12 @@ export class S3Service {
       },
       forcePathStyle: storage.forcePathStyle,
     });
+  }
+
+  getClient(): S3Client | null {
+    if (this.cachedClient === undefined) {
+      this.cachedClient = this.createClient();
+    }
+    return this.cachedClient;
   }
 }
