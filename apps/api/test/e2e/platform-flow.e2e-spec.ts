@@ -949,6 +949,26 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
     const adminPhone = `+33699${suffix}`;
     const adminToken = await loginAdmin(http, adminPhone, userIds, prisma);
 
+    const dashboard = await http()
+      .get('/api/v1/admin/dashboard')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+    expect(
+      (
+        dashboard.body as Envelope<{
+          gmv: { currency: string };
+          bookingsByStatus: Array<{ status: string; count: number }>;
+          providersPendingKyc: number;
+        }>
+      ).data,
+    ).toMatchObject({
+      gmv: { currency: 'EUR' },
+    });
+    expect(
+      (dashboard.body as Envelope<{ bookingsByStatus: unknown[] }>).data
+        .bookingsByStatus.length,
+    ).toBeGreaterThanOrEqual(13);
+
     const created = await http()
       .post('/api/v1/bookings')
       .set('Authorization', `Bearer ${tokens.client}`)

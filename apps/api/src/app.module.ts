@@ -12,6 +12,7 @@ import { RedisModule } from './modules/redis/redis.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
 import { DisputesModule } from './modules/disputes/disputes.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { AdminModule } from './modules/admin/admin.module';
 import { ZonesModule } from './modules/zones/zones.module';
 import { PrismaModule } from './prisma/prisma.module';
 
@@ -31,6 +32,7 @@ import { PrismaModule } from './prisma/prisma.module';
     DisputesModule,
     NotificationsModule,
     BookingsModule,
+    AdminModule,
   ],
   controllers: [AppController],
 })

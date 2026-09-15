@@ -1237,6 +1237,39 @@ describe('api-client', () => {
   });
 
   describe('api.admin', () => {
+    it('récupère le dashboard KPIs', async () => {
+      const dashboard = {
+        generatedAt: '2026-09-16T12:00:00.000Z',
+        gmv: {
+          dayCents: 11200,
+          weekCents: 11200,
+          monthCents: 11200,
+          currency: 'EUR' as const,
+        },
+        gmvLast30Days: [{ date: '2026-09-16', amountCents: 11200 }],
+        bookingsByStatus: [{ status: 'completed' as const, count: 1 }],
+        providerAcceptanceRateAvg: 100,
+        matchingDelayMedianMinutes: 12,
+        openDisputes: 0,
+        providersPendingKyc: 1,
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: dashboard }));
+      initApiClient({
+        baseUrl: 'http://api.test',
+        getAccessToken: jest.fn().mockResolvedValue('admin.jwt'),
+      });
+
+      await expect(api.admin.dashboard()).resolves.toEqual(dashboard);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/admin/dashboard',
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: 'Bearer admin.jwt',
+          }),
+        }),
+      );
+    });
+
     it('rembourse un booking (admin)', async () => {
       const refunded = {
         bookingId: '77777777-7777-4777-8777-777777777777',

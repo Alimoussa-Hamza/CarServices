@@ -1029,6 +1029,46 @@ Erreurs : `STRIPE_WEBHOOK_INVALID_SIGNATURE` (400), `VALIDATION_ERROR` (400).
 | POST | `/admin/providers/:id/reject` | admin | Rejeter KYC |
 | CRUD | `/admin/catalog/*` | admin | Offres, options, zones |
 | GET | `/admin/bookings` | admin | Tous bookings |
+
+### GET `/admin/dashboard`
+
+JWT **admin**. KPIs A02 (CS-M10-S02), fenêtres UTC :
+
+| Champ | Définition |
+|-------|------------|
+| `gmv.dayCents` | Somme `payments.amount_cents` `captured` depuis le début du jour UTC |
+| `gmv.weekCents` | Idem sur 7 jours (J-6 → maintenant) |
+| `gmv.monthCents` | Idem sur 30 jours (J-29 → maintenant) |
+| `gmvLast30Days` | Série journalière (30 points, jours sans capture = 0) |
+| `bookingsByStatus` | Comptage tous statuts RG-BOOK (0 inclus) |
+| `providerAcceptanceRateAvg` | Moyenne `acceptance_rate` des pros `kyc=approved` |
+| `matchingDelayMedianMinutes` | Médiane minutes `pending_provider` → `accepted` (null si aucune) |
+| `openDisputes` | Litiges `open` + `under_review` |
+| `providersPendingKyc` | Pros `kyc_status=submitted` |
+
+```json
+// Response 200
+{
+  "data": {
+    "generatedAt": "2026-09-16T12:00:00.000Z",
+    "gmv": {
+      "dayCents": 11200,
+      "weekCents": 56000,
+      "monthCents": 224000,
+      "currency": "EUR"
+    },
+    "gmvLast30Days": [{ "date": "2026-09-15", "amountCents": 11200 }],
+    "bookingsByStatus": [{ "status": "completed", "count": 3 }],
+    "providerAcceptanceRateAvg": 92.5,
+    "matchingDelayMedianMinutes": 18.5,
+    "openDisputes": 1,
+    "providersPendingKyc": 2
+  }
+}
+```
+
+Erreurs : `UNAUTHORIZED` (401), `FORBIDDEN` (403).
+
 ### POST `/admin/bookings/:id/refund`
 
 JWT **admin**. Remboursement total (RG-PAY-05) : si le paiement est `authorized`, **cancel** du PaymentIntent (libération d’auth) ; s’il est `captured`, **refund** Stripe. Le booking passe à `cancelled_by_admin` si la transition est autorisée (pas `in_progress` / `completed` / `disputed`). Sans `STRIPE_SECRET_KEY` : mock local.

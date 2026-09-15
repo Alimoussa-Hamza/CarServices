@@ -23,6 +23,7 @@ import {
   StripeWebhookEventSchema,
   AdminRefundBookingSchema,
   AdminRefundResponseSchema,
+  AdminDashboardSchema,
   ConfirmMediaUploadSchema,
   ConfirmedMediaUploadSchema,
   CreateMediaUploadUrlSchema,
@@ -1608,6 +1609,46 @@ describe('AdminRefundBookingSchema / AdminRefundResponseSchema', () => {
         action: 'canceled_authorization',
       }),
     ).toMatchObject({ action: 'canceled_authorization' });
+  });
+});
+
+describe('AdminDashboardSchema', () => {
+  const valid = {
+    generatedAt: '2026-09-16T10:00:00.000Z',
+    gmv: {
+      dayCents: 11200,
+      weekCents: 56000,
+      monthCents: 224000,
+      currency: 'EUR' as const,
+    },
+    gmvLast30Days: [{ date: '2026-09-15', amountCents: 11200 }],
+    bookingsByStatus: [{ status: 'completed' as const, count: 3 }],
+    providerAcceptanceRateAvg: 92.5,
+    matchingDelayMedianMinutes: 18.5,
+    openDisputes: 1,
+    providersPendingKyc: 2,
+  };
+
+  it('valide les KPIs A02', () => {
+    expect(AdminDashboardSchema.parse(valid)).toEqual(valid);
+  });
+
+  it('autorise matchingDelayMedianMinutes null', () => {
+    expect(
+      AdminDashboardSchema.parse({
+        ...valid,
+        matchingDelayMedianMinutes: null,
+      }).matchingDelayMedianMinutes,
+    ).toBeNull();
+  });
+
+  it('refuse un taux d’acceptation > 100', () => {
+    expect(
+      AdminDashboardSchema.safeParse({
+        ...valid,
+        providerAcceptanceRateAvg: 101,
+      }).success,
+    ).toBe(false);
   });
 });
 

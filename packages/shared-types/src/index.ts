@@ -976,6 +976,35 @@ export const AdminRefundResponseSchema = z.object({
 });
 export type AdminRefundResponse = z.infer<typeof AdminRefundResponseSchema>;
 
+/** KPIs back-office A02 — GET /admin/dashboard (CS-M10-S02). */
+export const AdminDashboardGmvDaySchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  amountCents: z.number().int().nonnegative(),
+});
+export type AdminDashboardGmvDay = z.infer<typeof AdminDashboardGmvDaySchema>;
+
+export const AdminDashboardSchema = z.object({
+  generatedAt: z.string().datetime(),
+  gmv: z.object({
+    dayCents: z.number().int().nonnegative(),
+    weekCents: z.number().int().nonnegative(),
+    monthCents: z.number().int().nonnegative(),
+    currency: z.literal('EUR'),
+  }),
+  gmvLast30Days: z.array(AdminDashboardGmvDaySchema),
+  bookingsByStatus: z.array(
+    z.object({
+      status: BookingStatusSchema,
+      count: z.number().int().nonnegative(),
+    }),
+  ),
+  providerAcceptanceRateAvg: z.number().min(0).max(100),
+  matchingDelayMedianMinutes: z.number().nonnegative().nullable(),
+  openDisputes: z.number().int().nonnegative(),
+  providersPendingKyc: z.number().int().nonnegative(),
+});
+export type AdminDashboard = z.infer<typeof AdminDashboardSchema>;
+
 export const MEDIA_UPLOAD_TTL_SECONDS = 900;
 export const MEDIA_MAX_PHOTO_BYTES = 10 * 1024 * 1024;
 export const MEDIA_MAX_DOCUMENT_BYTES = 5 * 1024 * 1024;

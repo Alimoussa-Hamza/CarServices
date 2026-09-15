@@ -1035,6 +1035,24 @@
       "name": "Admin",
       "item": [
         {
+          "name": "Dashboard KPIs",
+          "request": {
+            "method": "GET",
+            "description": "JWT admin. GMV, bookings by status, acceptation, délai matching, litiges, KYC pending.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/admin/dashboard"
+          }
+        },
+        {
           "name": "Refund Booking",
           "request": {
             "method": "POST",

@@ -1,5 +1,6 @@
 import {
   AdminLoginDto,
+  AdminDashboardSchema,
   AdminRefundBookingDto,
   AdminRefundResponseSchema,
   AuthTokensResponseSchema,
@@ -296,6 +297,10 @@ export const api = {
       }).then((data) => CancelledBookingSchema.parse(data)),
   },
   admin: {
+    dashboard: () =>
+      apiRequest('/api/v1/admin/dashboard').then((data) =>
+        AdminDashboardSchema.parse(data),
+      ),
     refundBooking: (bookingId: string, dto: AdminRefundBookingDto = {}) =>
       apiRequest(`/api/v1/admin/bookings/${bookingId}/refund`, {
         method: 'POST',
