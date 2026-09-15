@@ -1228,6 +1228,36 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
       .expect(200);
   });
 
+  it('CS-M10-S08 admin config get + patch', async () => {
+    const adminPhone = `+33695${suffix}`;
+    const adminToken = await loginAdmin(http, adminPhone, userIds, prisma);
+
+    const current = await http()
+      .get('/api/v1/admin/config')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+    const before = (
+      current.body as Envelope<{ matchingTimeoutT1Minutes: number }>
+    ).data;
+
+    const patched = await http()
+      .patch('/api/v1/admin/config')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ matchingTimeoutT1Minutes: 40 })
+      .expect(200);
+    expect(
+      (
+        patched.body as Envelope<{ matchingTimeoutT1Minutes: number }>
+      ).data.matchingTimeoutT1Minutes,
+    ).toBe(40);
+
+    await http()
+      .patch('/api/v1/admin/config')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ matchingTimeoutT1Minutes: before.matchingTimeoutT1Minutes })
+      .expect(200);
+  });
+
   it('CS-M06-S06 account.updated synchronise charges_enabled', async () => {
     const stripeAccountId = `acct_e2e_${suffix}`;
     const provider = await prisma.user.findUniqueOrThrow({

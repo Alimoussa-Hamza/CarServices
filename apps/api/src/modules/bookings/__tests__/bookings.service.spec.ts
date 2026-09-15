@@ -158,6 +158,14 @@ function buildService() {
     onEnRoute: jest.fn().mockResolvedValue(undefined),
     onCompleted: jest.fn().mockResolvedValue(undefined),
   };
+  const platformConfig = {
+    getCommissionRate: jest.fn().mockResolvedValue(0.2),
+    getMatchingTimeouts: jest.fn().mockResolvedValue({
+      t1Minutes: 30,
+      t2Hours: 2,
+      leadHours: 2,
+    }),
+  };
 
   return {
     service: new BookingsService(
@@ -171,6 +179,7 @@ function buildService() {
       config as unknown as ConfigService,
       paymentsService as unknown as PaymentsService,
       bookingNotifications as never,
+      platformConfig as never,
     ),
     prisma,
     catalogService,
@@ -180,6 +189,7 @@ function buildService() {
     redis,
     paymentsService,
     bookingNotifications,
+    platformConfig,
   };
 }
 

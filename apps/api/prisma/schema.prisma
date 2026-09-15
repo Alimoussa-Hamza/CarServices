@@ -560,3 +560,11 @@ model PushToken {
   @@index([userId])
   @@map("push_tokens")
 }
+
+model PlatformConfig {
+  key       String   @id @db.VarChar(100)
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("platform_config")
+}

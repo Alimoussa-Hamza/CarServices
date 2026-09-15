@@ -239,6 +239,24 @@ async function main() {
   }
 
   console.log(`Seed catalog: ${createdOffers.length} offers for zone Lyon`);
+
+  const configDefaults: Array<{ key: string; value: number }> = [
+    { key: 'commission_rate', value: 0.2 },
+    { key: 'matching_timeout_t1_minutes', value: 30 },
+    { key: 'matching_timeout_t2_hours', value: 2 },
+    { key: 'matching_unassigned_lead_hours', value: 2 },
+    { key: 'cancel_free_hours', value: 24 },
+    { key: 'cancel_late_hours', value: 2 },
+    { key: 'service_fee_cents', value: 0 },
+  ];
+  for (const row of configDefaults) {
+    await prisma.platformConfig.upsert({
+      where: { key: row.key },
+      create: { key: row.key, value: row.value },
+      update: { value: row.value },
+    });
+  }
+  console.log(`Seed platform_config: ${configDefaults.length} keys`);
 }
 
 main()

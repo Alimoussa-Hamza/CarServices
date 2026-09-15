@@ -36,6 +36,8 @@ import {
   CreatedDisputeSchema,
   AdminListDisputesQuerySchema,
   AdminResolveDisputeSchema,
+  AdminPlatformConfigSchema,
+  AdminUpdatePlatformConfigSchema,
   RegisterPushTokenSchema,
   RegisteredPushTokenSchema,
   MEDIA_UPLOAD_TTL_SECONDS,
@@ -2137,6 +2139,33 @@ describe('Admin disputes schemas (CS-M10-S07)', () => {
     expect(
       AdminResolveDisputeSchema.safeParse({ decision: 'closed' }).success,
     ).toBe(false);
+  });
+});
+
+describe('AdminPlatformConfig schemas (CS-M10-S08)', () => {
+  it('valide la config complète', () => {
+    expect(
+      AdminPlatformConfigSchema.parse({
+        commissionRate: 0.2,
+        matchingTimeoutT1Minutes: 30,
+        matchingTimeoutT2Hours: 2,
+        matchingUnassignedLeadHours: 2,
+        cancelFreeHours: 24,
+        cancelLateHours: 2,
+        serviceFeeCents: 0,
+        updatedAt: null,
+      }),
+    ).toMatchObject({ commissionRate: 0.2 });
+  });
+
+  it('refuse update vide et commission hors bornes', () => {
+    expect(AdminUpdatePlatformConfigSchema.safeParse({}).success).toBe(false);
+    expect(
+      AdminUpdatePlatformConfigSchema.safeParse({ commissionRate: 1 }).success,
+    ).toBe(false);
+    expect(
+      AdminUpdatePlatformConfigSchema.parse({ matchingTimeoutT1Minutes: 45 }),
+    ).toEqual({ matchingTimeoutT1Minutes: 45 });
   });
 });
 

@@ -23,7 +23,7 @@
 | J — Médias & preuves (M07) | 4/4 | — terminé |
 | K — Avis & litiges (M08) | 4/4 | — terminé |
 | L — Notifications (M09) | 4/4 | — terminé |
-| M — Admin API (M10) | 7/8 | CS-M10-S08 config |
+| M — Admin API (M10) | 8/8 | — terminé |
 | N — Mobile client (M11) | 0/12 | — en attente maquettes |
 | O — Mobile pro (M12) | 0/11 | — en attente maquettes |
 | P — Admin web (M13) | 0/8 | — après M10 |
@@ -348,7 +348,9 @@ Détail écrans → pistes **N** (M11) et **O** (M12).
   - [x] `GET /admin/bookings` + `GET /admin/bookings/:id` (refund déjà M06)
 - [x] **CS-M10-S07** Resolve disputes
   - [x] `GET /admin/disputes` + `PATCH .../resolve` (client refund / pro / split)
-- [ ] **CS-M10-S08** PATCH `/admin/config` (commission, timeouts)
+- [x] **CS-M10-S08** PATCH `/admin/config` (commission, timeouts)
+  - [x] `GET/PATCH /admin/config` + table `platform_config`
+- [x] Gate fin M10 — `test/e2e/m10-admin.e2e-spec.ts`
 
 ---
 

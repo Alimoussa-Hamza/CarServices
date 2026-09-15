@@ -1307,6 +1307,50 @@
           }
         },
         {
+          "name": "Get Admin Config",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/admin/config"
+          }
+        },
+        {
+          "name": "Patch Admin Config",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"matchingTimeoutT1Minutes\": 45,\n  \"commissionRate\": 0.22\n}"
+            },
+            "url": "{{baseUrl}}/admin/config"
+          }
+        },
+        {
           "name": "List Admin Disputes",
           "request": {
             "method": "GET",

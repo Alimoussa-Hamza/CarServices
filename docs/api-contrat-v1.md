@@ -1192,6 +1192,36 @@ JWT **admin**. File A07 + résolution. Booking reste `disputed` (terminal). Effe
 
 Erreurs : `DISPUTE_NOT_FOUND` (404), `DISPUTE_ALREADY_RESOLVED` (409), `PAYMENT_NOT_FOUND` / `PAYMENT_NOT_REFUNDABLE` (409), `VALIDATION_ERROR` (400).
 
+### Admin platform config (CS-M10-S08)
+
+JWT **admin**. Persistance `platform_config` (key/json). Defaults = constantes shared-types si clé absente. Utilisée pour commission booking + timeouts matching.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/admin/config` | Lire la config courante |
+| PATCH | `/admin/config` | Update partiel |
+
+```json
+// GET /admin/config
+{
+  "data": {
+    "commissionRate": 0.2,
+    "matchingTimeoutT1Minutes": 30,
+    "matchingTimeoutT2Hours": 2,
+    "matchingUnassignedLeadHours": 2,
+    "cancelFreeHours": 24,
+    "cancelLateHours": 2,
+    "serviceFeeCents": 0,
+    "updatedAt": "2026-09-16T15:00:00.000Z"
+  }
+}
+
+// PATCH /admin/config
+{ "matchingTimeoutT1Minutes": 45, "commissionRate": 0.22 }
+```
+
+Erreurs : `VALIDATION_ERROR` (400).
+
 ### GET `/admin/dashboard`
 
 JWT **admin**. KPIs A02 (CS-M10-S02), fenêtres UTC :

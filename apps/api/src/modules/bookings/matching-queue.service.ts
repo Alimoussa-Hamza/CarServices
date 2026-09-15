@@ -5,17 +5,13 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-  MATCHING_TIMEOUT_T1_MINUTES,
-  MATCHING_TIMEOUT_T2_HOURS,
-  MATCHING_UNASSIGNED_LEAD_HOURS,
-} from '@carservice/shared-types';
 import { JobsOptions, Queue, Worker } from 'bullmq';
 import { BookingMatchingService } from './booking-matching.service';
 import {
   computeMatchingJobDelays,
   redisConnectionFromUrl,
 } from './matching-timeouts';
+import { PlatformConfigService } from '../platform-config/platform-config.service';
 
 export const MATCHING_QUEUE_NAME = 'matching';
 export const MATCHING_JOB_EXPAND = 'expand-radius';
@@ -34,6 +30,7 @@ export class MatchingQueueService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly config: ConfigService,
     private readonly matchingService: BookingMatchingService,
+    private readonly platformConfig: PlatformConfigService,
   ) {}
 
   async onModuleInit() {
@@ -82,12 +79,19 @@ export class MatchingQueueService implements OnModuleInit, OnModuleDestroy {
       return;
     }
 
+    const timeouts = await this.platformConfig.getMatchingTimeouts();
     const delays = computeMatchingJobDelays(now, slotStart, {
-      t1Minutes: this.numberConfig('MATCHING_TIMEOUT_T1_MINUTES', MATCHING_TIMEOUT_T1_MINUTES),
-      t2Hours: this.numberConfig('MATCHING_TIMEOUT_T2_HOURS', MATCHING_TIMEOUT_T2_HOURS),
+      t1Minutes: this.numberConfig(
+        'MATCHING_TIMEOUT_T1_MINUTES',
+        timeouts.t1Minutes,
+      ),
+      t2Hours: this.numberConfig(
+        'MATCHING_TIMEOUT_T2_HOURS',
+        timeouts.t2Hours,
+      ),
       leadHours: this.numberConfig(
         'MATCHING_UNASSIGNED_LEAD_HOURS',
-        MATCHING_UNASSIGNED_LEAD_HOURS,
+        timeouts.leadHours,
       ),
     });
 

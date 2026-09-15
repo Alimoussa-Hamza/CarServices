@@ -24,6 +24,8 @@ import {
   AdminDisputesListResponseSchema,
   AdminResolveDisputeDto,
   AdminResolvedDisputeSchema,
+  AdminPlatformConfigSchema,
+  AdminUpdatePlatformConfigDto,
   AdminRefundBookingDto,
   AdminRefundResponseSchema,
   AuthTokensResponseSchema,
@@ -449,6 +451,15 @@ export const api = {
         method: 'PATCH',
         body: JSON.stringify(dto),
       }).then((data) => AdminResolvedDisputeSchema.parse(data)),
+    getConfig: () =>
+      apiRequest('/api/v1/admin/config').then((data) =>
+        AdminPlatformConfigSchema.parse(data),
+      ),
+    updateConfig: (dto: AdminUpdatePlatformConfigDto) =>
+      apiRequest('/api/v1/admin/config', {
+        method: 'PATCH',
+        body: JSON.stringify(dto),
+      }).then((data) => AdminPlatformConfigSchema.parse(data)),
     refundBooking: (bookingId: string, dto: AdminRefundBookingDto = {}) =>
       apiRequest(`/api/v1/admin/bookings/${bookingId}/refund`, {
         method: 'POST',

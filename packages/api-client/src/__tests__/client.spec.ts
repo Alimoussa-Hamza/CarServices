@@ -1632,6 +1632,39 @@ describe('api-client', () => {
         }),
       ).resolves.toEqual(resolved);
     });
+
+    it('GET/PATCH config plateforme admin', async () => {
+      initApiClient({
+        baseUrl: 'http://api.test',
+        getAccessToken: jest.fn().mockResolvedValue('admin.jwt'),
+      });
+
+      const config = {
+        commissionRate: 0.2,
+        matchingTimeoutT1Minutes: 30,
+        matchingTimeoutT2Hours: 2,
+        matchingUnassignedLeadHours: 2,
+        cancelFreeHours: 24,
+        cancelLateHours: 2,
+        serviceFeeCents: 0,
+        updatedAt: null,
+      };
+      fetchMock.mockResolvedValueOnce(mockFetchResponse({ data: config }));
+      await expect(api.admin.getConfig()).resolves.toEqual(config);
+
+      fetchMock.mockResolvedValueOnce(
+        mockFetchResponse({
+          data: {
+            ...config,
+            matchingTimeoutT1Minutes: 45,
+            updatedAt: '2026-09-16T15:00:00.000Z',
+          },
+        }),
+      );
+      await expect(
+        api.admin.updateConfig({ matchingTimeoutT1Minutes: 45 }),
+      ).resolves.toMatchObject({ matchingTimeoutT1Minutes: 45 });
+    });
   });
 
   describe('api.media', () => {

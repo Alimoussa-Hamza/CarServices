@@ -12,7 +12,8 @@ import {
 } from './e2e-helpers';
 
 /**
- * Gate fin de module M10 : admin auth, dashboard, KYC queue, catalog, zones.
+ * Gate fin de module M10 : admin auth, dashboard, KYC, catalog, zones,
+ * bookings, disputes, config.
  */
 describe('E2E M10 Admin — gate module', () => {
   let app: INestApplication;
@@ -260,6 +261,37 @@ describe('E2E M10 Admin — gate module', () => {
     expect(
       (listed.body as Envelope<{ items: unknown[]; page: number }>).data.page,
     ).toBe(1);
+  });
+
+  it('config admin get + patch timeouts', async () => {
+    const current = await http()
+      .get('/api/v1/admin/config')
+      .set('Authorization', `Bearer ${tokens.admin}`)
+      .expect(200);
+    const before = (
+      current.body as Envelope<{
+        commissionRate: number;
+        matchingTimeoutT1Minutes: number;
+      }>
+    ).data;
+    expect(before.commissionRate).toBeGreaterThan(0);
+
+    const patched = await http()
+      .patch('/api/v1/admin/config')
+      .set('Authorization', `Bearer ${tokens.admin}`)
+      .send({ matchingTimeoutT1Minutes: 45 })
+      .expect(200);
+    expect(
+      (
+        patched.body as Envelope<{ matchingTimeoutT1Minutes: number }>
+      ).data.matchingTimeoutT1Minutes,
+    ).toBe(45);
+
+    await http()
+      .patch('/api/v1/admin/config')
+      .set('Authorization', `Bearer ${tokens.admin}`)
+      .send({ matchingTimeoutT1Minutes: before.matchingTimeoutT1Minutes })
+      .expect(200);
   });
 
   it('refuse accès admin aux non-admins', async () => {

@@ -47,6 +47,7 @@ import { BookingMatchingService } from './booking-matching.service';
 import { generateBookingReference } from './booking-reference';
 import { BookingStateMachine } from './booking-state.machine';
 import { MatchingQueueService } from './matching-queue.service';
+import { PlatformConfigService } from '../platform-config/platform-config.service';
 
 const REFERENCE_RETRY_MAX = 5;
 
@@ -63,6 +64,7 @@ export class BookingsService {
     private readonly config: ConfigService,
     private readonly payments: PaymentsService,
     private readonly bookingNotifications: BookingNotificationEventsService,
+    private readonly platformConfig: PlatformConfigService,
   ) {}
 
   async create(userId: string, dto: CreateBookingDto, now = new Date()) {
@@ -122,7 +124,7 @@ export class BookingsService {
     );
     const addressSnapshot = this.toAddressSnapshot(address, lat, lng);
     const pricingSnapshot = quote.breakdown;
-    const commissionRate = this.commissionRate();
+    const commissionRate = await this.commissionRate();
     const payment = await this.payments.authorizeBooking({
       amountCents: pricingSnapshot.totalCents,
       commissionRate: Number(commissionRate),
@@ -640,14 +642,13 @@ export class BookingsService {
     return BOOKING_GEOFENCE_METERS;
   }
 
-  private commissionRate(): Prisma.Decimal {
-    const configured = this.config.get<string>('PLATFORM_COMMISSION_RATE');
-    const parsed = configured ? Number(configured) : PLATFORM_COMMISSION_RATE;
-    const rate =
-      Number.isFinite(parsed) && parsed > 0 && parsed < 1
-        ? parsed
+  private async commissionRate(): Promise<Prisma.Decimal> {
+    const rate = await this.platformConfig.getCommissionRate();
+    const safe =
+      Number.isFinite(rate) && rate > 0 && rate < 1
+        ? rate
         : PLATFORM_COMMISSION_RATE;
-    return new Prisma.Decimal(rate.toFixed(2));
+    return new Prisma.Decimal(safe.toFixed(2));
   }
 
   private toListItem(

@@ -7,6 +7,7 @@ import { PaymentsModule } from '../payments/payments.module';
 import { ProvidersModule } from '../providers/providers.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { ZonesModule } from '../zones/zones.module';
+import { PlatformConfigModule } from '../platform-config/platform-config.module';
 import { BookingMatchingService } from './booking-matching.service';
 import { BookingStateMachine } from './booking-state.machine';
 import { BookingsController } from './bookings.controller';
@@ -22,6 +23,7 @@ import { SlotPickerService } from './slot-picker.service';
     ProvidersModule,
     PaymentsModule,
     NotificationsModule,
+    PlatformConfigModule,
   ],
   controllers: [BookingsController],
   providers: [

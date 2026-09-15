@@ -1585,6 +1585,34 @@ export const AdminResolvedDisputeSchema = z.object({
 });
 export type AdminResolvedDispute = z.infer<typeof AdminResolvedDisputeSchema>;
 
+/** Platform config A09 — CS-M10-S08 */
+export const AdminPlatformConfigSchema = z.object({
+  commissionRate: z.number().gt(0).lt(1),
+  matchingTimeoutT1Minutes: z.number().int().positive().max(240),
+  matchingTimeoutT2Hours: z.number().int().positive().max(48),
+  matchingUnassignedLeadHours: z.number().int().positive().max(24),
+  cancelFreeHours: z.number().int().positive().max(168),
+  cancelLateHours: z.number().int().positive().max(48),
+  serviceFeeCents: z.number().int().nonnegative().max(10_000),
+  updatedAt: z.string().datetime().nullable(),
+});
+export type AdminPlatformConfig = z.infer<typeof AdminPlatformConfigSchema>;
+
+export const AdminUpdatePlatformConfigSchema = z
+  .object({
+    commissionRate: z.number().gt(0).lt(1).optional(),
+    matchingTimeoutT1Minutes: z.number().int().positive().max(240).optional(),
+    matchingTimeoutT2Hours: z.number().int().positive().max(48).optional(),
+    matchingUnassignedLeadHours: z.number().int().positive().max(24).optional(),
+    cancelFreeHours: z.number().int().positive().max(168).optional(),
+    cancelLateHours: z.number().int().positive().max(48).optional(),
+    serviceFeeCents: z.number().int().nonnegative().max(10_000).optional(),
+  })
+  .refine((dto) => Object.keys(dto).length > 0, 'Aucun champ à mettre à jour.');
+export type AdminUpdatePlatformConfigDto = z.infer<
+  typeof AdminUpdatePlatformConfigSchema
+>;
+
 /** Formats Expo : ExponentPushToken[...] ou ExpoPushToken[...] */
 export const ExpoPushTokenSchema = z
   .string()
