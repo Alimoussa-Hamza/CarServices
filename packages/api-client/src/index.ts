@@ -4,6 +4,14 @@ import {
   AdminPendingProvidersResponseSchema,
   AdminKycDecisionResponseSchema,
   AdminRejectKycDto,
+  AdminCategorySchema,
+  AdminOfferSchema,
+  AdminOfferOptionSchema,
+  AdminCreateOfferInput,
+  AdminUpdateCategoryDto,
+  AdminUpdateOfferDto,
+  AdminCreateOfferOptionInput,
+  AdminUpdateOfferOptionDto,
   AdminRefundBookingDto,
   AdminRefundResponseSchema,
   AuthTokensResponseSchema,
@@ -317,6 +325,43 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(dto),
       }).then((data) => AdminKycDecisionResponseSchema.parse(data)),
+    listCategories: () =>
+      apiRequest('/api/v1/admin/catalog/categories').then((data) =>
+        AdminCategorySchema.array().parse(data),
+      ),
+    updateCategory: (categoryId: string, dto: AdminUpdateCategoryDto) =>
+      apiRequest(`/api/v1/admin/catalog/categories/${categoryId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(dto),
+      }).then((data) => AdminCategorySchema.parse(data)),
+    listOffers: () =>
+      apiRequest('/api/v1/admin/catalog/offers').then((data) =>
+        AdminOfferSchema.array().parse(data),
+      ),
+    getOffer: (offerId: string) =>
+      apiRequest(`/api/v1/admin/catalog/offers/${offerId}`).then((data) =>
+        AdminOfferSchema.parse(data),
+      ),
+    createOffer: (dto: AdminCreateOfferInput) =>
+      apiRequest('/api/v1/admin/catalog/offers', {
+        method: 'POST',
+        body: JSON.stringify(dto),
+      }).then((data) => AdminOfferSchema.parse(data)),
+    updateOffer: (offerId: string, dto: AdminUpdateOfferDto) =>
+      apiRequest(`/api/v1/admin/catalog/offers/${offerId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(dto),
+      }).then((data) => AdminOfferSchema.parse(data)),
+    createOfferOption: (offerId: string, dto: AdminCreateOfferOptionInput) =>
+      apiRequest(`/api/v1/admin/catalog/offers/${offerId}/options`, {
+        method: 'POST',
+        body: JSON.stringify(dto),
+      }).then((data) => AdminOfferOptionSchema.parse(data)),
+    updateOfferOption: (optionId: string, dto: AdminUpdateOfferOptionDto) =>
+      apiRequest(`/api/v1/admin/catalog/options/${optionId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(dto),
+      }).then((data) => AdminOfferOptionSchema.parse(data)),
     refundBooking: (bookingId: string, dto: AdminRefundBookingDto = {}) =>
       apiRequest(`/api/v1/admin/bookings/${bookingId}/refund`, {
         method: 'POST',

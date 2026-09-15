@@ -44,6 +44,7 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
   let zoneId = '';
   let offerId = '';
   let optionId = '';
+  let categoryId = '';
   let clientAddressId = '';
   let bookingId = '';
   let bookingReference = '';
@@ -57,6 +58,7 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
     zoneId = catalog.zoneId;
     offerId = catalog.offerId;
     optionId = catalog.optionId;
+    categoryId = catalog.categoryId;
   });
 
   afterAll(async () => {
@@ -111,6 +113,59 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
       (covered.body as Envelope<{ covered: boolean; zone?: { slug: string } }>)
         .data,
     ).toMatchObject({ covered: true, zone: { slug: 'lyon' } });
+  });
+
+  it('CS-M10-S04 admin catalog create + soft-disable offre', async () => {
+    const adminPhone = `+33691${suffix}`;
+    const adminToken = await loginAdmin(http, adminPhone, userIds, prisma);
+    const slug = `wash-e2e-${suffix}`;
+
+    const created = await http()
+      .post('/api/v1/admin/catalog/offers')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        categoryId,
+        slug,
+        name: `Offre e2e ${suffix}`,
+        basePriceCents: 9900,
+        durationMinutes: 75,
+        formSchema: { fields: [] },
+        checklistTemplate: { items: [] },
+        isActive: true,
+        sortOrder: 99,
+      })
+      .expect(201);
+    const createdOffer = (
+      created.body as Envelope<{ id: string; slug: string; isActive: boolean }>
+    ).data;
+    expect(createdOffer).toMatchObject({ slug, isActive: true });
+
+    await http()
+      .post(`/api/v1/admin/catalog/offers/${createdOffer.id}/options`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        slug: `opt-${suffix}`,
+        name: 'Option e2e',
+        priceDeltaCents: 500,
+        durationDeltaMinutes: 5,
+      })
+      .expect(201);
+
+    await http()
+      .patch(`/api/v1/admin/catalog/offers/${createdOffer.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ isActive: false })
+      .expect(200);
+
+    const publicOffers = await http().get('/api/v1/catalog/offers').expect(200);
+    expect(
+      (
+        publicOffers.body as Envelope<Array<{ slug: string }>>
+      ).data.some((row) => row.slug === slug),
+    ).toBe(false);
+
+    await prisma.offerOption.deleteMany({ where: { offerId: createdOffer.id } });
+    await prisma.serviceOffer.delete({ where: { id: createdOffer.id } });
   });
 
   it('CS-M02 auth OTP mock → JWT client + providers', async () => {

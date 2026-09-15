@@ -1027,8 +1027,43 @@ Erreurs : `STRIPE_WEBHOOK_INVALID_SIGNATURE` (400), `VALIDATION_ERROR` (400).
 | GET | `/admin/providers/pending` | admin | KYC à valider |
 | POST | `/admin/providers/:id/approve` | admin | Approuver KYC |
 | POST | `/admin/providers/:id/reject` | admin | Rejeter KYC |
-| CRUD | `/admin/catalog/*` | admin | Offres, options, zones |
+| CRUD | `/admin/catalog/*` | admin | Catégories, offres, options |
 | GET | `/admin/bookings` | admin | Tous bookings |
+
+### Admin catalog (CS-M10-S04)
+
+JWT **admin**. Soft-disable via `isActive` / `isEnabled` (pas de hard delete — bookings historiques intacts). Zones/pricing = CS-M10-S05.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/admin/catalog/categories` | Toutes catégories (y compris désactivées) |
+| PATCH | `/admin/catalog/categories/:id` | Update partiel (`name`, `isEnabled`, …) |
+| GET | `/admin/catalog/offers` | Toutes offres + options |
+| GET | `/admin/catalog/offers/:id` | Détail offre admin |
+| POST | `/admin/catalog/offers` | Créer offre |
+| PATCH | `/admin/catalog/offers/:id` | Update / désactiver offre |
+| POST | `/admin/catalog/offers/:offerId/options` | Créer option |
+| PATCH | `/admin/catalog/options/:id` | Update / désactiver option |
+
+```json
+// POST /admin/catalog/offers
+{
+  "categoryId": "uuid",
+  "slug": "wash-premium",
+  "name": "Lavage premium",
+  "basePriceCents": 12000,
+  "durationMinutes": 120,
+  "formSchema": { "fields": [] },
+  "checklistTemplate": { "items": [] },
+  "isActive": true,
+  "sortOrder": 10
+}
+
+// PATCH /admin/catalog/offers/:id
+{ "isActive": false }
+```
+
+Erreurs : `CATEGORY_NOT_FOUND` / `OFFER_NOT_FOUND` / `OPTION_NOT_FOUND` (404), `OFFER_SLUG_TAKEN` / `OPTION_SLUG_TAKEN` (409), `VALIDATION_ERROR` (400).
 
 ### GET `/admin/dashboard`
 

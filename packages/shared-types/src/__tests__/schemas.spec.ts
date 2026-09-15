@@ -83,6 +83,11 @@ import {
   SendOtpSchema,
   ServiceCategorySchema,
   ServiceOfferSchema,
+  AdminCategorySchema,
+  AdminCreateOfferSchema,
+  AdminUpdateOfferSchema,
+  AdminCreateOfferOptionSchema,
+  AdminUpdateCategorySchema,
   StripeOnboardingLinkResponseSchema,
   SubmitKycSchema,
   UpdateProviderAvailabilitySchema,
@@ -903,6 +908,70 @@ describe('ServiceOfferSchema', () => {
     expect(
       ServiceOfferSchema.safeParse({ ...offer, basePriceCents: -1 }).success,
     ).toBe(false);
+  });
+});
+
+describe('Admin catalog schemas (CS-M10-S04)', () => {
+  it('valide une catégorie admin avec isEnabled', () => {
+    expect(
+      AdminCategorySchema.parse({
+        id: '4e165206-73f4-4987-86dd-eafde885a323',
+        slug: 'wash',
+        name: 'Lavage auto',
+        description: null,
+        icon: null,
+        isEnabled: true,
+        sortOrder: 1,
+      }),
+    ).toMatchObject({ isEnabled: true, sortOrder: 1 });
+  });
+
+  it('refuse un update catégorie vide', () => {
+    expect(AdminUpdateCategorySchema.safeParse({}).success).toBe(false);
+  });
+
+  it('valide la création d’offre admin', () => {
+    expect(
+      AdminCreateOfferSchema.parse({
+        categoryId: '4e165206-73f4-4987-86dd-eafde885a323',
+        slug: 'wash-premium',
+        name: 'Lavage premium',
+        basePriceCents: 12000,
+        durationMinutes: 120,
+        formSchema: { fields: [] },
+        checklistTemplate: { items: [] },
+      }),
+    ).toMatchObject({ isActive: true, sortOrder: 0 });
+  });
+
+  it('refuse un slug non kebab-case', () => {
+    expect(
+      AdminCreateOfferSchema.safeParse({
+        categoryId: '4e165206-73f4-4987-86dd-eafde885a323',
+        slug: 'Wash_Premium',
+        name: 'Lavage premium',
+        basePriceCents: 12000,
+        durationMinutes: 120,
+        formSchema: {},
+        checklistTemplate: {},
+      }).success,
+    ).toBe(false);
+  });
+
+  it('valide update offre et création option', () => {
+    expect(
+      AdminUpdateOfferSchema.parse({ isActive: false, basePriceCents: 9000 }),
+    ).toEqual({ isActive: false, basePriceCents: 9000 });
+    expect(
+      AdminCreateOfferOptionSchema.parse({
+        slug: 'ozone',
+        name: 'Ozone',
+      }),
+    ).toMatchObject({
+      priceDeltaCents: 0,
+      durationDeltaMinutes: 0,
+      isActive: true,
+    });
   });
 });
 

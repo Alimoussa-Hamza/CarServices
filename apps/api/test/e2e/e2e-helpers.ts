@@ -43,6 +43,7 @@ export async function loadCatalogSeed(prisma: PrismaService) {
     zoneId: zone.id,
     offerId: offer.id,
     optionId: offer.options[0]?.id ?? '',
+    categoryId: offer.categoryId,
   };
 }
 

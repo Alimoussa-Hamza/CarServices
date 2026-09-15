@@ -1121,6 +1121,94 @@
           }
         },
         {
+          "name": "List Catalog Categories",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/admin/catalog/categories"
+          }
+        },
+        {
+          "name": "List Catalog Offers",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/admin/catalog/offers"
+          }
+        },
+        {
+          "name": "Create Catalog Offer",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryId\": \"{{zoneId}}\",\n  \"slug\": \"wash-premium\",\n  \"name\": \"Lavage premium\",\n  \"basePriceCents\": 12000,\n  \"durationMinutes\": 120,\n  \"formSchema\": { \"fields\": [] },\n  \"checklistTemplate\": { \"items\": [] },\n  \"isActive\": true,\n  \"sortOrder\": 10\n}"
+            },
+            "url": "{{baseUrl}}/admin/catalog/offers"
+          }
+        },
+        {
+          "name": "Deactivate Catalog Offer",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": false\n}"
+            },
+            "url": "{{baseUrl}}/admin/catalog/offers/{{offerId}}"
+          }
+        },
+        {
           "name": "Refund Booking",
           "request": {
             "method": "POST",

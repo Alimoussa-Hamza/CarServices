@@ -23,7 +23,7 @@
 | J — Médias & preuves (M07) | 4/4 | — terminé |
 | K — Avis & litiges (M08) | 4/4 | — terminé |
 | L — Notifications (M09) | 4/4 | — terminé |
-| M — Admin API (M10) | 3/8 | CS-M10-S04 CRUD catalog |
+| M — Admin API (M10) | 4/8 | CS-M10-S05 zones + pricing |
 | N — Mobile client (M11) | 0/12 | — en attente maquettes |
 | O — Mobile pro (M12) | 0/11 | — en attente maquettes |
 | P — Admin web (M13) | 0/8 | — après M10 |
@@ -340,7 +340,8 @@ Détail écrans → pistes **N** (M11) et **O** (M12).
   - [x] Agrégations GMV / bookings / acceptation / matching / litiges / KYC pending
 - [x] **CS-M10-S03** Approve/reject KYC
   - [x] `GET /admin/providers/pending` + `POST .../approve` + `POST .../reject`
-- [ ] **CS-M10-S04** CRUD catalog admin
+- [x] **CS-M10-S04** CRUD catalog admin
+  - [x] Categories / offers / options (soft-disable `isActive` / `isEnabled`)
 - [ ] **CS-M10-S05** CRUD zones + pricing
 - [ ] **CS-M10-S06** Admin bookings search + refund
 - [ ] **CS-M10-S07** Resolve disputes

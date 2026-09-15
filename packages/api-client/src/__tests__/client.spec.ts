@@ -1338,6 +1338,62 @@ describe('api-client', () => {
       ).resolves.toMatchObject({ kycStatus: 'rejected' });
     });
 
+    it('CRUD catalog admin (offres / options)', async () => {
+      initApiClient({
+        baseUrl: 'http://api.test',
+        getAccessToken: jest.fn().mockResolvedValue('admin.jwt'),
+      });
+
+      const category = {
+        id: '4e165206-73f4-4987-86dd-eafde885a323',
+        slug: 'wash',
+        name: 'Lavage auto',
+        description: null,
+        icon: null,
+        isEnabled: true,
+        sortOrder: 1,
+      };
+      fetchMock.mockResolvedValueOnce(
+        mockFetchResponse({ data: [category] }),
+      );
+      await expect(api.admin.listCategories()).resolves.toEqual([category]);
+
+      const offer = {
+        id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        categoryId: category.id,
+        slug: 'wash-premium',
+        name: 'Lavage premium',
+        description: null,
+        basePriceCents: 12000,
+        durationMinutes: 120,
+        formSchema: { fields: [] },
+        checklistTemplate: { items: [] },
+        isActive: true,
+        sortOrder: 10,
+        category: { slug: 'wash', name: 'Lavage auto' },
+        options: [],
+      };
+      fetchMock.mockResolvedValueOnce(mockFetchResponse({ data: offer }));
+      await expect(
+        api.admin.createOffer({
+          categoryId: category.id,
+          slug: 'wash-premium',
+          name: 'Lavage premium',
+          basePriceCents: 12000,
+          durationMinutes: 120,
+          formSchema: { fields: [] },
+          checklistTemplate: { items: [] },
+        }),
+      ).resolves.toMatchObject({ slug: 'wash-premium' });
+
+      fetchMock.mockResolvedValueOnce(
+        mockFetchResponse({ data: { ...offer, isActive: false } }),
+      );
+      await expect(
+        api.admin.updateOffer(offer.id, { isActive: false }),
+      ).resolves.toMatchObject({ isActive: false });
+    });
+
     it('rembourse un booking (admin)', async () => {
       const refunded = {
         bookingId: '77777777-7777-4777-8777-777777777777',

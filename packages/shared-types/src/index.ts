@@ -259,6 +259,117 @@ export const ServiceOfferSchema = z.object({
 });
 export type ServiceOfferDto = z.infer<typeof ServiceOfferSchema>;
 
+const JsonObjectSchema = z
+  .unknown()
+  .refine(
+    (value) => value !== null && typeof value === 'object' && !Array.isArray(value),
+    'Objet JSON requis.',
+  );
+
+const SlugSchema = z
+  .string()
+  .trim()
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug kebab-case invalide.')
+  .max(100);
+
+/** Admin catalog — CS-M10-S04 */
+export const AdminCategorySchema = ServiceCategorySchema.extend({
+  isEnabled: z.boolean(),
+  sortOrder: z.number().int(),
+});
+export type AdminCategory = z.infer<typeof AdminCategorySchema>;
+
+export const AdminUpdateCategorySchema = z
+  .object({
+    name: z.string().trim().min(2).max(100).optional(),
+    description: z.string().trim().max(2000).nullable().optional(),
+    icon: z.string().trim().max(100).nullable().optional(),
+    isEnabled: z.boolean().optional(),
+    sortOrder: z.number().int().min(0).optional(),
+  })
+  .refine((dto) => Object.keys(dto).length > 0, 'Aucun champ à mettre à jour.');
+export type AdminUpdateCategoryDto = z.infer<typeof AdminUpdateCategorySchema>;
+
+export const AdminOfferOptionSchema = OfferOptionSchema.extend({
+  isActive: z.boolean(),
+});
+export type AdminOfferOption = z.infer<typeof AdminOfferOptionSchema>;
+
+export const AdminOfferSchema = z.object({
+  id: z.string().uuid(),
+  categoryId: z.string().uuid(),
+  slug: z.string(),
+  name: z.string(),
+  description: z.string().nullable(),
+  basePriceCents: z.number().int().nonnegative(),
+  durationMinutes: z.number().int().positive(),
+  formSchema: z.unknown(),
+  checklistTemplate: z.unknown(),
+  isActive: z.boolean(),
+  sortOrder: z.number().int(),
+  category: ServiceCategorySchema.pick({ slug: true, name: true }),
+  options: z.array(AdminOfferOptionSchema),
+});
+export type AdminOffer = z.infer<typeof AdminOfferSchema>;
+
+export const AdminCreateOfferSchema = z.object({
+  categoryId: z.string().uuid(),
+  slug: SlugSchema,
+  name: z.string().trim().min(2).max(150),
+  description: z.string().trim().max(2000).nullable().optional(),
+  basePriceCents: z.number().int().nonnegative(),
+  durationMinutes: z.number().int().positive().max(24 * 60),
+  formSchema: JsonObjectSchema,
+  checklistTemplate: JsonObjectSchema,
+  isActive: z.boolean().default(true),
+  sortOrder: z.number().int().min(0).default(0),
+});
+export type AdminCreateOfferDto = z.infer<typeof AdminCreateOfferSchema>;
+export type AdminCreateOfferInput = z.input<typeof AdminCreateOfferSchema>;
+
+export const AdminUpdateOfferSchema = z
+  .object({
+    categoryId: z.string().uuid().optional(),
+    slug: SlugSchema.optional(),
+    name: z.string().trim().min(2).max(150).optional(),
+    description: z.string().trim().max(2000).nullable().optional(),
+    basePriceCents: z.number().int().nonnegative().optional(),
+    durationMinutes: z.number().int().positive().max(24 * 60).optional(),
+    formSchema: JsonObjectSchema.optional(),
+    checklistTemplate: JsonObjectSchema.optional(),
+    isActive: z.boolean().optional(),
+    sortOrder: z.number().int().min(0).optional(),
+  })
+  .refine((dto) => Object.keys(dto).length > 0, 'Aucun champ à mettre à jour.');
+export type AdminUpdateOfferDto = z.infer<typeof AdminUpdateOfferSchema>;
+
+export const AdminCreateOfferOptionSchema = z.object({
+  slug: SlugSchema,
+  name: z.string().trim().min(2).max(150),
+  priceDeltaCents: z.number().int().default(0),
+  durationDeltaMinutes: z.number().int().default(0),
+  isActive: z.boolean().default(true),
+});
+export type AdminCreateOfferOptionDto = z.infer<
+  typeof AdminCreateOfferOptionSchema
+>;
+export type AdminCreateOfferOptionInput = z.input<
+  typeof AdminCreateOfferOptionSchema
+>;
+
+export const AdminUpdateOfferOptionSchema = z
+  .object({
+    slug: SlugSchema.optional(),
+    name: z.string().trim().min(2).max(150).optional(),
+    priceDeltaCents: z.number().int().optional(),
+    durationDeltaMinutes: z.number().int().optional(),
+    isActive: z.boolean().optional(),
+  })
+  .refine((dto) => Object.keys(dto).length > 0, 'Aucun champ à mettre à jour.');
+export type AdminUpdateOfferOptionDto = z.infer<
+  typeof AdminUpdateOfferOptionSchema
+>;
+
 export const CatalogQuoteSchema = z.object({
   offerId: z.string().uuid(),
   vehicleType: VehicleTypeSchema,
