@@ -359,9 +359,9 @@ describe('BOOKING_GEOFENCE_METERS / photos min', () => {
     expect(BOOKING_GEOFENCE_METERS).toBe(200);
   });
 
-  it('exige au moins 1 photo avant et 1 après (RG-BOOK-04)', () => {
-    expect(BOOKING_MIN_BEFORE_PHOTOS).toBe(1);
-    expect(BOOKING_MIN_AFTER_PHOTOS).toBe(1);
+  it('exige au moins 2 photos avant et 2 après du pro (RG-BOOK-04)', () => {
+    expect(BOOKING_MIN_BEFORE_PHOTOS).toBe(2);
+    expect(BOOKING_MIN_AFTER_PHOTOS).toBe(2);
   });
 });
 

@@ -13,6 +13,7 @@ import {
   futureSlotIso,
   loadCatalogSeed,
   login,
+  providerCompletionPhotos,
   submitAndApproveKyc,
 } from './e2e-helpers';
 
@@ -206,20 +207,10 @@ describe('E2E M05 Bookings — gate module', () => {
       .expect(200);
 
     await prisma.bookingPhoto.createMany({
-      data: [
-        {
-          bookingId,
-          uploadedBy: 'provider',
-          photoType: 'before',
-          fileUrl: 'https://cdn.carservice.test/m05-before.jpg',
-        },
-        {
-          bookingId,
-          uploadedBy: 'provider',
-          photoType: 'after',
-          fileUrl: 'https://cdn.carservice.test/m05-after.jpg',
-        },
-      ],
+      data: providerCompletionPhotos(
+        bookingId,
+        'https://cdn.carservice.test/m05',
+      ),
     });
     await http()
       .patch(`/api/v1/bookings/${bookingId}/status`)

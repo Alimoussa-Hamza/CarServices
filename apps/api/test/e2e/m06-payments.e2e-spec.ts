@@ -13,6 +13,7 @@ import {
   loadCatalogSeed,
   login,
   loginAdmin,
+  providerCompletionPhotos,
   submitAndApproveKyc,
 } from './e2e-helpers';
 
@@ -131,20 +132,10 @@ describe('E2E M06 Payments — gate module', () => {
       .expect(200);
 
     await prisma.bookingPhoto.createMany({
-      data: [
-        {
-          bookingId: created.booking.id,
-          uploadedBy: 'provider',
-          photoType: 'before',
-          fileUrl: 'https://cdn.carservice.test/m06-before.jpg',
-        },
-        {
-          bookingId: created.booking.id,
-          uploadedBy: 'provider',
-          photoType: 'after',
-          fileUrl: 'https://cdn.carservice.test/m06-after.jpg',
-        },
-      ],
+      data: providerCompletionPhotos(
+        created.booking.id,
+        'https://cdn.carservice.test/m06',
+      ),
     });
     await http()
       .patch(`/api/v1/bookings/${created.booking.id}/status`)

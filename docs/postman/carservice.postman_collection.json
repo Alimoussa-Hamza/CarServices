@@ -725,7 +725,7 @@
           "name": "Patch Booking Status",
           "request": {
             "method": "PATCH",
-            "description": "completed capture le PaymentIntent (RG-PAY-02) avec commission 20 % déjà figée (RG-PAY-03). Échec Stripe = booking reste in_progress.",
+            "description": "completed exige 2 photos before + 2 after du pro (RG-BOOK-04) puis capture le PaymentIntent (RG-PAY-02) avec commission 20 % déjà figée (RG-PAY-03). Échec Stripe = booking reste in_progress.",
             "auth": {
               "type": "bearer",
               "bearer": [

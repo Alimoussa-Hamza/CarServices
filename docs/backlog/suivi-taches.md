@@ -20,7 +20,7 @@
 | G — Backend Pros & KYC (M04) | 8/8 | — terminé |
 | H — Bookings (M05) | 10/10 | — terminé |
 | I — Paiements Stripe (M06) | 6/6 | — terminé |
-| J — Médias & preuves (M07) | 3/4 | CS-M07-S04 min photos |
+| J — Médias & preuves (M07) | 4/4 | — gate M07 |
 
 ---
 
@@ -285,7 +285,9 @@
   - [x] Parse `fileKey` (`bookings/{id}/{type}/{uuid}.ext` / `kyc/{userId}/{uuid}.ext`)
   - [x] HeadObject S3 (skip mock) + `booking_photos` idempotent sur `fileUrl`
   - [x] KYC confirm sans écriture `booking_photos`
-- [ ] **CS-M07-S04** Validation min photos clôture
+- [x] **CS-M07-S04** Validation min photos clôture
+  - [x] `BOOKING_MIN_BEFORE_PHOTOS` / `AFTER` = 2 (RG-BOOK-04)
+  - [x] `BOOKING_PHOTOS_REQUIRED` si quota pro non atteint
 
 ---
 

@@ -9,6 +9,8 @@ import { ConfigService } from '@nestjs/config';
 import {
   AddressSnapshotSchema,
   BOOKING_GEOFENCE_METERS,
+  BOOKING_MIN_AFTER_PHOTOS,
+  BOOKING_MIN_BEFORE_PHOTOS,
   PLATFORM_COMMISSION_RATE,
   PricingSnapshotSchema,
   BOOKING_LIST_LIMIT,
@@ -413,7 +415,7 @@ export class BookingsService {
     ) {
       throw new BadRequestException({
         code: 'BOOKING_PHOTOS_REQUIRED',
-        message: 'Photos avant et après obligatoires pour clôturer.',
+        message: `Au moins ${BOOKING_MIN_BEFORE_PHOTOS} photos avant et ${BOOKING_MIN_AFTER_PHOTOS} photos après du prestataire sont requises pour clôturer.`,
         details: [],
       });
     }

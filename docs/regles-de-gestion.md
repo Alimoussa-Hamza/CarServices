@@ -88,7 +88,7 @@ Branches :
 | **RG-BOOK-01** | Transitions strictes (pas de saut arbitraire sauf admin). |
 | **RG-BOOK-02** | `en_route` seulement après `accepted`. |
 | **RG-BOOK-03** | `in_progress` : géofence optionnelle (≤ X m de l'adresse). |
-| **RG-BOOK-04** | `completed` uniquement si pro + photos min validées. |
+| **RG-BOOK-04** | `completed` uniquement si le pro a au moins 2 photos `before` et 2 photos `after`. |
 | **RG-BOOK-05** | 1 booking = 1 adresse, 1 créneau, 1 offre principale. |
 
 ### Transitions autorisées

@@ -497,13 +497,38 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
           bookingId,
           uploadedBy: 'provider',
           photoType: 'before',
-          fileUrl: 'https://cdn.example/e2e-before.jpg',
+          fileUrl: 'https://cdn.example/e2e-before-1.jpg',
         },
         {
           bookingId,
           uploadedBy: 'provider',
           photoType: 'after',
-          fileUrl: 'https://cdn.example/e2e-after.jpg',
+          fileUrl: 'https://cdn.example/e2e-after-1.jpg',
+        },
+      ],
+    });
+    const incompletePhotos = await http()
+      .patch(`/api/v1/bookings/${bookingId}/status`)
+      .set('Authorization', `Bearer ${tokens.providerA}`)
+      .send({ status: 'completed' })
+      .expect(400);
+    expect((incompletePhotos.body as ErrorEnvelope).error.code).toBe(
+      'BOOKING_PHOTOS_REQUIRED',
+    );
+
+    await prisma.bookingPhoto.createMany({
+      data: [
+        {
+          bookingId,
+          uploadedBy: 'provider',
+          photoType: 'before',
+          fileUrl: 'https://cdn.example/e2e-before-2.jpg',
+        },
+        {
+          bookingId,
+          uploadedBy: 'provider',
+          photoType: 'after',
+          fileUrl: 'https://cdn.example/e2e-after-2.jpg',
         },
       ],
     });

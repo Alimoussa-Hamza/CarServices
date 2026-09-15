@@ -120,9 +120,9 @@ export const CANCEL_PROVIDER_PENALTY_LATE = 5;
 /** Géofence optionnelle à l’arrivée (RG-BOOK-03, wireframe P04). */
 export const BOOKING_GEOFENCE_METERS = 200;
 
-/** Photos min avant/après pour clôturer (RG-BOOK-04). M07-S04 pourra relever. */
-export const BOOKING_MIN_BEFORE_PHOTOS = 1;
-export const BOOKING_MIN_AFTER_PHOTOS = 1;
+/** Photos min avant/après du prestataire pour clôturer (RG-BOOK-04). */
+export const BOOKING_MIN_BEFORE_PHOTOS = 2;
+export const BOOKING_MIN_AFTER_PHOTOS = 2;
 
 export const BookingPhotoTypeSchema = z.enum(['before', 'after', 'issue']);
 export type BookingPhotoType = z.infer<typeof BookingPhotoTypeSchema>;

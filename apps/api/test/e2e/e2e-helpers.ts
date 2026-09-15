@@ -1,3 +1,7 @@
+import {
+  BOOKING_MIN_AFTER_PHOTOS,
+  BOOKING_MIN_BEFORE_PHOTOS,
+} from '@carservice/shared-types';
 import { Prisma, UserRole } from '@prisma/client';
 import request from 'supertest';
 import { PrismaService } from '../../src/prisma/prisma.service';
@@ -96,6 +100,34 @@ export async function loginAdmin(
   expect(data.user.role).toBe('admin');
 
   return data.accessToken;
+}
+
+export function providerCompletionPhotos(bookingId: string, urlPrefix: string) {
+  const rows: Array<{
+    bookingId: string;
+    uploadedBy: 'provider';
+    photoType: 'before' | 'after';
+    fileUrl: string;
+  }> = [];
+
+  for (let i = 1; i <= BOOKING_MIN_BEFORE_PHOTOS; i += 1) {
+    rows.push({
+      bookingId,
+      uploadedBy: 'provider',
+      photoType: 'before',
+      fileUrl: `${urlPrefix}-before-${i}.jpg`,
+    });
+  }
+  for (let i = 1; i <= BOOKING_MIN_AFTER_PHOTOS; i += 1) {
+    rows.push({
+      bookingId,
+      uploadedBy: 'provider',
+      photoType: 'after',
+      fileUrl: `${urlPrefix}-after-${i}.jpg`,
+    });
+  }
+
+  return rows;
 }
 
 export function futureSlotIso(daysAhead = 7): string {

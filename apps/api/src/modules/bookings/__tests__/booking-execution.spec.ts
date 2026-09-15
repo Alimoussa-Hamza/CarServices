@@ -19,22 +19,27 @@ describe('booking-execution', () => {
     expect(isWithinGeofence(far, LYON, BOOKING_GEOFENCE_METERS)).toBe(false);
   });
 
-  it('exige au moins une photo before et after du pro (RG-BOOK-04)', () => {
+  it('exige 2 photos before et 2 after du pro (RG-BOOK-04)', () => {
     expect(hasMinCompletionPhotos([])).toBe(false);
     expect(
       hasMinCompletionPhotos([
         { photoType: 'before', uploadedBy: 'provider' },
+        { photoType: 'after', uploadedBy: 'provider' },
       ]),
     ).toBe(false);
     expect(
       hasMinCompletionPhotos([
         { photoType: 'before', uploadedBy: 'client' },
+        { photoType: 'before', uploadedBy: 'client' },
+        { photoType: 'after', uploadedBy: 'client' },
         { photoType: 'after', uploadedBy: 'client' },
       ]),
     ).toBe(false);
     expect(
       hasMinCompletionPhotos([
         { photoType: 'before', uploadedBy: 'provider' },
+        { photoType: 'before', uploadedBy: 'provider' },
+        { photoType: 'after', uploadedBy: 'provider' },
         { photoType: 'after', uploadedBy: 'provider' },
       ]),
     ).toBe(true);

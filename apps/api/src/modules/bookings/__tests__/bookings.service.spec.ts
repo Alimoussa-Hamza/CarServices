@@ -394,6 +394,13 @@ const addressSnapshot = {
   label: 'Maison',
 };
 
+const minProviderCompletionPhotos = [
+  { photoType: 'before', uploadedBy: 'provider' },
+  { photoType: 'before', uploadedBy: 'provider' },
+  { photoType: 'after', uploadedBy: 'provider' },
+  { photoType: 'after', uploadedBy: 'provider' },
+];
+
 function assignedBooking(status: string, photos: unknown[] = []) {
   return {
     id: bookingId,
@@ -529,8 +536,8 @@ describe('BookingsService.updateStatus', () => {
     }
   });
 
-  it('clôture si photos before/after du pro et capture le paiement (RG-PAY-02)', async () => {
-    const { service, prisma, paymentsService } = buildService();
+  it('refuse completed avec seulement 1 before et 1 after du pro (RG-BOOK-04)', async () => {
+    const { service, prisma } = buildService();
     prisma.providerProfile.findUnique.mockResolvedValue({
       id: providerId,
       userId,
@@ -540,6 +547,21 @@ describe('BookingsService.updateStatus', () => {
         { photoType: 'before', uploadedBy: 'provider' },
         { photoType: 'after', uploadedBy: 'provider' },
       ]),
+    );
+
+    await expect(
+      service.updateStatus(userId, bookingId, { status: 'completed' }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('clôture si photos before/after du pro et capture le paiement (RG-PAY-02)', async () => {
+    const { service, prisma, paymentsService } = buildService();
+    prisma.providerProfile.findUnique.mockResolvedValue({
+      id: providerId,
+      userId,
+    });
+    prisma.booking.findUnique.mockResolvedValue(
+      assignedBooking('in_progress', minProviderCompletionPhotos),
     );
     prisma.booking.update.mockResolvedValue(assignedBooking('completed'));
 
@@ -558,10 +580,7 @@ describe('BookingsService.updateStatus', () => {
       userId,
     });
     prisma.booking.findUnique.mockResolvedValue(
-      assignedBooking('in_progress', [
-        { photoType: 'before', uploadedBy: 'provider' },
-        { photoType: 'after', uploadedBy: 'provider' },
-      ]),
+      assignedBooking('in_progress', minProviderCompletionPhotos),
     );
     paymentsService.captureForBooking.mockRejectedValue(
       new ServiceUnavailableException({
