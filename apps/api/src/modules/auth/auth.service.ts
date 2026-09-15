@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User, UserRole } from '@prisma/client';
 import {
+  AdminLoginDto,
   OtpRole,
   RefreshTokenDto,
   SendOtpDto,
@@ -24,12 +25,16 @@ import {
   OTP_TTL_SECONDS,
   OtpService,
 } from './otp.service';
+import { DUMMY_PASSWORD_HASH, verifyPassword } from './password.util';
 import { SmsService } from './sms.service';
 
 type OtpCacheEntry = {
   hash: string;
   role: OtpRole;
 };
+
+const ADMIN_LOGIN_RATE_LIMIT_MAX = 10;
+const ADMIN_LOGIN_RATE_LIMIT_WINDOW_SECONDS = 900;
 
 @Injectable()
 export class AuthService {
@@ -118,11 +123,49 @@ export class AuthService {
     return {
       data: {
         ...tokens,
-        user: {
-          id: user.id,
-          role: user.role,
-          phone: user.phone,
+        user: this.toAuthUser(user),
+      },
+    };
+  }
+
+  async loginAdmin(dto: AdminLoginDto) {
+    const email = dto.email.trim().toLowerCase();
+    const retryAfter = await this.checkAdminLoginRateLimit(email);
+    if (retryAfter !== null) {
+      throw new HttpException(
+        {
+          code: 'AUTH_RATE_LIMIT',
+          message: 'Trop de tentatives. Réessayez plus tard.',
+          details: [{ retryAfter }],
         },
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    const hash = user?.passwordHash ?? DUMMY_PASSWORD_HASH;
+    const passwordOk = await verifyPassword(dto.password, hash);
+
+    if (
+      !user ||
+      !user.isActive ||
+      user.role !== UserRole.admin ||
+      !user.passwordHash ||
+      !passwordOk
+    ) {
+      throw new UnauthorizedException({
+        code: 'AUTH_INVALID_CREDENTIALS',
+        message: 'Email ou mot de passe incorrect.',
+        details: [],
+      });
+    }
+
+    const tokens = await this.issueTokens(user);
+
+    return {
+      data: {
+        ...tokens,
+        user: this.toAuthUser(user),
       },
     };
   }
@@ -201,6 +244,15 @@ export class AuthService {
     };
   }
 
+  private toAuthUser(user: User) {
+    return {
+      id: user.id,
+      role: user.role,
+      phone: user.phone,
+      email: user.email,
+    };
+  }
+
   private async checkRateLimit(phone: string): Promise<number | null> {
     const key = this.otpService.rateLimitKey(phone);
     const count = await this.redis.client.incr(key);
@@ -212,6 +264,24 @@ export class AuthService {
     if (count > OTP_RATE_LIMIT_MAX) {
       const ttl = await this.redis.client.ttl(key);
       return ttl > 0 ? ttl : OTP_RATE_LIMIT_WINDOW_SECONDS;
+    }
+
+    return null;
+  }
+
+  private async checkAdminLoginRateLimit(
+    email: string,
+  ): Promise<number | null> {
+    const key = `auth:admin:rate:${email}`;
+    const count = await this.redis.client.incr(key);
+
+    if (count === 1) {
+      await this.redis.client.expire(key, ADMIN_LOGIN_RATE_LIMIT_WINDOW_SECONDS);
+    }
+
+    if (count > ADMIN_LOGIN_RATE_LIMIT_MAX) {
+      const ttl = await this.redis.client.ttl(key);
+      return ttl > 0 ? ttl : ADMIN_LOGIN_RATE_LIMIT_WINDOW_SECONDS;
     }
 
     return null;

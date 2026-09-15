@@ -6,6 +6,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  AdminLoginDto,
+  AdminLoginSchema,
   RefreshTokenDto,
   RefreshTokenSchema,
   SendOtpDto,
@@ -33,6 +35,13 @@ export class AuthController {
   @Post('otp/verify')
   verifyOtp(@Body(new ZodValidationPipe(VerifyOtpSchema)) dto: VerifyOtpDto) {
     return this.authService.verifyOtp(dto);
+  }
+
+  @Post('admin/login')
+  loginAdmin(
+    @Body(new ZodValidationPipe(AdminLoginSchema)) dto: AdminLoginDto,
+  ) {
+    return this.authService.loginAdmin(dto);
   }
 
   @Post('refresh')

@@ -1,4 +1,5 @@
 import { PrismaClient, UserRole } from '@prisma/client';
+import { hashPassword } from '../src/modules/auth/password.util';
 
 const prisma = new PrismaClient();
 
@@ -7,18 +8,30 @@ const lyonPolygonWkt =
 
 async function main() {
   const adminPhone = process.env.SEED_ADMIN_PHONE ?? '+33600000000';
+  const adminEmail =
+    process.env.SEED_ADMIN_EMAIL ?? 'admin@carservice.fr';
+  const adminPassword =
+    process.env.SEED_ADMIN_PASSWORD ?? 'AdminTest123!';
+  const passwordHash = await hashPassword(adminPassword);
 
   const admin = await prisma.user.upsert({
     where: { phone: adminPhone },
-    update: { role: UserRole.admin, isActive: true },
+    update: {
+      role: UserRole.admin,
+      email: adminEmail,
+      passwordHash,
+      isActive: true,
+    },
     create: {
       phone: adminPhone,
+      email: adminEmail,
+      passwordHash,
       role: UserRole.admin,
       isActive: true,
     },
   });
 
-  console.log(`Seed admin: ${admin.id} (${admin.phone})`);
+  console.log(`Seed admin: ${admin.id} (${admin.email} / ${admin.phone})`);
 
   const category = await prisma.serviceCategory.upsert({
     where: { slug: 'wash' },

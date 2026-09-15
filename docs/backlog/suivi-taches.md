@@ -23,7 +23,7 @@
 | J — Médias & preuves (M07) | 4/4 | — terminé |
 | K — Avis & litiges (M08) | 4/4 | — terminé |
 | L — Notifications (M09) | 4/4 | — terminé |
-| M — Admin API (M10) | 0/8 | CS-M10-S01 auth admin |
+| M — Admin API (M10) | 1/8 | CS-M10-S02 dashboard KPIs |
 | N — Mobile client (M11) | 0/12 | — en attente maquettes |
 | O — Mobile pro (M12) | 0/11 | — en attente maquettes |
 | P — Admin web (M13) | 0/8 | — après M10 |
@@ -334,7 +334,8 @@ Détail écrans → pistes **N** (M11) et **O** (M12).
 
 ## Piste M — Admin API · Module M10
 
-- [ ] **CS-M10-S01** Auth admin (email + role)
+- [x] **CS-M10-S01** Auth admin (email + role)
+  - [x] `POST /auth/admin/login` (email + password scrypt, role admin)
 - [ ] **CS-M10-S02** GET `/admin/dashboard` KPIs
 - [ ] **CS-M10-S03** Approve/reject KYC
 - [ ] **CS-M10-S04** CRUD catalog admin

@@ -947,9 +947,6 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
 
   it('CS-M06-S05 refund admin libère l’auth (RG-PAY-05)', async () => {
     const adminPhone = `+33699${suffix}`;
-    await prisma.user.create({
-      data: { phone: adminPhone, role: 'admin', isActive: true },
-    });
     const adminToken = await loginAdmin(http, adminPhone, userIds, prisma);
 
     const created = await http()

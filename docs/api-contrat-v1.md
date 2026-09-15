@@ -46,6 +46,7 @@ X-Request-Id: <uuid>             # optionnel client, sinon généré serveur
 |--------|------|------|-------------|
 | POST | `/auth/otp/send` | public | Envoyer OTP SMS |
 | POST | `/auth/otp/verify` | public | Vérifier OTP → tokens |
+| POST | `/auth/admin/login` | public | Login admin email + password |
 | POST | `/auth/refresh` | public | Refresh token |
 | POST | `/auth/logout` | auth | Invalider refresh |
 | GET | `/auth/me` | auth | Profil courant |
@@ -72,10 +73,36 @@ X-Request-Id: <uuid>             # optionnel client, sinon généré serveur
     "accessToken": "jwt...",
     "refreshToken": "jwt...",
     "expiresIn": 900,
-    "user": { "id": "uuid", "role": "client", "phone": "+336..." }
+    "user": { "id": "uuid", "role": "client", "phone": "+336...", "email": null }
   }
 }
 ```
+
+### POST `/auth/admin/login`
+
+Login back-office (CS-M10-S01). Réservé aux users `role=admin` avec `email` + `password_hash` (scrypt). Rate limit Redis 10 essais / 15 min. Seed local : `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`.
+
+```json
+// Request
+{ "email": "admin@carservice.fr", "password": "AdminTest123!" }
+
+// Response 201
+{
+  "data": {
+    "accessToken": "jwt...",
+    "refreshToken": "jwt...",
+    "expiresIn": 900,
+    "user": {
+      "id": "uuid",
+      "role": "admin",
+      "phone": "+33600000000",
+      "email": "admin@carservice.fr"
+    }
+  }
+}
+```
+
+Erreurs : `AUTH_INVALID_CREDENTIALS` (401), `AUTH_RATE_LIMIT` (429), `VALIDATION_ERROR` (400).
 
 ---
 

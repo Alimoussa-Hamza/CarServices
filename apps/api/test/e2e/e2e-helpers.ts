@@ -76,36 +76,51 @@ export async function login(
   return data.accessToken;
 }
 
-/** Admin OTP uses role `client`; existing admin users keep `UserRole.admin`. */
+/** Admin email/password (CS-M10-S01). Upsert le user admin puis login. */
 export async function loginAdmin(
   http: Http,
   phone: string,
   userIds: string[],
   prisma: PrismaService,
 ): Promise<string> {
-  await http()
-    .post('/api/v1/auth/otp/send')
-    .send({ phone, role: 'client' })
-    .expect(201);
+  const email = `admin-${phone.replace(/\D/g, '')}@carservice.test`;
+  const password = 'AdminTest123!';
+  const { hashPassword } = await import(
+    '../../src/modules/auth/password.util'
+  );
+  const passwordHash = await hashPassword(password);
+
+  const admin = await prisma.user.upsert({
+    where: { phone },
+    update: {
+      role: UserRole.admin,
+      email,
+      passwordHash,
+      isActive: true,
+    },
+    create: {
+      phone,
+      email,
+      passwordHash,
+      role: UserRole.admin,
+      isActive: true,
+    },
+  });
+  userIds.push(admin.id);
 
   const verified = await http()
-    .post('/api/v1/auth/otp/verify')
-    .send({ phone, role: 'client', code: E2E_OTP, acceptTerms: true })
+    .post('/api/v1/auth/admin/login')
+    .send({ email, password })
     .expect(201);
 
   const data = (
     verified.body as Envelope<{
       accessToken: string;
-      user: { id: string; role: string };
+      user: { id: string; role: string; email?: string | null };
     }>
   ).data;
-  userIds.push(data.user.id);
-
-  const user = await prisma.user.findUniqueOrThrow({
-    where: { id: data.user.id },
-  });
-  expect(user.role).toBe(UserRole.admin);
   expect(data.user.role).toBe('admin');
+  expect(data.user.email).toBe(email);
 
   return data.accessToken;
 }

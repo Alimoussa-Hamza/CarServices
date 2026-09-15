@@ -1,4 +1,5 @@
 import {
+  AdminLoginDto,
   AdminRefundBookingDto,
   AdminRefundResponseSchema,
   AuthTokensResponseSchema,
@@ -129,6 +130,11 @@ export const api = {
       ).then((data) => SendOtpResponseSchema.parse(data)),
     verifyOtp: (dto: VerifyOtpDto) =>
       apiRequest('/api/v1/auth/otp/verify', {
+        method: 'POST',
+        body: JSON.stringify(dto),
+      }).then((data) => AuthTokensResponseSchema.parse(data)),
+    adminLogin: (dto: AdminLoginDto) =>
+      apiRequest('/api/v1/auth/admin/login', {
         method: 'POST',
         body: JSON.stringify(dto),
       }).then((data) => AuthTokensResponseSchema.parse(data)),

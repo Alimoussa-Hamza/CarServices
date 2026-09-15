@@ -177,6 +177,46 @@ describe('api-client', () => {
       });
     });
 
+    it('login admin email/password et valide les tokens', async () => {
+      fetchMock.mockResolvedValue(
+        mockFetchResponse({
+          data: {
+            accessToken: 'admin.access.jwt',
+            refreshToken: 'admin-refresh-token',
+            expiresIn: 900,
+            user: {
+              id: '4e165206-73f4-4987-86dd-eafde885a323',
+              role: 'admin',
+              phone: '+33600000000',
+              email: 'admin@carservice.fr',
+            },
+          },
+        }),
+      );
+
+      await expect(
+        api.auth.adminLogin({
+          email: 'admin@carservice.fr',
+          password: 'AdminTest123!',
+        }),
+      ).resolves.toMatchObject({
+        accessToken: 'admin.access.jwt',
+        user: { role: 'admin', email: 'admin@carservice.fr' },
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/auth/admin/login',
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            email: 'admin@carservice.fr',
+            password: 'AdminTest123!',
+          }),
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    });
+
     it('rafraîchit une session et valide les nouveaux tokens', async () => {
       fetchMock.mockResolvedValue(
         mockFetchResponse({

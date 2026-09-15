@@ -228,6 +228,7 @@ describe('AuthService', () => {
         id: user.id,
         role: user.role,
         phone: user.phone,
+        email: user.email,
       });
       expect(result.data.refreshToken).toMatch(/^[a-f0-9]{64}$/);
     });
@@ -246,6 +247,76 @@ describe('AuthService', () => {
           acceptTerms: true,
         }),
       ).rejects.toBeInstanceOf(BadRequestException);
+    });
+  });
+
+  describe('loginAdmin', () => {
+    it('émet des tokens pour un admin email/password valide', async () => {
+      const { service, prisma, jwtService } = buildMocks();
+      const { hashPassword } = await import('../password.util');
+      const passwordHash = await hashPassword('AdminTest123!');
+      const admin: User = {
+        ...user,
+        role: UserRole.admin,
+        email: 'admin@carservice.fr',
+        passwordHash,
+      };
+      prisma.user.findUnique.mockResolvedValue(admin);
+
+      const result = await service.loginAdmin({
+        email: 'Admin@carservice.fr',
+        password: 'AdminTest123!',
+      });
+
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { email: 'admin@carservice.fr' },
+      });
+      expect(jwtService.sign).toHaveBeenCalledWith(
+        { sub: admin.id, role: UserRole.admin },
+        { expiresIn: 900 },
+      );
+      expect(result.data.user).toEqual({
+        id: admin.id,
+        role: UserRole.admin,
+        phone: admin.phone,
+        email: 'admin@carservice.fr',
+      });
+    });
+
+    it('rejette un mot de passe incorrect', async () => {
+      const { service, prisma } = buildMocks();
+      const { hashPassword } = await import('../password.util');
+      prisma.user.findUnique.mockResolvedValue({
+        ...user,
+        role: UserRole.admin,
+        email: 'admin@carservice.fr',
+        passwordHash: await hashPassword('AdminTest123!'),
+      });
+
+      await expect(
+        service.loginAdmin({
+          email: 'admin@carservice.fr',
+          password: 'WrongPass1!',
+        }),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+    });
+
+    it('rejette un client même avec le bon password', async () => {
+      const { service, prisma } = buildMocks();
+      const { hashPassword } = await import('../password.util');
+      prisma.user.findUnique.mockResolvedValue({
+        ...user,
+        role: UserRole.client,
+        email: 'client@carservice.fr',
+        passwordHash: await hashPassword('AdminTest123!'),
+      });
+
+      await expect(
+        service.loginAdmin({
+          email: 'client@carservice.fr',
+          password: 'AdminTest123!',
+        }),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
     });
   });
 

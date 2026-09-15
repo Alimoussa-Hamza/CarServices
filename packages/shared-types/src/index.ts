@@ -199,8 +199,15 @@ export const AuthUserSchema = z.object({
   id: z.string().uuid(),
   role: UserRoleSchema,
   phone: z.string(),
+  email: z.string().email().nullable().optional(),
 });
 export type AuthUser = z.infer<typeof AuthUserSchema>;
+
+export const AdminLoginSchema = z.object({
+  email: z.string().email().max(255),
+  password: z.string().min(8).max(128),
+});
+export type AdminLoginDto = z.infer<typeof AdminLoginSchema>;
 
 export const SendOtpResponseSchema = z.object({
   expiresIn: z.number().int().positive(),

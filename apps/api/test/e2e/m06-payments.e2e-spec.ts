@@ -56,9 +56,6 @@ describe('E2E M06 Payments — gate module', () => {
       prisma,
     );
 
-    await prisma.user.create({
-      data: { phone: phones.admin, role: 'admin', isActive: true },
-    });
     tokens.admin = await loginAdmin(http, phones.admin, userIds, prisma);
 
     await submitAndApproveKyc(

@@ -1,6 +1,7 @@
 import {
   AddressSnapshotSchema,
   AuthTokensResponseSchema,
+  AdminLoginSchema,
   BOOKING_DISPUTE_WINDOW_HOURS,
   BOOKING_GEOFENCE_METERS,
   BOOKING_MIN_AFTER_PHOTOS,
@@ -208,11 +209,56 @@ describe('AuthTokensResponseSchema', () => {
     expect(AuthTokensResponseSchema.parse(valid)).toEqual(valid);
   });
 
+  it('accepte un user admin avec email', () => {
+    expect(
+      AuthTokensResponseSchema.parse({
+        ...valid,
+        user: {
+          ...valid.user,
+          role: 'admin',
+          email: 'admin@carservice.fr',
+        },
+      }).user.email,
+    ).toBe('admin@carservice.fr');
+  });
+
   it("rejette un id utilisateur qui n'est pas un UUID", () => {
     expect(
       AuthTokensResponseSchema.safeParse({
         ...valid,
         user: { ...valid.user, id: 'not-a-uuid' },
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe('AdminLoginSchema', () => {
+  it('valide email + mot de passe', () => {
+    expect(
+      AdminLoginSchema.parse({
+        email: 'admin@carservice.fr',
+        password: 'Secret123!',
+      }),
+    ).toEqual({
+      email: 'admin@carservice.fr',
+      password: 'Secret123!',
+    });
+  });
+
+  it('refuse un mot de passe trop court', () => {
+    expect(
+      AdminLoginSchema.safeParse({
+        email: 'admin@carservice.fr',
+        password: 'short',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('refuse un email invalide', () => {
+    expect(
+      AdminLoginSchema.safeParse({
+        email: 'not-an-email',
+        password: 'Secret123!',
       }).success,
     ).toBe(false);
   });
