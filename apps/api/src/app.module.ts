@@ -5,6 +5,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { BookingsModule } from './modules/bookings/bookings.module';
 import { CatalogModule } from './modules/catalog/catalog.module';
 import { HealthModule } from './modules/health/health.module';
+import { PaymentsModule } from './modules/payments/payments.module';
 import { ProvidersModule } from './modules/providers/providers.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { ZonesModule } from './modules/zones/zones.module';
@@ -20,6 +21,7 @@ import { PrismaModule } from './prisma/prisma.module';
     CatalogModule,
     ZonesModule,
     ProvidersModule,
+    PaymentsModule,
     BookingsModule,
   ],
   controllers: [AppController],

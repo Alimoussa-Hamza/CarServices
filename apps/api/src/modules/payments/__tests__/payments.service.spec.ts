@@ -3,7 +3,9 @@ import {
   ConflictException,
   ServiceUnavailableException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
+import { BookingStateMachine } from '../../bookings/booking-state.machine';
 import { PaymentsService } from '../payments.service';
 import { StripeService } from '../stripe.service';
 
@@ -42,12 +44,27 @@ function buildService() {
       findUnique: jest.fn(),
       update: jest.fn(),
     },
+    stripeEvent: {
+      create: jest.fn().mockResolvedValue({}),
+      delete: jest.fn(),
+    },
+    booking: {
+      findUnique: jest.fn(),
+      update: jest.fn(),
+    },
+    bookingStatusHistory: { create: jest.fn() },
+    $transaction: jest.fn(),
   };
+  prisma.$transaction.mockImplementation(
+    async (callback: (tx: typeof prisma) => Promise<unknown>) =>
+      callback(prisma),
+  );
 
   return {
     service: new PaymentsService(
       stripe as unknown as StripeService,
       prisma as unknown as PrismaService,
+      new BookingStateMachine(),
     ),
     stripe,
     prisma,
@@ -193,5 +210,74 @@ describe('PaymentsService.captureForBooking', () => {
       ServiceUnavailableException,
     );
     expect(prisma.payment.update).not.toHaveBeenCalled();
+  });
+});
+
+describe('PaymentsService.processStripeEvent', () => {
+  const failedEvent = {
+    id: 'evt_mock_payment_failed_1',
+    type: 'payment_intent.payment_failed',
+    data: { object: { id: 'pi_mock_abc123' } },
+  };
+
+  it('marque le paiement failed et expire le booking unpaid (RG-PAY-06)', async () => {
+    const { service, prisma } = buildService();
+    prisma.payment.findUnique.mockResolvedValue(authorizedPayment);
+    prisma.booking.findUnique.mockResolvedValue({
+      id: bookingId,
+      status: 'pending_provider',
+    });
+
+    await expect(service.processStripeEvent(failedEvent, now)).resolves.toEqual({
+      duplicate: false,
+    });
+    expect(prisma.stripeEvent.create).toHaveBeenCalledWith({
+      data: {
+        stripeEventId: 'evt_mock_payment_failed_1',
+        type: 'payment_intent.payment_failed',
+      },
+    });
+    expect(prisma.payment.update).toHaveBeenCalledWith({
+      where: { id: paymentId },
+      data: { status: 'failed' },
+    });
+    expect(prisma.booking.update).toHaveBeenCalledWith({
+      where: { id: bookingId },
+      data: { status: 'expired' },
+    });
+  });
+
+  it('est idempotent si l’event id est déjà stocké', async () => {
+    const { service, prisma } = buildService();
+    const conflict = new Prisma.PrismaClientKnownRequestError(
+      'Unique constraint failed',
+      { code: 'P2002', clientVersion: '6.6.0' },
+    );
+    prisma.stripeEvent.create.mockRejectedValue(conflict);
+
+    await expect(service.processStripeEvent(failedEvent, now)).resolves.toEqual({
+      duplicate: true,
+    });
+    expect(prisma.payment.findUnique).not.toHaveBeenCalled();
+  });
+
+  it('confirme captured sur payment_intent.succeeded', async () => {
+    const { service, prisma } = buildService();
+    prisma.payment.findUnique.mockResolvedValue(authorizedPayment);
+
+    await expect(
+      service.processStripeEvent(
+        {
+          id: 'evt_mock_pi_succeeded_1',
+          type: 'payment_intent.succeeded',
+          data: { object: { id: 'pi_mock_abc123' } },
+        },
+        now,
+      ),
+    ).resolves.toEqual({ duplicate: false });
+    expect(prisma.payment.update).toHaveBeenCalledWith({
+      where: { id: paymentId },
+      data: { status: 'captured', capturedAt: now },
+    });
   });
 });

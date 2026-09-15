@@ -934,3 +934,12 @@ export const SlotPickerResponseSchema = z.object({
   days: z.array(SlotPickerDaySchema),
 });
 export type SlotPickerResponse = z.infer<typeof SlotPickerResponseSchema>;
+
+export const StripeWebhookEventSchema = z.object({
+  id: z.string().min(1).max(255),
+  type: z.string().min(1).max(100),
+  data: z.object({
+    object: z.record(z.unknown()),
+  }),
+});
+export type StripeWebhookEvent = z.infer<typeof StripeWebhookEventSchema>;

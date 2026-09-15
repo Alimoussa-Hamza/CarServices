@@ -307,6 +307,17 @@ platform_config
 | refunded_at | TIMESTAMPTZ | nullable |
 | created_at | TIMESTAMPTZ | NOT NULL |
 
+#### `stripe_events`
+
+Idempotence webhooks Stripe (CS-M06-S04).
+
+| Colonne | Type | Contraintes |
+|---------|------|-------------|
+| id | UUID | PK |
+| stripe_event_id | VARCHAR(255) | UNIQUE |
+| event_type | VARCHAR(100) | NOT NULL |
+| created_at | TIMESTAMPTZ | NOT NULL |
+
 ---
 
 ### 2.7 Avis & litiges

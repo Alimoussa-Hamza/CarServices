@@ -854,4 +854,60 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
       .expect(404);
     expect((unknown.body as ErrorEnvelope).error.code).toBe('ADDRESS_NOT_FOUND');
   });
+
+  it('CS-M06-S04 webhook payment_failed expire le booking unpaid (RG-PAY-06)', async () => {
+    const created = await http()
+      .post('/api/v1/bookings')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({
+        offerId,
+        vehicleType: 'suv',
+        optionIds: [],
+        addressId: clientAddressId,
+        slotStart: futureSlotIso(8),
+      })
+      .expect(201);
+    const createdPayload = (
+      created.body as Envelope<{
+        booking: { id: string; status: string };
+        payment: { paymentIntentId: string };
+      }>
+    ).data;
+    expect(createdPayload.booking.status).toBe('pending_provider');
+
+    const eventId = `evt_mock_${suffix}_payfail`;
+    const webhook = await http()
+      .post('/api/v1/webhooks/stripe')
+      .send({
+        id: eventId,
+        type: 'payment_intent.payment_failed',
+        data: { object: { id: createdPayload.payment.paymentIntentId } },
+      })
+      .expect(200);
+    expect(
+      (webhook.body as Envelope<{ received: boolean; duplicate: boolean }>)
+        .data.received,
+    ).toBe(true);
+
+    const replay = await http()
+      .post('/api/v1/webhooks/stripe')
+      .send({
+        id: eventId,
+        type: 'payment_intent.payment_failed',
+        data: { object: { id: createdPayload.payment.paymentIntentId } },
+      })
+      .expect(200);
+    expect(
+      (replay.body as Envelope<{ duplicate: boolean }>).data.duplicate,
+    ).toBe(true);
+
+    const payment = await prisma.payment.findUniqueOrThrow({
+      where: { bookingId: createdPayload.booking.id },
+    });
+    expect(payment.status).toBe('failed');
+    const booking = await prisma.booking.findUniqueOrThrow({
+      where: { id: createdPayload.booking.id },
+    });
+    expect(booking.status).toBe('expired');
+  });
 });

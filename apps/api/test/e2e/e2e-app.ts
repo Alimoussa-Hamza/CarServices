@@ -18,7 +18,7 @@ export async function createE2eApp(): Promise<{
     .useClass(E2eOtpService)
     .compile();
 
-  const app = moduleRef.createNestApplication();
+  const app = moduleRef.createNestApplication({ rawBody: true });
   app.setGlobalPrefix('api/v1');
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new ResponseEnvelopeInterceptor());

@@ -6,8 +6,11 @@ import {
 import {
   PLATFORM_COMMISSION_RATE,
   computePaymentSplit,
+  type StripeWebhookEvent,
 } from '@carservice/shared-types';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { BookingStateMachine } from '../bookings/booking-state.machine';
 import { StripeService } from './stripe.service';
 
 export type BookingPaymentAuthorization = {
@@ -34,6 +37,7 @@ export class PaymentsService {
   constructor(
     private readonly stripe: StripeService,
     private readonly prisma: PrismaService,
+    private readonly stateMachine: BookingStateMachine,
   ) {}
 
   async authorizeBooking(input: {
@@ -146,5 +150,159 @@ export class PaymentsService {
       status: 'captured',
       capturedAt: (updated.capturedAt ?? now).toISOString(),
     };
+  }
+
+  async processStripeEvent(
+    event: StripeWebhookEvent,
+    now = new Date(),
+  ): Promise<{ duplicate: boolean }> {
+    try {
+      await this.prisma.stripeEvent.create({
+        data: {
+          stripeEventId: event.id,
+          type: event.type,
+        },
+      });
+    } catch (error) {
+      if (this.isUniqueConflict(error)) {
+        return { duplicate: true };
+      }
+      throw error;
+    }
+
+    try {
+      await this.applyStripeEvent(event, now);
+    } catch (error) {
+      await this.prisma.stripeEvent.delete({
+        where: { stripeEventId: event.id },
+      });
+      throw error;
+    }
+
+    return { duplicate: false };
+  }
+
+  private async applyStripeEvent(event: StripeWebhookEvent, now: Date) {
+    const object = event.data.object;
+    const paymentIntentId = this.paymentIntentIdFromObject(object);
+
+    if (event.type === 'payment_intent.succeeded' && paymentIntentId) {
+      await this.markCapturedFromWebhook(paymentIntentId, now);
+      return;
+    }
+
+    if (event.type === 'payment_intent.payment_failed' && paymentIntentId) {
+      await this.failUnpaidBooking(paymentIntentId);
+      return;
+    }
+
+    if (event.type === 'charge.refunded' && paymentIntentId) {
+      await this.markRefundedFromWebhook(paymentIntentId, now);
+    }
+  }
+
+  private async markCapturedFromWebhook(paymentIntentId: string, now: Date) {
+    const payment = await this.prisma.payment.findUnique({
+      where: { stripePaymentIntentId: paymentIntentId },
+    });
+    if (!payment || payment.status !== 'authorized') {
+      return;
+    }
+
+    await this.prisma.payment.update({
+      where: { id: payment.id },
+      data: { status: 'captured', capturedAt: now },
+    });
+  }
+
+  private async failUnpaidBooking(paymentIntentId: string) {
+    const payment = await this.prisma.payment.findUnique({
+      where: { stripePaymentIntentId: paymentIntentId },
+    });
+    if (!payment || payment.status !== 'authorized') {
+      return;
+    }
+
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: payment.bookingId },
+    });
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.payment.update({
+        where: { id: payment.id },
+        data: { status: 'failed' },
+      });
+
+      if (
+        !booking ||
+        (booking.status !== 'payment_authorized' &&
+          booking.status !== 'pending_provider')
+      ) {
+        return;
+      }
+
+      this.stateMachine.assertCanTransition(
+        booking.status,
+        'expired',
+        'system',
+      );
+      const history = this.stateMachine.buildHistoryEntry(
+        booking.status,
+        'expired',
+        'system',
+        { reason: 'payment_failed' },
+      );
+
+      await tx.booking.update({
+        where: { id: booking.id },
+        data: { status: 'expired' },
+      });
+      await tx.bookingStatusHistory.create({
+        data: {
+          bookingId: booking.id,
+          fromStatus: history.fromStatus,
+          toStatus: history.toStatus,
+          actorType: history.actorType,
+          reason: history.reason,
+        },
+      });
+    });
+  }
+
+  private async markRefundedFromWebhook(paymentIntentId: string, now: Date) {
+    const payment = await this.prisma.payment.findUnique({
+      where: { stripePaymentIntentId: paymentIntentId },
+    });
+    if (
+      !payment ||
+      payment.status === 'refunded' ||
+      payment.status === 'failed'
+    ) {
+      return;
+    }
+
+    await this.prisma.payment.update({
+      where: { id: payment.id },
+      data: { status: 'refunded', refundedAt: now },
+    });
+  }
+
+  private paymentIntentIdFromObject(
+    object: Record<string, unknown>,
+  ): string | null {
+    if (typeof object.id === 'string' && object.id.startsWith('pi_')) {
+      return object.id;
+    }
+    if (typeof object.payment_intent === 'string') {
+      return object.payment_intent;
+    }
+    return null;
+  }
+
+  private isUniqueConflict(error: unknown): boolean {
+    return (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    );
   }
 }

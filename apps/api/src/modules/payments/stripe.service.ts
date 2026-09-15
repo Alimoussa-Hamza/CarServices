@@ -1,6 +1,11 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { BadRequestException, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import {
+  StripeWebhookEventSchema,
+  type StripeWebhookEvent,
+} from '@carservice/shared-types';
 import { randomBytes, randomUUID } from 'crypto';
+import { verifyStripeWebhookSignature } from './stripe-webhook';
 
 export const STRIPE_API_VERSION = '2024-11-20.acacia';
 
@@ -31,6 +36,64 @@ export class StripeService {
     }
 
     return secretKey;
+  }
+
+  webhookSecret(): string | null {
+    const secret = this.config.get<string>('STRIPE_WEBHOOK_SECRET')?.trim();
+    if (!secret || !/^whsec_[A-Za-z0-9+/=_-]{16,}$/.test(secret)) {
+      return null;
+    }
+
+    return secret;
+  }
+
+  parseWebhookEvent(
+    rawBody: Buffer | undefined,
+    signature: string | undefined,
+    parsedBody: unknown,
+  ): StripeWebhookEvent {
+    const secret = this.webhookSecret();
+    let payload: unknown = parsedBody;
+
+    if (secret) {
+      if (!rawBody || !signature) {
+        throw new BadRequestException({
+          code: 'STRIPE_WEBHOOK_INVALID_SIGNATURE',
+          message: 'Signature Stripe manquante.',
+          details: [],
+        });
+      }
+
+      const raw = rawBody.toString('utf8');
+      if (!verifyStripeWebhookSignature({ payload: raw, header: signature, secret })) {
+        throw new BadRequestException({
+          code: 'STRIPE_WEBHOOK_INVALID_SIGNATURE',
+          message: 'Signature Stripe invalide.',
+          details: [],
+        });
+      }
+
+      try {
+        payload = JSON.parse(raw) as unknown;
+      } catch {
+        throw new BadRequestException({
+          code: 'VALIDATION_ERROR',
+          message: 'Payload webhook Stripe invalide.',
+          details: [],
+        });
+      }
+    }
+
+    const parsed = StripeWebhookEventSchema.safeParse(payload);
+    if (!parsed.success) {
+      throw new BadRequestException({
+        code: 'VALIDATION_ERROR',
+        message: 'Événement Stripe invalide.',
+        details: parsed.error.flatten(),
+      });
+    }
+
+    return parsed.data;
   }
 
   async createManualCapturePaymentIntent(input: {

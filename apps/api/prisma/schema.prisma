@@ -464,3 +464,13 @@ model Payment {
   @@index([status])
   @@map("payments")
 }
+
+model StripeEvent {
+  id            String   @id @default(uuid()) @db.Uuid
+  stripeEventId String   @unique @map("stripe_event_id") @db.VarChar(255)
+  type          String   @map("event_type") @db.VarChar(100)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([type])
+  @@map("stripe_events")
+}

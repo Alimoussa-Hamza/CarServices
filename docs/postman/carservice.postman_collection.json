@@ -777,6 +777,34 @@
           }
         }
       ]
+    },
+    {
+      "name": "Webhooks",
+      "item": [
+        {
+          "name": "Stripe Webhook",
+          "request": {
+            "method": "POST",
+            "description": "Pas de JWT. Local sans STRIPE_WEBHOOK_SECRET. Prod : header Stripe-Signature (HMAC v1). Idempotent via stripe_events.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Stripe-Signature",
+                "value": "",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"evt_mock_1\",\n  \"type\": \"payment_intent.payment_failed\",\n  \"data\": { \"object\": { \"id\": \"pi_mock_abc\" } }\n}"
+            },
+            "url": "{{baseUrl}}/webhooks/stripe"
+          }
+        }
+      ]
     }
   ]
 }

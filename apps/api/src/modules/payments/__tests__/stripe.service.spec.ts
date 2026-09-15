@@ -1,5 +1,6 @@
-import { ServiceUnavailableException } from '@nestjs/common';
+import { BadRequestException, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { createHmac } from 'crypto';
 import { StripeService } from '../stripe.service';
 
 async function withMockedFetch<T>(
@@ -215,5 +216,58 @@ describe('StripeService.capturePaymentIntent', () => {
     ).rejects.toMatchObject({
       response: { code: 'STRIPE_CAPTURE_FAILED' },
     });
+  });
+});
+
+const webhookPayload = JSON.stringify({
+  id: 'evt_mock_1',
+  type: 'payment_intent.succeeded',
+  data: { object: { id: 'pi_mock_abc' } },
+});
+
+describe('StripeService.parseWebhookEvent', () => {
+  it('accepte un event mock sans secret', () => {
+    const { service } = serviceWithKey(undefined);
+    expect(
+      service.parseWebhookEvent(
+        undefined,
+        undefined,
+        JSON.parse(webhookPayload) as unknown,
+      ),
+    ).toEqual({
+      id: 'evt_mock_1',
+      type: 'payment_intent.succeeded',
+      data: { object: { id: 'pi_mock_abc' } },
+    });
+  });
+
+  it('exige une signature valide si le secret est configuré', () => {
+    const secret = 'whsec_mocklocalkey16chars';
+    const config = {
+      get: jest.fn((key: string) =>
+        key === 'STRIPE_WEBHOOK_SECRET' ? secret : undefined,
+      ),
+    };
+    const service = new StripeService(config as unknown as ConfigService);
+    const timestamp = Math.floor(Date.now() / 1000);
+    const digest = createHmac('sha256', secret)
+      .update(`${timestamp}.${webhookPayload}`, 'utf8')
+      .digest('hex');
+
+    expect(
+      service.parseWebhookEvent(
+        Buffer.from(webhookPayload),
+        `t=${timestamp},v1=${digest}`,
+        {},
+      ),
+    ).toMatchObject({ id: 'evt_mock_1' });
+
+    expect(() =>
+      service.parseWebhookEvent(
+        Buffer.from(webhookPayload),
+        't=1,v1=deadbeef',
+        {},
+      ),
+    ).toThrow(BadRequestException);
   });
 });

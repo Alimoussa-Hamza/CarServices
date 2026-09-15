@@ -787,7 +787,32 @@ Handlers idempotents, retry 3×. Worker désactivé si `NODE_ENV=test` (sauf `MA
 
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/webhooks/stripe` | Webhooks Stripe (signature) |
+| POST | `/webhooks/stripe` | Webhooks Stripe (signature HMAC `v1`) |
+
+Pas de JWT. Auth = header `Stripe-Signature` si `STRIPE_WEBHOOK_SECRET` (`whsec_…`) est configuré. Sans secret (local) : body JSON accepté tel quel.
+
+```json
+// Request
+{
+  "id": "evt_xxx",
+  "type": "payment_intent.payment_failed",
+  "data": { "object": { "id": "pi_xxx" } }
+}
+
+// Response 200
+{ "data": { "received": true, "duplicate": false } }
+```
+
+Traitement **idempotent** via table `stripe_events` (unique `stripe_event_id`). En production la vérif HMAC est obligatoire ; le job BullMQ `process-stripe-webhook` (queue `payments`) applique l’event. En `NODE_ENV=test` le worker est off : traitement inline.
+
+| Event | Action |
+|-------|--------|
+| `payment_intent.succeeded` | Si `payments.status=authorized` → `captured` |
+| `payment_intent.payment_failed` | `payments.status=failed` ; booking `payment_authorized` / `pending_provider` → `expired` (RG-PAY-06) |
+| `charge.refunded` | `payments.status=refunded` |
+| `account.updated` | no-op (CS-M06-S06) |
+
+Erreurs : `STRIPE_WEBHOOK_INVALID_SIGNATURE` (400), `VALIDATION_ERROR` (400).
 
 ---
 
@@ -836,6 +861,7 @@ Handlers idempotents, retry 3×. Worker désactivé si `NODE_ENV=test` (sauf `MA
 | `BOOKING_NOT_FOUND` | 404 | Réservation introuvable |
 | `SLOT_UNAVAILABLE` | 409 | Créneau complet |
 | `PAYMENT_FAILED` | 402 | Paiement refusé |
+| `STRIPE_WEBHOOK_INVALID_SIGNATURE` | 400 | Signature webhook Stripe invalide |
 | `OTP_RATE_LIMITED` | 429 | Trop de tentatives OTP |
 
 ---

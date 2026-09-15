@@ -18,6 +18,7 @@ import {
   PaymentStatusSchema,
   PaymentSchema,
   computePaymentSplit,
+  StripeWebhookEventSchema,
   BookingActorTypeSchema,
   BookingPhotoTypeSchema,
   BookingPhotoUploaderSchema,
@@ -1483,6 +1484,27 @@ describe('UpdateProviderProfileSchema', () => {
       UpdateProviderProfileSchema.strict().safeParse({
         companyName: 'Clean Auto Lyon',
         kycStatus: 'approved',
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe('StripeWebhookEventSchema', () => {
+  it('valide un event payment_intent', () => {
+    expect(
+      StripeWebhookEventSchema.parse({
+        id: 'evt_mock_1',
+        type: 'payment_intent.payment_failed',
+        data: { object: { id: 'pi_mock_abc' } },
+      }),
+    ).toMatchObject({ type: 'payment_intent.payment_failed' });
+  });
+
+  it('rejette un event sans id', () => {
+    expect(
+      StripeWebhookEventSchema.safeParse({
+        type: 'payment_intent.succeeded',
+        data: { object: {} },
       }).success,
     ).toBe(false);
   });
