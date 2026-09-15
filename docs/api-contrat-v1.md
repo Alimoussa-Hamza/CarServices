@@ -827,7 +827,7 @@ Erreurs : `VALIDATION_ERROR` (400), `MEDIA_FILE_KEY_INVALID` (400), `MEDIA_OBJEC
 
 ### POST `/reviews`
 
-JWT **client**. 1 avis / booking (`REVIEW_ALREADY_EXISTS`). Booking `completed` uniquement (RG-QUAL-04). Recalcule `provider_profiles.rating_avg` / `rating_count` sur les avis **non masqués** (RG-QUAL-02). Tags : `punctuality`, `quality`, `cleanliness`, `friendliness`. Fenêtre 72 h (RG-QUAL-05) = M08-S04.
+JWT **client**. 1 avis / booking (`REVIEW_ALREADY_EXISTS`). Booking `completed` uniquement (RG-QUAL-04). Fenêtre **72 h** après `completed` (`REVIEW_WINDOW_HOURS`, RG-QUAL-05). Recalcule `provider_profiles.rating_avg` / `rating_count` sur les avis **non masqués** (RG-QUAL-02). Tags : `punctuality`, `quality`, `cleanliness`, `friendliness`.
 
 ```json
 // Request
@@ -847,7 +847,7 @@ JWT **client**. 1 avis / booking (`REVIEW_ALREADY_EXISTS`). Booking `completed` 
 }
 ```
 
-Erreurs : `VALIDATION_ERROR` (400), `REVIEW_BOOKING_NOT_COMPLETED` (400), `FORBIDDEN` (403), `BOOKING_NOT_FOUND` (404), `REVIEW_ALREADY_EXISTS` (409), `BOOKING_NOT_ASSIGNED` (409).
+Erreurs : `VALIDATION_ERROR` (400), `REVIEW_BOOKING_NOT_COMPLETED` (400), `FORBIDDEN` (403), `BOOKING_NOT_FOUND` (404), `REVIEW_ALREADY_EXISTS` (409), `REVIEW_WINDOW_EXPIRED` (409), `BOOKING_NOT_ASSIGNED` (409).
 
 ### GET `/reviews/provider/:id`
 
@@ -1015,6 +1015,7 @@ Erreurs : `FORBIDDEN` (403), `BOOKING_NOT_FOUND` (404), `PAYMENT_NOT_FOUND` / `P
 | `BOOKING_DISPUTE_WINDOW_EXPIRED` | 409 | Litige hors délai 48 h |
 | `REVIEW_BOOKING_NOT_COMPLETED` | 400 | Avis hors mission `completed` |
 | `REVIEW_ALREADY_EXISTS` | 409 | Un avis existe déjà pour ce booking |
+| `REVIEW_WINDOW_EXPIRED` | 409 | Avis hors délai 72 h |
 | `PROVIDER_NOT_FOUND` | 404 | Prestataire introuvable |
 | `DISPUTE_ALREADY_EXISTS` | 409 | Un litige existe déjà pour ce booking |
 | `BOOKING_ALREADY_ACCEPTED` | 409 | Mission déjà prise |

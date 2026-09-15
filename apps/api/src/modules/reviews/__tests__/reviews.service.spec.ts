@@ -15,6 +15,7 @@ const providerId = '33333333-3333-4333-8333-333333333333';
 const now = new Date('2026-09-15T21:00:00.000Z');
 
 function buildService(booking?: object | null) {
+  const completedAt = new Date('2026-09-15T12:00:00.000Z');
   const created = {
     id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     bookingId,
@@ -32,7 +33,9 @@ function buildService(booking?: object | null) {
               status: 'completed',
               clientId,
               providerId,
+              updatedAt: completedAt,
               client: { id: clientId, userId: clientUserId },
+              history: [{ toStatus: 'completed', createdAt: completedAt }],
             }
           : booking,
       ),
@@ -56,6 +59,7 @@ function buildService(booking?: object | null) {
     service: new ReviewsService(prisma as unknown as PrismaService),
     prisma,
     created,
+    completedAt,
   };
 }
 
@@ -125,7 +129,9 @@ describe('ReviewsService.create', () => {
       status: 'in_progress',
       clientId,
       providerId,
+      updatedAt: now,
       client: { id: clientId, userId: clientUserId },
+      history: [],
     });
 
     await expect(
@@ -136,6 +142,17 @@ describe('ReviewsService.create', () => {
     await expect(
       service.create(user, { ...dto, tags: [...dto.tags] }),
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('refuse hors fenêtre 72 h (RG-QUAL-05)', async () => {
+    const { service, completedAt } = buildService();
+    const late = new Date(completedAt.getTime() + 73 * 60 * 60 * 1000);
+
+    await expect(
+      service.create(user, { ...dto, tags: [...dto.tags] }, late),
+    ).rejects.toMatchObject({
+      response: { code: 'REVIEW_WINDOW_EXPIRED' },
+    });
   });
 
   it('refuse un second avis sur le même booking', async () => {

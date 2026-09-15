@@ -6,13 +6,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import type {
-  CreateReviewDto,
-  ListProviderReviewsQuery,
-  ReviewTag,
+import {
+  REVIEW_WINDOW_HOURS,
+  type CreateReviewDto,
+  type ListProviderReviewsQuery,
+  type ReviewTag,
 } from '@carservice/shared-types';
 import { AuthPayload } from '../../common/decorators/current-user.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
+
+export const REVIEW_WINDOW_MS = REVIEW_WINDOW_HOURS * 60 * 60 * 1000;
 
 export function computeProviderRating(ratings: number[]): {
   ratingAvg: number;
@@ -33,10 +36,13 @@ export function computeProviderRating(ratings: number[]): {
 export class ReviewsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(user: AuthPayload, dto: CreateReviewDto) {
+  async create(user: AuthPayload, dto: CreateReviewDto, now = new Date()) {
     const booking = await this.prisma.booking.findUnique({
       where: { id: dto.bookingId },
-      include: { client: { select: { id: true, userId: true } } },
+      include: {
+        client: { select: { id: true, userId: true } },
+        history: { orderBy: { createdAt: 'desc' } },
+      },
     });
 
     if (!booking) {
@@ -68,6 +74,17 @@ export class ReviewsService {
       throw new ConflictException({
         code: 'BOOKING_NOT_ASSIGNED',
         message: 'Aucun prestataire assigné à cette mission.',
+        details: [],
+      });
+    }
+
+    const completedAt =
+      booking.history.find((row) => row.toStatus === 'completed')?.createdAt ??
+      booking.updatedAt;
+    if (now.getTime() - completedAt.getTime() > REVIEW_WINDOW_MS) {
+      throw new ConflictException({
+        code: 'REVIEW_WINDOW_EXPIRED',
+        message: 'Le délai de 72 h pour laisser un avis est dépassé.',
         details: [],
       });
     }

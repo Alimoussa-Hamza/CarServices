@@ -20,6 +20,7 @@ import {
   loadCatalogSeed,
   login,
   loginAdmin,
+  providerCompletionPhotos,
 } from './e2e-helpers';
 
 describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
@@ -1443,6 +1444,81 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
       .expect(404);
     expect((missing.body as ErrorEnvelope).error.code).toBe(
       'PROVIDER_NOT_FOUND',
+    );
+  });
+
+  it('CS-M08-S04 fenêtres 72 h avis / 48 h litige', async () => {
+    const created = await http()
+      .post('/api/v1/bookings')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({
+        offerId,
+        vehicleType: 'suv',
+        optionIds: [],
+        addressId: clientAddressId,
+        slotStart: futureSlotIso(15),
+      })
+      .expect(201);
+    const lateBookingId = (
+      created.body as Envelope<{ booking: { id: string } }>
+    ).data.booking.id;
+
+    await http()
+      .post(`/api/v1/bookings/${lateBookingId}/accept`)
+      .set('Authorization', `Bearer ${tokens.providerA}`)
+      .expect(201);
+    await http()
+      .patch(`/api/v1/bookings/${lateBookingId}/status`)
+      .set('Authorization', `Bearer ${tokens.providerA}`)
+      .send({ status: 'en_route' })
+      .expect(200);
+    await http()
+      .patch(`/api/v1/bookings/${lateBookingId}/status`)
+      .set('Authorization', `Bearer ${tokens.providerA}`)
+      .send({ status: 'in_progress', lat: LYON.lat, lng: LYON.lng })
+      .expect(200);
+    await prisma.bookingPhoto.createMany({
+      data: providerCompletionPhotos(
+        lateBookingId,
+        'https://cdn.example/e2e-m08-s04',
+      ),
+    });
+    await http()
+      .patch(`/api/v1/bookings/${lateBookingId}/status`)
+      .set('Authorization', `Bearer ${tokens.providerA}`)
+      .send({ status: 'completed' })
+      .expect(200);
+
+    const expiredAt = new Date(Date.now() - 73 * 60 * 60 * 1000);
+    await prisma.bookingStatusHistory.updateMany({
+      where: { bookingId: lateBookingId, toStatus: 'completed' },
+      data: { createdAt: expiredAt },
+    });
+
+    const lateReview = await http()
+      .post('/api/v1/reviews')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({
+        bookingId: lateBookingId,
+        rating: 4,
+        comment: 'Trop tard pour noter',
+      })
+      .expect(409);
+    expect((lateReview.body as ErrorEnvelope).error.code).toBe(
+      'REVIEW_WINDOW_EXPIRED',
+    );
+
+    const lateDispute = await http()
+      .post('/api/v1/disputes')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({
+        bookingId: lateBookingId,
+        reason: 'quality',
+        description: 'Trop tard pour ouvrir un litige.',
+      })
+      .expect(409);
+    expect((lateDispute.body as ErrorEnvelope).error.code).toBe(
+      'BOOKING_DISPUTE_WINDOW_EXPIRED',
     );
   });
 });

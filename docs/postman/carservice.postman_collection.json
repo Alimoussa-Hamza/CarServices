@@ -846,7 +846,7 @@
           "name": "Create Review",
           "request": {
             "method": "POST",
-            "description": "JWT client. Booking completed, 1 avis / mission. Recalcule rating_avg (avis non masqués, RG-QUAL-02/04). Fenêtre 72 h = M08-S04.",
+            "description": "JWT client. Booking completed, fenêtre 72 h (RG-QUAL-05), 1 avis / mission. Recalcule rating_avg (avis non masqués, RG-QUAL-02/04).",
             "auth": {
               "type": "bearer",
               "bearer": [
