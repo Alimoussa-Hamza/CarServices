@@ -27,6 +27,7 @@ Suivre `.cursor/skills/carservice-dev/bug-resolution.md` — repro, root cause, 
 - Mettre à jour les tests existants quand un comportement change.
 - Avant de cocher une tâche comme faite : lancer au minimum `pnpm test` et, si le code compile, `pnpm build`.
 - Si un test n'est pas ajouté, justifier explicitement pourquoi dans la réponse.
+- **Fin de module Mxx :** e2e isolé `apps/api/test/e2e/mxx-*.e2e-spec.ts` + pyramide complète (unit + e2e + build) **avant** d’ouvrir M(n+1). Voir skill « Gate fin de module ».
 
 ## Postman
 - Toute création ou modification d'endpoint API doit mettre à jour `docs/postman/carservice.postman_collection.json`.

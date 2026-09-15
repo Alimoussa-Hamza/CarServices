@@ -16,7 +16,7 @@
         └─────────┘
 ```
 
-**MVP focus :** unit + intégration API. E2E manuel staging → automatiser phase 2.
+**MVP focus :** unit + intégration API. E2E HTTP (`supertest`, DB réelle) à **chaque fin de module** (`apps/api/test/e2e/mxx-*.e2e-spec.ts`). E2E mobile Maestro = phase 2.
 
 ---
 

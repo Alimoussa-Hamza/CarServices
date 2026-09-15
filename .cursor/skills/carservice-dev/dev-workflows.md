@@ -44,3 +44,7 @@ pnpm --filter api prisma migrate dev --name descriptive_name
 pnpm lint && pnpm typecheck && pnpm test
 git diff --stat  # < 400 lines?
 ```
+
+## Gate fin de module
+
+Avant d’ouvrir M(n+1) : `apps/api/test/e2e/mxx-*.e2e-spec.ts` + `pnpm --filter @carservice/api test:e2e` + unitaires + build. Voir skill « Gate fin de module ».

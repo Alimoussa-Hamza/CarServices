@@ -1,5 +1,4 @@
 import { INestApplication } from '@nestjs/common';
-import { Prisma, UserRole } from '@prisma/client';
 import request from 'supertest';
 import { BookingMatchingService } from '../../src/modules/bookings/booking-matching.service';
 import {
@@ -10,15 +9,17 @@ import {
 } from '../../src/modules/bookings/matching-queue.service';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { createE2eApp } from './e2e-app';
-
-const OTP = '123456';
-const LYON = { lat: 45.764, lng: 4.8357 };
-
-type Envelope<T> = { data: T; meta?: { requestId: string } };
-type ErrorEnvelope = {
-  error: { code: string; message: string };
-  meta?: { requestId: string };
-};
+import {
+  attachProviderBaseAddresses,
+  cleanupUsers,
+  createClientAddress,
+  E2E_LYON as LYON,
+  Envelope,
+  ErrorEnvelope,
+  futureSlotIso,
+  loadCatalogSeed,
+  login,
+} from './e2e-helpers';
 
 describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
   let app: INestApplication;
@@ -47,21 +48,10 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
     ({ app, prisma } = await createE2eApp());
     http = () => request(app.getHttpServer());
 
-    const zone = await prisma.serviceZone.findUnique({
-      where: { slug: 'lyon' },
-    });
-    const offer = await prisma.serviceOffer.findUnique({
-      where: { slug: 'wash-complete' },
-      include: { options: { where: { slug: 'pet-hair' } } },
-    });
-
-    if (!zone || !offer) {
-      throw new Error('Seed catalogue manquant — lancer `pnpm --filter @carservice/api prisma:seed`');
-    }
-
-    zoneId = zone.id;
-    offerId = offer.id;
-    optionId = offer.options[0]?.id ?? '';
+    const catalog = await loadCatalogSeed(prisma);
+    zoneId = catalog.zoneId;
+    offerId = catalog.offerId;
+    optionId = catalog.optionId;
   });
 
   afterAll(async () => {
@@ -273,25 +263,7 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
   });
 
   it('CS-M05-S01/S03 crée une adresse cliente puis POST /bookings + snapshots', async () => {
-    const client = await prisma.user.findUniqueOrThrow({
-      where: { phone: phones.client },
-    });
-
-    const address = await prisma.address.create({
-      data: {
-        userId: client.id,
-        label: 'E2E Maison',
-        street: '10 rue de la République',
-        complement: null,
-        city: 'Lyon',
-        postalCode: '69002',
-        country: 'FR',
-        lat: new Prisma.Decimal(LYON.lat.toFixed(7)),
-        lng: new Prisma.Decimal(LYON.lng.toFixed(7)),
-        instructions: 'Digicode 12',
-      },
-    });
-    clientAddressId = address.id;
+    clientAddressId = await createClientAddress(prisma, phones.client);
 
     await attachProviderBaseAddresses(prisma, [
       phones.providerA,
@@ -867,98 +839,3 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
     expect((unknown.body as ErrorEnvelope).error.code).toBe('ADDRESS_NOT_FOUND');
   });
 });
-
-async function login(
-  http: () => ReturnType<typeof request>,
-  phone: string,
-  role: 'client' | 'provider',
-  userIds: string[],
-  prisma: PrismaService,
-): Promise<string> {
-  await http().post('/api/v1/auth/otp/send').send({ phone, role }).expect(201);
-
-  const verified = await http()
-    .post('/api/v1/auth/otp/verify')
-    .send({ phone, role, code: OTP, acceptTerms: true })
-    .expect(201);
-
-  const data = (
-    verified.body as Envelope<{
-      accessToken: string;
-      user: { id: string };
-    }>
-  ).data;
-  userIds.push(data.user.id);
-
-  const user = await prisma.user.findUniqueOrThrow({ where: { id: data.user.id } });
-  expect(user.role).toBe(role === 'client' ? UserRole.client : UserRole.provider);
-
-  return data.accessToken;
-}
-
-function futureSlotIso(): string {
-  const slot = new Date();
-  slot.setUTCDate(slot.getUTCDate() + 7);
-  slot.setUTCHours(10, 0, 0, 0);
-  return slot.toISOString();
-}
-
-async function attachProviderBaseAddresses(
-  prisma: PrismaService,
-  phones: string[],
-) {
-  for (const phone of phones) {
-    const user = await prisma.user.findUniqueOrThrow({
-      where: { phone },
-      include: { providerProfile: true },
-    });
-    if (!user.providerProfile) {
-      continue;
-    }
-
-    const address = await prisma.address.create({
-      data: {
-        userId: user.id,
-        label: 'Base E2E',
-        street: '20 rue Mercière',
-        city: 'Lyon',
-        postalCode: '69002',
-        country: 'FR',
-        lat: new Prisma.Decimal('45.7600000'),
-        lng: new Prisma.Decimal('4.8300000'),
-      },
-    });
-
-    await prisma.providerProfile.update({
-      where: { id: user.providerProfile.id },
-      data: { baseAddressId: address.id },
-    });
-  }
-}
-
-async function cleanupUsers(prisma: PrismaService, userIds: string[]) {
-  if (userIds.length === 0) {
-    return;
-  }
-
-  const profiles = await prisma.providerProfile.findMany({
-    where: { userId: { in: userIds } },
-    select: { id: true },
-  });
-  const clients = await prisma.clientProfile.findMany({
-    where: { userId: { in: userIds } },
-    select: { id: true },
-  });
-
-  await prisma.booking.deleteMany({
-    where: {
-      OR: [
-        { clientId: { in: clients.map((row) => row.id) } },
-        { providerId: { in: profiles.map((row) => row.id) } },
-      ],
-    },
-  });
-  await prisma.address.deleteMany({ where: { userId: { in: userIds } } });
-  await prisma.refreshToken.deleteMany({ where: { userId: { in: userIds } } });
-  await prisma.user.deleteMany({ where: { id: { in: userIds } } });
-}

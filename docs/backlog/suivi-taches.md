@@ -78,6 +78,7 @@
 - [x] TU `ui-tokens` — couleurs, spacing, radius, typographie
 - [x] `pnpm test` branché dans la CI
 - [x] E2E API (`pnpm --filter @carservice/api test:e2e`) — Postgres réelle, OTP/SMS/Stripe mock, parcours M02→M05
+- [x] Gate fin M05 — `test/e2e/m05-bookings.e2e-spec.ts` (parcours isolé + erreurs P0)
 
 **Vérifié automatiquement :**
 - `@carservice/shared-types` : 109 tests passés

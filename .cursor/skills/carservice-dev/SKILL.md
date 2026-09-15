@@ -67,6 +67,21 @@ packages/shared-types  →  apps/api  →  packages/api-client  →  mobile/admi
 - Toujours lancer `pnpm test` avant de déclarer une tâche terminée ; lancer aussi `pnpm build` si des fichiers TS/app ont changé.
 - Si aucun test n'est ajouté, expliquer explicitement la raison.
 
+## Gate fin de module (Mxx)
+
+Quand **toutes** les stories d’un module (M00–M14) sont cochées, **avant** d’ouvrir le module suivant :
+
+1. Ajouter (ou étendre) `apps/api/test/e2e/mxx-*.e2e-spec.ts` — parcours **isolé** (DB réelle, OTP/Stripe mock), happy path + erreurs P0 du module.
+2. Lancer la pyramide complète :
+   - `pnpm --filter @carservice/shared-types test`
+   - `pnpm --filter @carservice/api test`
+   - `pnpm --filter @carservice/api-client test`
+   - `pnpm --filter @carservice/api test:e2e`
+   - `pnpm --filter @carservice/api build` (et api-client si touché)
+3. Commit + push la gate **avant** CS-M(n+1).
+
+Ne pas commencer M(n+1) tant que cette gate n’est pas verte.
+
 ## Quelle doc officielle consulter ?
 
 **Index complet (toutes les technos + liens) :** [docs/tech-stack/README.md](../../docs/tech-stack/README.md)
