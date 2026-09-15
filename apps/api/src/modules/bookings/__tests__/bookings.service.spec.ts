@@ -152,6 +152,13 @@ function buildService() {
     slotEnd: new Date('2026-09-13T15:45:00.000Z'),
   });
 
+  const bookingNotifications = {
+    onNewMissionBroadcast: jest.fn().mockResolvedValue(undefined),
+    onProviderAssigned: jest.fn().mockResolvedValue(undefined),
+    onEnRoute: jest.fn().mockResolvedValue(undefined),
+    onCompleted: jest.fn().mockResolvedValue(undefined),
+  };
+
   return {
     service: new BookingsService(
       prisma as unknown as PrismaService,
@@ -163,6 +170,7 @@ function buildService() {
       redis as unknown as RedisService,
       config as unknown as ConfigService,
       paymentsService as unknown as PaymentsService,
+      bookingNotifications as never,
     ),
     prisma,
     catalogService,
@@ -171,6 +179,7 @@ function buildService() {
     matchingQueue,
     redis,
     paymentsService,
+    bookingNotifications,
   };
 }
 
@@ -333,7 +342,7 @@ describe('BookingsService.create', () => {
 
 describe('BookingsService.accept / decline', () => {
   it('expose l’adresse exacte après accept (RG-SEC-02)', async () => {
-    const { service, matchingService } = buildService();
+    const { service, matchingService, bookingNotifications } = buildService();
     matchingService.tryClaim.mockResolvedValue({
       id: bookingId,
       reference: 'CS-20260913-A7B2',
@@ -366,6 +375,9 @@ describe('BookingsService.accept / decline', () => {
       addressSnapshot: { street: '12 rue de la République' },
     });
     expect(matchingService.tryClaim).toHaveBeenCalledWith(bookingId, userId);
+    expect(bookingNotifications.onProviderAssigned).toHaveBeenCalledWith(
+      bookingId,
+    );
   });
 
   it('délègue le refus au matching', async () => {
@@ -417,7 +429,8 @@ function assignedBooking(status: string, photos: unknown[] = []) {
 
 describe('BookingsService.updateStatus', () => {
   it('passe accepted → en_route (RG-BOOK-02)', async () => {
-    const { service, prisma, paymentsService } = buildService();
+    const { service, prisma, paymentsService, bookingNotifications } =
+      buildService();
     prisma.providerProfile.findUnique.mockResolvedValue({
       id: providerId,
       userId,
@@ -453,6 +466,7 @@ describe('BookingsService.updateStatus', () => {
         }),
       }),
     );
+    expect(bookingNotifications.onEnRoute).toHaveBeenCalledWith(bookingId);
   });
 
   it('refuse un saut accepted → completed (RG-BOOK-01)', async () => {
@@ -555,7 +569,8 @@ describe('BookingsService.updateStatus', () => {
   });
 
   it('clôture si photos before/after du pro et capture le paiement (RG-PAY-02)', async () => {
-    const { service, prisma, paymentsService } = buildService();
+    const { service, prisma, paymentsService, bookingNotifications } =
+      buildService();
     prisma.providerProfile.findUnique.mockResolvedValue({
       id: providerId,
       userId,
@@ -571,6 +586,7 @@ describe('BookingsService.updateStatus', () => {
 
     expect(result.data.status).toBe('completed');
     expect(paymentsService.captureForBooking).toHaveBeenCalledWith(bookingId);
+    expect(bookingNotifications.onCompleted).toHaveBeenCalledWith(bookingId);
   });
 
   it('n’enregistre pas completed si la capture Stripe échoue (RG-PAY-02)', async () => {

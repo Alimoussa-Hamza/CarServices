@@ -73,6 +73,12 @@ function buildService() {
     client: { lpush: jest.fn().mockResolvedValue(1) },
   };
   const config = { get: jest.fn().mockReturnValue(undefined) };
+  const bookingNotifications = {
+    onNewMissionBroadcast: jest.fn().mockResolvedValue(undefined),
+    onProviderAssigned: jest.fn().mockResolvedValue(undefined),
+    onEnRoute: jest.fn().mockResolvedValue(undefined),
+    onCompleted: jest.fn().mockResolvedValue(undefined),
+  };
 
   return {
     service: new BookingMatchingService(
@@ -80,9 +86,11 @@ function buildService() {
       new BookingStateMachine(),
       redis as unknown as RedisService,
       config as unknown as ConfigService,
+      bookingNotifications as never,
     ),
     prisma,
     redis,
+    bookingNotifications,
   };
 }
 
@@ -212,9 +220,10 @@ describe('BookingMatchingService', () => {
 
   describe('broadcast', () => {
     it('persiste le top N, passe en pending_provider et enqueue un push', async () => {
-      const { service, prisma, redis } = buildService();
+      const { service, prisma, bookingNotifications } = buildService();
       prisma.booking.findUnique.mockResolvedValue({
         id: bookingId,
+        reference: 'CS-20260913-A7B2',
         status: 'payment_authorized',
         zoneId,
         slotStart,
@@ -243,10 +252,12 @@ describe('BookingMatchingService', () => {
         where: { id: bookingId },
         data: { status: 'pending_provider' },
       });
-      expect(redis.client.lpush).toHaveBeenCalledWith(
-        'notifications:push',
-        expect.stringContaining('booking.broadcast'),
-      );
+      expect(bookingNotifications.onNewMissionBroadcast).toHaveBeenCalledWith({
+        bookingId,
+        reference: 'CS-20260913-A7B2',
+        slotStart,
+        providerIds: [providerId],
+      });
     });
 
     it('reste payment_authorized si aucun pro éligible', async () => {
@@ -440,9 +451,10 @@ describe('BookingMatchingService', () => {
   describe('expandRadius / timeoutUnassigned', () => {
     it('ajoute les nouveaux pros hors rayon initial (RG-MATCH-04)', async () => {
       const extraId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
-      const { service, prisma, redis } = buildService();
+      const { service, prisma, bookingNotifications } = buildService();
       prisma.booking.findUnique.mockResolvedValue({
         id: bookingId,
+        reference: 'CS-20260913-A7B2',
         status: 'pending_provider',
         zoneId,
         slotStart,
@@ -480,7 +492,12 @@ describe('BookingMatchingService', () => {
           }),
         ],
       });
-      expect(redis.client.lpush).toHaveBeenCalled();
+      expect(bookingNotifications.onNewMissionBroadcast).toHaveBeenCalledWith({
+        bookingId,
+        reference: 'CS-20260913-A7B2',
+        slotStart,
+        providerIds: [extraId],
+      });
     });
 
     it('ne fait rien si déjà accepted', async () => {

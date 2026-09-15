@@ -13,6 +13,7 @@ import {
 } from '@carservice/shared-types';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { BookingNotificationEventsService } from '../notifications/booking-notification-events.service';
 import { RedisService } from '../redis/redis.service';
 import { BookingStateMachine } from './booking-state.machine';
 import {
@@ -55,6 +56,7 @@ export class BookingMatchingService {
     private readonly stateMachine: BookingStateMachine,
     private readonly redis: RedisService,
     private readonly config: ConfigService,
+    private readonly bookingNotifications: BookingNotificationEventsService,
   ) {}
 
   async broadcast(
@@ -139,7 +141,10 @@ export class BookingMatchingService {
       });
     });
 
-    await this.enqueuePushNotifications(bookingId, selected);
+    await this.enqueuePushNotifications(bookingId, selected, {
+      reference: booking.reference,
+      slotStart: booking.slotStart,
+    });
 
     return { broadcastCount: selected.length, status: 'pending_provider' };
   }
@@ -594,7 +599,10 @@ export class BookingMatchingService {
       })),
     });
 
-    await this.enqueuePushNotifications(bookingId, newcomers);
+    await this.enqueuePushNotifications(bookingId, newcomers, {
+      reference: booking.reference,
+      slotStart: booking.slotStart,
+    });
 
     return {
       skipped: false as const,
@@ -735,22 +743,15 @@ export class BookingMatchingService {
   private async enqueuePushNotifications(
     bookingId: string,
     selected: EligibleCandidate[],
+    booking: { reference: string; slotStart: Date },
   ) {
     try {
-      if (selected.length === 0) {
-        return;
-      }
-
-      await this.redis.client.lpush(
-        'notifications:push',
-        ...selected.map((candidate) =>
-          JSON.stringify({
-            type: 'booking.broadcast',
-            bookingId,
-            providerId: candidate.providerId,
-          }),
-        ),
-      );
+      await this.bookingNotifications.onNewMissionBroadcast({
+        bookingId,
+        reference: booking.reference,
+        slotStart: booking.slotStart,
+        providerIds: selected.map((row) => row.providerId),
+      });
     } catch {
       // Push réelle = module notifications. Le matching ne doit pas échouer.
     }

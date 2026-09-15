@@ -22,7 +22,7 @@
 | I — Paiements Stripe (M06) | 6/6 | — terminé |
 | J — Médias & preuves (M07) | 4/4 | — terminé |
 | K — Avis & litiges (M08) | 4/4 | — terminé |
-| L — Notifications (M09) | 3/4 | CS-M09-S04 events statut |
+| L — Notifications (M09) | 4/4 | — terminé |
 | M — Admin API (M10) | 0/8 | CS-M10-S01 auth admin |
 | N — Mobile client (M11) | 0/12 | — en attente maquettes |
 | O — Mobile pro (M12) | 0/11 | — en attente maquettes |
@@ -326,8 +326,9 @@ Détail écrans → pistes **N** (M11) et **O** (M12).
   - [x] Templates email (Brevo) + SMS booking
   - [x] Templates SMS
   - [x] Queue notifications multi-canal (`send-sms`, `send-email`)
-- [ ] **CS-M09-S04** Events : pro trouvé, en route, terminé, nouvelle mission
-  - [ ] Triggers sur changements de statut booking
+- [x] **CS-M09-S04** Events : pro trouvé, en route, terminé, nouvelle mission
+  - [x] Triggers sur changements de statut booking (`BookingNotificationEventsService`)
+- [x] Gate fin M09 — `test/e2e/m09-notifications.e2e-spec.ts`
 
 ---
 

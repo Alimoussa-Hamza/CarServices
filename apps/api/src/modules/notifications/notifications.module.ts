@@ -4,6 +4,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { AuthModule } from '../auth/auth.module';
 import { EmailService } from './email.service';
 import { ExpoPushService } from './expo-push.service';
+import { BookingNotificationEventsService } from './booking-notification-events.service';
 import { NotificationsQueueService } from './notifications-queue.service';
 import { NotificationsService } from './notifications.service';
 import { UsersController } from './users.controller';
@@ -16,6 +17,7 @@ import { UsersController } from './users.controller';
     ExpoPushService,
     EmailService,
     NotificationsQueueService,
+    BookingNotificationEventsService,
     JwtAuthGuard,
     RolesGuard,
   ],
@@ -24,6 +26,7 @@ import { UsersController } from './users.controller';
     NotificationsQueueService,
     ExpoPushService,
     EmailService,
+    BookingNotificationEventsService,
   ],
 })
 export class NotificationsModule {}

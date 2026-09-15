@@ -942,9 +942,20 @@ JWT **client** ou **provider**. Upsert par `token` (réassigne à l’utilisateu
 
 Erreurs : `VALIDATION_ERROR` (400), `UNAUTHORIZED` (401), `FORBIDDEN` (403).
 
-Worker **send-push** (BullMQ queue `notifications`, job `send-push`) : lit les `push_tokens` de l’utilisateur et envoie via Expo Push API. Sans `EXPO_ACCESS_TOKEN` → mock console (local/CI). Branché sur les events métier en M09-S04.
+Worker **send-push** (BullMQ queue `notifications`, job `send-push`) : lit les `push_tokens` de l’utilisateur et envoie via Expo Push API. Sans `EXPO_ACCESS_TOKEN` → mock console (local/CI).
 
 Jobs **send-sms** / **send-email** (M09-S03) : templates booking (`booking_confirmed`, `provider_assigned`, `booking_completed`, `provider_new_mission`). Email via Brevo (`BREVO_API_KEY`, sinon mock). SMS via Twilio (même credentials OTP, sinon mock).
+
+### Events métier (M09-S04 / RG-NOTIF)
+
+Triggers automatiques (échec notif ≠ échec booking) :
+
+| Événement | Destinataire | Canaux |
+|-----------|--------------|--------|
+| Broadcast / expansion matching | Pros ciblés | Push + SMS (`provider_new_mission`) |
+| Accept (pro trouvé) | Client | Push + SMS + email (`provider_assigned`) |
+| Status `en_route` | Client | Push |
+| Status `completed` | Client | Push + email (`booking_completed`) |
 
 ---
 

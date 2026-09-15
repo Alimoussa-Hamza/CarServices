@@ -5,6 +5,7 @@ import { AuthModule } from '../auth/auth.module';
 import { CatalogModule } from '../catalog/catalog.module';
 import { PaymentsModule } from '../payments/payments.module';
 import { ProvidersModule } from '../providers/providers.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { ZonesModule } from '../zones/zones.module';
 import { BookingMatchingService } from './booking-matching.service';
 import { BookingStateMachine } from './booking-state.machine';
@@ -20,6 +21,7 @@ import { SlotPickerService } from './slot-picker.service';
     ZonesModule,
     ProvidersModule,
     PaymentsModule,
+    NotificationsModule,
   ],
   controllers: [BookingsController],
   providers: [

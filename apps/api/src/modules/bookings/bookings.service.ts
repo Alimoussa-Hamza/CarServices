@@ -29,6 +29,7 @@ import {
 import { Prisma, UserRole } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CatalogService } from '../catalog/catalog.service';
+import { BookingNotificationEventsService } from '../notifications/booking-notification-events.service';
 import { PaymentsService } from '../payments/payments.service';
 import { RedisService } from '../redis/redis.service';
 import { ZonesService } from '../zones/zones.service';
@@ -61,6 +62,7 @@ export class BookingsService {
     private readonly redis: RedisService,
     private readonly config: ConfigService,
     private readonly payments: PaymentsService,
+    private readonly bookingNotifications: BookingNotificationEventsService,
   ) {}
 
   async create(userId: string, dto: CreateBookingDto, now = new Date()) {
@@ -326,6 +328,8 @@ export class BookingsService {
     const address = AddressSnapshotSchema.parse(booking.addressSnapshot);
     const pricing = PricingSnapshotSchema.safeParse(booking.pricingSnapshot);
 
+    await this.bookingNotifications.onProviderAssigned(booking.id);
+
     return {
       data: {
         id: booking.id,
@@ -456,6 +460,13 @@ export class BookingsService {
       });
       return next;
     });
+
+    if (dto.status === 'en_route') {
+      await this.bookingNotifications.onEnRoute(bookingId);
+    }
+    if (dto.status === 'completed') {
+      await this.bookingNotifications.onCompleted(bookingId);
+    }
 
     return {
       data: {
