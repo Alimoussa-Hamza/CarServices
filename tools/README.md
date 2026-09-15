@@ -57,3 +57,14 @@ Contenu du skill :
 ## Ton Mac (dernière vérif)
 
 Exécuter `./tools/check-env.sh` pour rapport à jour.
+
+## Smoke / charge / Docker API
+
+```bash
+./tools/smoke-api.sh
+k6 run tools/load-k6.js
+docker build -f apps/api/Dockerfile -t carservice-api:local .
+```
+
+Staging playbook : [deploy/README.md](../deploy/README.md)  
+Runbooks : [docs/runbooks/](../docs/runbooks/)

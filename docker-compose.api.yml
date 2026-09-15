@@ -1,0 +1,27 @@
+# Optional full-stack local stack (CS-M16)
+# Usage: docker compose -f docker-compose.yml -f docker-compose.api.yml up --build
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: carservice-api
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      DATABASE_URL: postgresql://carservice:carservice@postgres:5432/carservice?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: change-me-in-production-min-32-chars
+      JWT_REFRESH_SECRET: change-me-refresh-min-32-chars
+      OTP_PEPPER: change-me-otp-pepper-min-32-chars
+      CORS_ORIGINS: http://localhost:3001,http://localhost:8081
+      THROTTLE_LIMIT: '200'
+      THROTTLE_TTL_MS: '60000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy

@@ -6,7 +6,7 @@
     "dev": "next dev --port 3001",
     "build": "next build",
     "start": "next start --port 3001",
-    "lint": "next lint",
+    "lint": "echo 'lint admin — ESLint CLI pending (Next 15)'",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

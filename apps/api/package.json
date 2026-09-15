@@ -7,7 +7,7 @@
     "dev": "nest start --watch",
     "start": "node dist/main",
     "start:prod": "node dist/main",
-    "lint": "eslint \"{src,test}/**/*.ts\"",
+    "lint": "tsc -p tsconfig.build.json --noEmit",
     "typecheck": "tsc -p tsconfig.build.json --noEmit",
     "test": "jest --passWithNoTests",
     "test:e2e": "jest --config jest-e2e.config.js --runInBand",

@@ -35,6 +35,8 @@
 | CS-EP-12 | App Mobile Pro | M12 | 55 | S7–S10 |
 | CS-EP-13 | Admin Web | M13 | 34 | S8–S10 |
 | CS-EP-14 | QA & Mise en production | M14 | 21 | S11–S12 |
+| CS-EP-15 | Fermeture backend MVP | M15 | 26 | S10 |
+| CS-EP-16 | DevOps & Qualité repo | M16 | 16 | S11 |
 | | **TOTAL MVP** | | **~416 pts** | **~12 sprints** |
 
 ---
@@ -481,6 +483,22 @@ Cahier : [cahier-fermeture-backend.md](cahier-fermeture-backend.md)
 | CS-M15-S04 | Sentry + logging Pino API | P1 | 3 | S10 |
 | CS-M15-S05 | Helmet + Throttler Nest | P1 | 2 | S10 |
 | CS-M15-S06 | Pack QA + smoke + charge k6 | P0 | 5 | S10 |
+
+---
+
+# CS-EP-16 — DevOps & Qualité repo
+
+## Module M16 — DevOps & Quality
+
+Cahier : [cahier-devops-qualite.md](cahier-devops-qualite.md)
+
+| ID | Story | P | Pts | Sprint |
+|----|-------|---|-----|--------|
+| CS-M16-S01 | Cahier + sync M14 déjà livré | P0 | 2 | S11 |
+| CS-M16-S02 | Dockerfile API multi-stage | P0 | 5 | S11 |
+| CS-M16-S03 | CI lint + docker build + harden e2e | P0 | 3 | S11 |
+| CS-M16-S04 | Templates staging Railway/Render | P1 | 3 | S11 |
+| CS-M16-S05 | Runbooks incident + release checklist | P1 | 3 | S11 |
 
 ---
 

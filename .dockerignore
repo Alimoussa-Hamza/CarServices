@@ -1,0 +1,21 @@
+# Monorepo dockerignore for API image builds (context = repo root)
+.git
+.github
+.cursor
+**/.turbo
+**/node_modules
+**/dist
+**/coverage
+**/.env
+**/.env.*
+!**/.env.example
+apps/admin/**
+!apps/admin/package.json
+apps/mobile-client/**
+!apps/mobile-client/package.json
+apps/mobile-provider/**
+!apps/mobile-provider/package.json
+docs
+tools
+*.md
+agent-transcripts

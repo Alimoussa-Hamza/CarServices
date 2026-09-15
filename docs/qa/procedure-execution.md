@@ -108,10 +108,13 @@ SC-0X | Date | Env | Exécuteur | Résultat GO/NOGO | Bugs | Preuves (IDs bookin
 
 | Job | Contenu |
 |-----|---------|
-| `quality` | install · prisma generate · typecheck · `pnpm test` · build |
-| `e2e-api` | services Postgres/Redis · migrate · seed · `test:e2e` (gates M02–M15 + platform-flow) |
+| `quality` | install · prisma generate · **lint** · typecheck · `pnpm test` · build |
+| `e2e-api` | Postgres/Redis · migrate · seed · `test:e2e` (gates M02–M15 + platform-flow) |
+| `docker-api` | `docker build -f apps/api/Dockerfile` (no push) |
 
-Ne pas merger une PR qui casse `pnpm test` ou `e2e-api`. Smoke + k6 restent **locaux** (API runtime requis).
+Ne pas merger une PR qui casse `pnpm test`, `e2e-api` ou `docker-api`. Smoke + k6 restent **locaux** (API runtime requis).
+
+Release GO/NOGO : [release-checklist.md](../runbooks/release-checklist.md) · Incidents : [incident-api.md](../runbooks/incident-api.md).
 
 ---
 

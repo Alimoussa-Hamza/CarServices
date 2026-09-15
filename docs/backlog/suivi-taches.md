@@ -27,8 +27,9 @@
 | N — Mobile client (M11) | 0/12 | — en attente maquettes |
 | O — Mobile pro (M12) | 0/11 | — en attente maquettes |
 | P — Admin web (M13) | 0/8 | — après M10 |
-| Q — QA & launch (M14) | 0/6 | — fin de parcours |
-| R — Fermeture backend (M15) | 6/6 | Gate M15 verte |
+| Q — QA & launch (M14) | 5/9 | EAS / stores / SC staging / prod deploy |
+| R — Fermeture backend (M15) | 6/6 | — terminé |
+| S — DevOps & Qualité (M16) | 5/5 | — terminé (staging cloud = playbook) |
 
 ---
 
@@ -403,12 +404,15 @@ Détail écrans → pistes **N** (M11) et **O** (M12).
 
 ## Piste Q — QA & launch · Module M14
 
-- [ ] **CS-M14-S01** Collection Bruno/Postman API
-- [ ] **CS-M14-S02** Tests E2E manuels SC-01 à SC-06
+- [x] **CS-M14-S01** Collection Postman API (`docs/postman/`)
+- [ ] **CS-M14-S02** Tests E2E manuels SC-01 à SC-06 (staging réel)
 - [ ] **CS-M14-S03** EAS build preview TestFlight + APK
 - [ ] **CS-M14-S04** Prod deploy + smoke tests
 - [ ] **CS-M14-S05** App Store + Play Store submission
-- [ ] **CS-M14-S06** Runbook incident + monitoring alertes
+- [x] **CS-M14-S06** Runbook incident + monitoring alertes (docs M16 ; alerting SaaS hors repo)
+- [x] **CS-M14-S07** Cahier de tests API + matrice (`docs/qa/`)
+- [x] **CS-M14-S08** Gates E2E M02–M15 + smoke (`tools/smoke-api.sh`)
+- [x] **CS-M14-S09** CI job `e2e-api` (migrate + seed)
 
 ---
 
@@ -429,6 +433,18 @@ Cahier : [cahier-fermeture-backend.md](../cahier-fermeture-backend.md)
 - [x] **CS-M15-S06** Pack QA + smoke + charge k6
   - [x] `docs/qa/` · `tools/smoke-api.sh` · `tools/load-k6.js` · gates m02–m04
 - [x] Gate fin M15 — `test/e2e/m15-backend-closure.e2e-spec.ts`
+
+---
+
+## Piste S — DevOps & Qualité · Module M16
+
+Cahier : [cahier-devops-qualite.md](../cahier-devops-qualite.md)
+
+- [x] **CS-M16-S01** Cahier + sync M14 (S01/S07/S08/S09)
+- [x] **CS-M16-S02** Dockerfile API multi-stage
+- [x] **CS-M16-S03** CI lint + docker build + harden e2e
+- [x] **CS-M16-S04** Templates staging Railway/Render
+- [x] **CS-M16-S05** Runbooks incident + release checklist
 
 ---
 

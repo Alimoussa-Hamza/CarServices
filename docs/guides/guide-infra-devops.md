@@ -54,50 +54,39 @@
 
 ## 4. Docker local (dev)
 
-```yaml
-# docker-compose.yml (racine)
-services:
-  postgres:
-    image: postgis/postgis:16-3.4
-    ports: ['5432:5432']
-    environment:
-      POSTGRES_DB: carservice
-      POSTGRES_USER: carservice
-      POSTGRES_PASSWORD: dev
-  redis:
-    image: redis:7-alpine
-    ports: ['6379:6379']
+```bash
+pnpm db:up   # Postgres 5434 + Redis 6380 (docker-compose.yml)
+
+# Image API (optionnel, CS-M16)
+docker build -f apps/api/Dockerfile -t carservice-api:local .
+docker compose -f docker-compose.yml -f docker-compose.api.yml up --build
 ```
 
-API : `pnpm --filter api dev` (hot reload Nest)
+API hot-reload : `pnpm --filter @carservice/api dev`
 
 ---
 
 ## 5. CI/CD — GitHub Actions
 
-### Pipeline PR
-```yaml
-jobs:
-  ci:
-    runs-on: ubuntu-latest
-    steps:
-      - checkout
-      - pnpm install
-      - pnpm lint
-      - pnpm typecheck
-      - pnpm test
-      - pnpm build
-```
+### Pipeline PR / main ([`.github/workflows/ci.yml`](../../.github/workflows/ci.yml))
 
-### Deploy staging (push main)
-- API → Railway auto-deploy
-- Admin → Vercel preview/production
-- Mobile → EAS build manual ou tag
+| Job | Contenu |
+|-----|---------|
+| `quality` | lint · typecheck · test · build (+ Postgres/Redis services) |
+| `e2e-api` | migrate · seed · `test:e2e` |
+| `docker-api` | build image `apps/api/Dockerfile` |
+
+### Deploy staging
+
+Playbook détaillé : [deploy/README.md](../../deploy/README.md)  
+Templates : [deploy/railway.toml](../../deploy/railway.toml) · [deploy/render.yaml](../../deploy/render.yaml)
 
 ### Deploy production
+
 - Tag semver `v1.0.0`
 - Approval manuelle GitHub Environment
 - Migrations Prisma `migrate deploy` pre-deploy
+- Checklist : [docs/runbooks/release-checklist.md](../runbooks/release-checklist.md)
 
 ---
 
