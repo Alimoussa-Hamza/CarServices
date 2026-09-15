@@ -130,4 +130,38 @@ describe('BookingsController', () => {
       {},
     );
   });
+
+  it('délègue GET /bookings au service', async () => {
+    const bookingsService = {
+      list: jest.fn().mockResolvedValue({ data: [] }),
+    };
+    const controller = new BookingsController(
+      bookingsService as unknown as BookingsService,
+    );
+
+    await expect(controller.list(user, { group: 'upcoming' })).resolves.toEqual({
+      data: [],
+    });
+    expect(bookingsService.list).toHaveBeenCalledWith(user.sub, user.role, {
+      group: 'upcoming',
+    });
+  });
+
+  it('délègue GET /bookings/:id au service', async () => {
+    const bookingsService = {
+      getById: jest.fn().mockResolvedValue({ data: { id: 'b1' } }),
+    };
+    const controller = new BookingsController(
+      bookingsService as unknown as BookingsService,
+    );
+
+    await expect(
+      controller.getById(user, '77777777-7777-4777-8777-777777777777'),
+    ).resolves.toEqual({ data: { id: 'b1' } });
+    expect(bookingsService.getById).toHaveBeenCalledWith(
+      user.sub,
+      user.role,
+      '77777777-7777-4777-8777-777777777777',
+    );
+  });
 });

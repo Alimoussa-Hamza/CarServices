@@ -1042,6 +1042,94 @@ describe('api-client', () => {
       );
     });
 
+    it('liste les bookings avec filtre group C12', async () => {
+      const items = [
+        {
+          id: '77777777-7777-4777-8777-777777777777',
+          reference: 'CS-20260906-A7B2',
+          status: 'accepted' as const,
+          slotStart: '2026-09-06T08:00:00.000Z',
+          slotEnd: '2026-09-06T09:30:00.000Z',
+          offerName: 'Lavage complet',
+          vehicleType: 'suv' as const,
+          totalCents: 9700,
+          currency: 'EUR' as const,
+          zone: { slug: 'lyon', name: 'Lyon' },
+          addressSnapshot: null,
+        },
+      ];
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: items }));
+
+      await expect(api.bookings.list({ group: 'upcoming' })).resolves.toEqual(
+        items,
+      );
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/bookings?group=upcoming',
+        { headers: { 'Content-Type': 'application/json' } },
+      );
+    });
+
+    it('récupère le détail booking avec timeline', async () => {
+      const detail = {
+        id: '77777777-7777-4777-8777-777777777777',
+        reference: 'CS-20260906-A7B2',
+        status: 'accepted' as const,
+        slotStart: '2026-09-06T08:00:00.000Z',
+        slotEnd: '2026-09-06T09:30:00.000Z',
+        offerName: 'Lavage complet',
+        vehicleType: 'suv' as const,
+        totalCents: 9700,
+        currency: 'EUR' as const,
+        zone: { slug: 'lyon', name: 'Lyon' },
+        addressSnapshot: {
+          street: '12 rue de la République',
+          complement: null,
+          city: 'Lyon',
+          postalCode: '69002',
+          country: 'FR',
+          lat: 45.764,
+          lng: 4.835,
+          instructions: null,
+        },
+        clientComment: 'Parking B2',
+        providerNotes: null,
+        pricingSnapshot: {
+          base: 8500,
+          vehicleSurcharge: 1000,
+          options: [],
+          serviceFee: 200,
+          totalCents: 9700,
+          currency: 'EUR' as const,
+        },
+        timeline: [
+          {
+            fromStatus: null,
+            toStatus: 'draft' as const,
+            actorType: 'system' as const,
+            reason: null,
+            createdAt: '2026-09-06T07:00:00.000Z',
+          },
+        ],
+        photos: [],
+        provider: {
+          companyName: 'Marc Wash',
+          avatarUrl: null,
+          ratingAvg: 4.8,
+          washMethods: ['waterless' as const],
+        },
+        client: null,
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: detail }));
+
+      await expect(
+        api.bookings.get('77777777-7777-4777-8777-777777777777'),
+      ).resolves.toEqual(detail);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/bookings/77777777-7777-4777-8777-777777777777',
+        { headers: { 'Content-Type': 'application/json' } },
+      );
+    });
+
     it('remonte ZONE_NOT_COVERED depuis la création booking', async () => {
       fetchMock.mockResolvedValue(
         mockFetchResponse(

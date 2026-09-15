@@ -7,6 +7,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
@@ -17,6 +18,8 @@ import {
   CancelBookingSchema,
   DeclineBookingDto,
   DeclineBookingSchema,
+  ListBookingsQuery,
+  ListBookingsQuerySchema,
   PatchBookingStatusDto,
   PatchBookingStatusSchema,
 } from '@carservice/shared-types';
@@ -41,6 +44,25 @@ export class BookingsController {
   @UseGuards(JwtAuthGuard, RolesGuard, KycApprovedGuard)
   listAvailable(@CurrentUser() user: AuthPayload) {
     return this.bookingsService.listAvailable(user.sub);
+  }
+
+  @Get()
+  @Roles(UserRole.client, UserRole.provider)
+  list(
+    @CurrentUser() user: AuthPayload,
+    @Query(new ZodValidationPipe(ListBookingsQuerySchema))
+    query: ListBookingsQuery,
+  ) {
+    return this.bookingsService.list(user.sub, user.role, query);
+  }
+
+  @Get(':id')
+  @Roles(UserRole.client, UserRole.provider)
+  getById(
+    @CurrentUser() user: AuthPayload,
+    @Param('id', new ParseUUIDPipe()) bookingId: string,
+  ) {
+    return this.bookingsService.getById(user.sub, user.role, bookingId);
   }
 
   @Post()

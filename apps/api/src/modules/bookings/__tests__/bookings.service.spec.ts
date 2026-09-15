@@ -69,14 +69,16 @@ const now = new Date('2026-09-13T10:00:00.000Z');
 
 function buildService() {
   const prisma = {
-    clientProfile: { upsert: jest.fn() },
+    clientProfile: { upsert: jest.fn(), findUnique: jest.fn() },
     address: { findFirst: jest.fn() },
     booking: {
       create: jest.fn(),
       findUnique: jest.fn(),
+      findMany: jest.fn(),
       update: jest.fn(),
     },
     bookingStatusHistory: { create: jest.fn() },
+    bookingBroadcast: { findFirst: jest.fn() },
     providerProfile: { findUnique: jest.fn(), update: jest.fn() },
     $transaction: jest.fn(),
   };
@@ -639,5 +641,175 @@ describe('BookingsService.cancel', () => {
       'notifications:push',
       expect.stringContaining('booking.rematch_urgent'),
     );
+  });
+});
+
+const listRow = {
+  id: bookingId,
+  reference: 'CS-20260913-A7B2',
+  status: 'accepted' as const,
+  slotStart: new Date('2026-09-20T14:00:00.000Z'),
+  slotEnd: new Date('2026-09-20T15:45:00.000Z'),
+  categorySlug: 'wash',
+  addressSnapshot: {
+    street: '12 rue de la République',
+    complement: null,
+    city: 'Lyon',
+    postalCode: '69002',
+    country: 'FR',
+    lat: 45.764,
+    lng: 4.835,
+    instructions: 'Digicode 12',
+  },
+  pricingSnapshot: quote.breakdown,
+  items: [{ offerName: 'Lavage complet', vehicleType: 'suv' as const }],
+  zone: { slug: 'lyon', name: 'Lyon' },
+};
+
+describe('BookingsService.list', () => {
+  it('liste les bookings du client hors draft', async () => {
+    const { service, prisma } = buildService();
+    prisma.clientProfile.findUnique.mockResolvedValue({ id: clientId, userId });
+    prisma.booking.findMany.mockResolvedValue([listRow]);
+
+    await expect(
+      service.list(userId, UserRole.client, {}),
+    ).resolves.toEqual({
+      data: [
+        expect.objectContaining({
+          id: bookingId,
+          status: 'accepted',
+          offerName: 'Lavage complet',
+          addressSnapshot: expect.objectContaining({ city: 'Lyon' }),
+        }),
+      ],
+    });
+    expect(prisma.booking.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { clientId, status: { not: 'draft' } },
+        take: 50,
+      }),
+    );
+  });
+
+  it('filtre par group upcoming pour le pro assigné', async () => {
+    const { service, prisma } = buildService();
+    prisma.providerProfile.findUnique.mockResolvedValue({ id: providerId, userId });
+    prisma.booking.findMany.mockResolvedValue([]);
+
+    await service.list(userId, UserRole.provider, { group: 'upcoming' });
+
+    expect(prisma.booking.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          providerId,
+          status: {
+            in: [
+              'payment_authorized',
+              'pending_provider',
+              'accepted',
+              'en_route',
+              'in_progress',
+            ],
+          },
+        },
+      }),
+    );
+  });
+});
+
+describe('BookingsService.getById', () => {
+  const detailRow = {
+    ...listRow,
+    clientComment: 'Parking B2',
+    providerNotes: null,
+    history: [
+      {
+        fromStatus: null,
+        toStatus: 'draft',
+        actorType: 'system' as const,
+        reason: null,
+        createdAt: new Date('2026-09-13T10:00:00.000Z'),
+      },
+    ],
+    photos: [],
+    client: {
+      userId,
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+      user: { phone: '+33601000000' },
+    },
+    provider: {
+      id: providerId,
+      userId: '88888888-8888-4888-8888-888888888888',
+      companyName: 'Marc Wash',
+      avatarUrl: null,
+      ratingAvg: 4.8,
+      washMethods: ['waterless' as const],
+    },
+    providerId,
+  };
+
+  it('renvoie timeline + adresse au client propriétaire', async () => {
+    const { service, prisma } = buildService();
+    prisma.booking.findUnique.mockResolvedValue(detailRow);
+
+    const result = await service.getById(userId, UserRole.client, bookingId);
+
+    expect(result.data.timeline).toHaveLength(1);
+    expect(result.data.addressSnapshot?.street).toContain('République');
+    expect(result.data.provider).toMatchObject({ companyName: 'Marc Wash' });
+    expect(result.data.client).toBeNull();
+  });
+
+  it('masque l’adresse au pro broadcast (RG-SEC-02)', async () => {
+    const { service, prisma } = buildService();
+    prisma.booking.findUnique.mockResolvedValue({
+      ...detailRow,
+      status: 'pending_provider',
+      providerId: null,
+      provider: null,
+    });
+    prisma.bookingBroadcast.findFirst.mockResolvedValue({ id: 'b1' });
+
+    const result = await service.getById(
+      '88888888-8888-4888-8888-888888888888',
+      UserRole.provider,
+      bookingId,
+    );
+
+    expect(result.data.addressSnapshot).toBeNull();
+    expect(result.data.client).toBeNull();
+    expect(result.data.clientComment).toBe('Parking B2');
+  });
+
+  it('révèle adresse + tel client au pro assigné', async () => {
+    const { service, prisma } = buildService();
+    prisma.booking.findUnique.mockResolvedValue(detailRow);
+
+    const result = await service.getById(
+      '88888888-8888-4888-8888-888888888888',
+      UserRole.provider,
+      bookingId,
+    );
+
+    expect(result.data.addressSnapshot?.street).toContain('République');
+    expect(result.data.client).toMatchObject({
+      firstName: 'Ada',
+      phone: '+33601000000',
+    });
+  });
+
+  it('interdit un autre client', async () => {
+    const { service, prisma } = buildService();
+    prisma.booking.findUnique.mockResolvedValue(detailRow);
+
+    await expect(
+      service.getById(
+        '99999999-9999-4999-8999-999999999999',
+        UserRole.client,
+        bookingId,
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
   });
 });

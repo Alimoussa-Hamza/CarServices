@@ -11,12 +11,18 @@ import {
   BOOKING_GEOFENCE_METERS,
   PLATFORM_COMMISSION_RATE,
   PricingSnapshotSchema,
+  BOOKING_LIST_LIMIT,
+  resolveBookingListStatuses,
   type AddressSnapshot,
+  type BookingDetail,
+  type BookingListItem,
   type BookingStatus,
   type CancelBookingDto,
   type CreateBookingDto,
+  type ListBookingsQuery,
   type PatchBookingStatusDto,
   type PricingSnapshot,
+  type WashMethod,
 } from '@carservice/shared-types';
 import { Prisma, UserRole } from '@prisma/client';
 import { randomBytes } from 'crypto';
@@ -186,6 +192,119 @@ export class BookingsService {
 
   listAvailable(userId: string) {
     return this.matchingService.listAvailable(userId);
+  }
+
+  async list(userId: string, role: UserRole, query: ListBookingsQuery) {
+    const statuses = resolveBookingListStatuses(query);
+    const statusFilter = statuses
+      ? { status: { in: statuses } }
+      : { status: { not: 'draft' as const } };
+
+    if (role === UserRole.provider) {
+      const provider = await this.prisma.providerProfile.findUnique({
+        where: { userId },
+      });
+      if (!provider) {
+        return { data: [] };
+      }
+
+      const rows = await this.prisma.booking.findMany({
+        where: { providerId: provider.id, ...statusFilter },
+        include: { items: true, zone: true },
+        orderBy: { slotStart: 'desc' },
+        take: BOOKING_LIST_LIMIT,
+      });
+
+      return {
+        data: rows.map((row) => this.toListItem(row, true)),
+      };
+    }
+
+    const client = await this.prisma.clientProfile.findUnique({
+      where: { userId },
+    });
+    if (!client) {
+      return { data: [] };
+    }
+
+    const rows = await this.prisma.booking.findMany({
+      where: { clientId: client.id, ...statusFilter },
+      include: { items: true, zone: true },
+      orderBy: { slotStart: 'desc' },
+      take: BOOKING_LIST_LIMIT,
+    });
+
+    return {
+      data: rows.map((row) => this.toListItem(row, true)),
+    };
+  }
+
+  async getById(userId: string, role: UserRole, bookingId: string) {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: {
+        items: true,
+        history: { orderBy: { createdAt: 'asc' } },
+        photos: { orderBy: { createdAt: 'asc' } },
+        zone: true,
+        client: { include: { user: { select: { phone: true } } } },
+        provider: true,
+      },
+    });
+
+    if (!booking) {
+      throw new NotFoundException({
+        code: 'BOOKING_NOT_FOUND',
+        message: 'Réservation introuvable.',
+        details: [],
+      });
+    }
+
+    const isClientOwner =
+      role === UserRole.client && booking.client.userId === userId;
+    const isAssignedProvider =
+      role === UserRole.provider && booking.provider?.userId === userId;
+
+    let isBroadcastProvider = false;
+    if (
+      role === UserRole.provider &&
+      !isAssignedProvider &&
+      booking.status === 'pending_provider'
+    ) {
+      const hit = await this.prisma.bookingBroadcast.findFirst({
+        where: { bookingId, provider: { userId } },
+        select: { id: true },
+      });
+      isBroadcastProvider = Boolean(hit);
+    }
+
+    if (role === UserRole.client && !isClientOwner) {
+      throw new ForbiddenException({
+        code: 'BOOKING_FORBIDDEN',
+        message: 'Cette réservation ne vous appartient pas.',
+        details: [],
+      });
+    }
+
+    if (
+      role === UserRole.provider &&
+      !isAssignedProvider &&
+      !isBroadcastProvider
+    ) {
+      throw new ForbiddenException({
+        code: 'BOOKING_NOT_ASSIGNED',
+        message: 'Cette mission ne vous est pas assignée.',
+        details: [],
+      });
+    }
+
+    return {
+      data: this.toDetail(booking, {
+        revealAddress: isClientOwner || isAssignedProvider,
+        revealClient: isAssignedProvider,
+        revealProvider: isClientOwner && Boolean(booking.providerId),
+      }),
+    };
   }
 
   async accept(userId: string, bookingId: string) {
@@ -505,6 +624,132 @@ export class BookingsService {
     return {
       paymentIntentId,
       clientSecret: `${paymentIntentId}_secret_${randomBytes(8).toString('hex')}`,
+    };
+  }
+
+  private toListItem(
+    booking: {
+      id: string;
+      reference: string;
+      status: BookingStatus;
+      slotStart: Date;
+      slotEnd: Date;
+      categorySlug: string;
+      addressSnapshot: Prisma.JsonValue;
+      pricingSnapshot: Prisma.JsonValue;
+      items: Array<{
+        offerName: string;
+        vehicleType: BookingListItem['vehicleType'];
+      }>;
+      zone: { slug: string; name: string };
+    },
+    revealAddress: boolean,
+  ): BookingListItem {
+    const pricing = PricingSnapshotSchema.safeParse(booking.pricingSnapshot);
+    const address = AddressSnapshotSchema.safeParse(booking.addressSnapshot);
+
+    return {
+      id: booking.id,
+      reference: booking.reference,
+      status: booking.status,
+      slotStart: booking.slotStart.toISOString(),
+      slotEnd: booking.slotEnd.toISOString(),
+      offerName: booking.items[0]?.offerName ?? booking.categorySlug,
+      vehicleType: booking.items[0]?.vehicleType ?? null,
+      totalCents: pricing.success ? pricing.data.totalCents : 0,
+      currency: 'EUR',
+      zone: {
+        slug: booking.zone.slug,
+        name: booking.zone.name,
+      },
+      addressSnapshot: revealAddress && address.success ? address.data : null,
+    };
+  }
+
+  private toDetail(
+    booking: {
+      id: string;
+      reference: string;
+      status: BookingStatus;
+      slotStart: Date;
+      slotEnd: Date;
+      categorySlug: string;
+      addressSnapshot: Prisma.JsonValue;
+      pricingSnapshot: Prisma.JsonValue;
+      clientComment: string | null;
+      providerNotes: string | null;
+      items: Array<{
+        offerName: string;
+        vehicleType: BookingListItem['vehicleType'];
+      }>;
+      zone: { slug: string; name: string };
+      history: Array<{
+        fromStatus: BookingStatus | null;
+        toStatus: BookingStatus;
+        actorType: BookingDetail['timeline'][number]['actorType'];
+        reason: string | null;
+        createdAt: Date;
+      }>;
+      photos: Array<{
+        photoType: BookingDetail['photos'][number]['photoType'];
+        uploadedBy: BookingDetail['photos'][number]['uploadedBy'];
+        fileUrl: string;
+        createdAt: Date;
+      }>;
+      client: {
+        firstName: string | null;
+        lastName: string | null;
+        user: { phone: string };
+      };
+      provider: {
+        companyName: string | null;
+        avatarUrl: string | null;
+        ratingAvg: Prisma.Decimal | number;
+        washMethods: WashMethod[];
+      } | null;
+    },
+    flags: {
+      revealAddress: boolean;
+      revealClient: boolean;
+      revealProvider: boolean;
+    },
+  ): BookingDetail {
+    const pricing = PricingSnapshotSchema.parse(booking.pricingSnapshot);
+
+    return {
+      ...this.toListItem(booking, flags.revealAddress),
+      clientComment: booking.clientComment,
+      providerNotes: booking.providerNotes,
+      pricingSnapshot: pricing,
+      timeline: booking.history.map((row) => ({
+        fromStatus: row.fromStatus,
+        toStatus: row.toStatus,
+        actorType: row.actorType,
+        reason: row.reason,
+        createdAt: row.createdAt.toISOString(),
+      })),
+      photos: booking.photos.map((row) => ({
+        photoType: row.photoType,
+        uploadedBy: row.uploadedBy,
+        fileUrl: row.fileUrl,
+        createdAt: row.createdAt.toISOString(),
+      })),
+      provider:
+        flags.revealProvider && booking.provider
+          ? {
+              companyName: booking.provider.companyName,
+              avatarUrl: booking.provider.avatarUrl,
+              ratingAvg: Number(booking.provider.ratingAvg),
+              washMethods: booking.provider.washMethods,
+            }
+          : null,
+      client: flags.revealClient
+        ? {
+            firstName: booking.client.firstName,
+            lastName: booking.client.lastName,
+            phone: booking.client.user.phone,
+          }
+        : null,
     };
   }
 

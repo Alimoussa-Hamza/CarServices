@@ -734,3 +734,126 @@ export const CancelledBookingSchema = z.object({
   rematchUrgent: z.boolean(),
 });
 export type CancelledBooking = z.infer<typeof CancelledBookingSchema>;
+
+export const BookingListGroupSchema = z.enum([
+  'upcoming',
+  'past',
+  'cancelled',
+]);
+export type BookingListGroup = z.infer<typeof BookingListGroupSchema>;
+
+export const BOOKING_LIST_LIMIT = 50;
+
+export const BOOKING_LIST_GROUP_STATUSES: Record<
+  BookingListGroup,
+  BookingStatus[]
+> = {
+  upcoming: [
+    'payment_authorized',
+    'pending_provider',
+    'accepted',
+    'en_route',
+    'in_progress',
+  ],
+  past: ['completed', 'disputed'],
+  cancelled: [
+    'cancelled_by_client',
+    'cancelled_by_provider',
+    'cancelled_by_admin',
+    'expired',
+    'unassigned',
+  ],
+};
+
+export const ListBookingsQuerySchema = z.object({
+  status: z.preprocess((value) => {
+    if (value === undefined || value === null || value === '') {
+      return undefined;
+    }
+    if (Array.isArray(value)) {
+      return value;
+    }
+    if (typeof value === 'string') {
+      return value
+        .split(',')
+        .map((part) => part.trim())
+        .filter(Boolean);
+    }
+    return value;
+  }, z.array(BookingStatusSchema).min(1).optional()),
+  group: BookingListGroupSchema.optional(),
+});
+export type ListBookingsQuery = z.infer<typeof ListBookingsQuerySchema>;
+
+export function resolveBookingListStatuses(
+  query: ListBookingsQuery,
+): BookingStatus[] | undefined {
+  if (query.status && query.status.length > 0) {
+    return query.status;
+  }
+  if (query.group) {
+    return BOOKING_LIST_GROUP_STATUSES[query.group];
+  }
+  return undefined;
+}
+
+export const BookingListItemSchema = z.object({
+  id: z.string().uuid(),
+  reference: BookingReferenceSchema,
+  status: BookingStatusSchema,
+  slotStart: z.string().datetime(),
+  slotEnd: z.string().datetime(),
+  offerName: z.string(),
+  vehicleType: VehicleTypeSchema.nullable(),
+  totalCents: z.number().int().nonnegative(),
+  currency: z.literal('EUR'),
+  zone: z.object({
+    slug: z.string(),
+    name: z.string(),
+  }),
+  addressSnapshot: AddressSnapshotSchema.nullable(),
+});
+export type BookingListItem = z.infer<typeof BookingListItemSchema>;
+
+export const BookingTimelineEventSchema = z.object({
+  fromStatus: BookingStatusSchema.nullable(),
+  toStatus: BookingStatusSchema,
+  actorType: BookingActorTypeSchema,
+  reason: z.string().nullable(),
+  createdAt: z.string().datetime(),
+});
+export type BookingTimelineEvent = z.infer<typeof BookingTimelineEventSchema>;
+
+export const BookingPhotoPublicSchema = z.object({
+  photoType: BookingPhotoTypeSchema,
+  uploadedBy: BookingPhotoUploaderSchema,
+  fileUrl: z.string().min(1),
+  createdAt: z.string().datetime(),
+});
+export type BookingPhotoPublic = z.infer<typeof BookingPhotoPublicSchema>;
+
+export const BookingDetailProviderSchema = z.object({
+  companyName: z.string().nullable(),
+  avatarUrl: z.string().nullable(),
+  ratingAvg: z.number(),
+  washMethods: z.array(WashMethodSchema),
+});
+export type BookingDetailProvider = z.infer<typeof BookingDetailProviderSchema>;
+
+export const BookingDetailClientSchema = z.object({
+  firstName: z.string().nullable(),
+  lastName: z.string().nullable(),
+  phone: z.string().nullable(),
+});
+export type BookingDetailClient = z.infer<typeof BookingDetailClientSchema>;
+
+export const BookingDetailSchema = BookingListItemSchema.extend({
+  clientComment: z.string().nullable(),
+  providerNotes: z.string().nullable(),
+  pricingSnapshot: PricingSnapshotSchema,
+  timeline: z.array(BookingTimelineEventSchema),
+  photos: z.array(BookingPhotoPublicSchema),
+  provider: BookingDetailProviderSchema.nullable(),
+  client: BookingDetailClientSchema.nullable(),
+});
+export type BookingDetail = z.infer<typeof BookingDetailSchema>;

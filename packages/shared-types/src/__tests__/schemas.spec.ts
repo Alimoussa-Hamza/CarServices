@@ -31,6 +31,10 @@ import {
   BookingStatusUpdateSchema,
   CancelBookingSchema,
   CancelledBookingSchema,
+  ListBookingsQuerySchema,
+  resolveBookingListStatuses,
+  BookingListItemSchema,
+  BookingDetailSchema,
   CreateStripeOnboardingLinkSchema,
   DirtLevelSchema,
   KycDocumentTypeSchema,
@@ -419,6 +423,118 @@ describe('CancelledBookingSchema', () => {
         rematchUrgent: false,
       }),
     ).toMatchObject({ window: 'free', feeCents: 0 });
+  });
+});
+
+describe('ListBookingsQuerySchema', () => {
+  it('accepte une query vide', () => {
+    expect(ListBookingsQuerySchema.parse({})).toEqual({});
+  });
+
+  it('parse status CSV et group C12', () => {
+    expect(
+      ListBookingsQuerySchema.parse({
+        status: 'accepted,en_route',
+        group: 'upcoming',
+      }),
+    ).toEqual({
+      status: ['accepted', 'en_route'],
+      group: 'upcoming',
+    });
+  });
+
+  it('rejette un statut inconnu', () => {
+    expect(
+      ListBookingsQuerySchema.safeParse({ status: 'flying' }).success,
+    ).toBe(false);
+  });
+});
+
+describe('resolveBookingListStatuses', () => {
+  it('priorise status sur group', () => {
+    expect(
+      resolveBookingListStatuses({
+        status: ['completed'],
+        group: 'upcoming',
+      }),
+    ).toEqual(['completed']);
+  });
+
+  it('mappe les onglets C12', () => {
+    expect(resolveBookingListStatuses({ group: 'cancelled' })).toEqual([
+      'cancelled_by_client',
+      'cancelled_by_provider',
+      'cancelled_by_admin',
+      'expired',
+      'unassigned',
+    ]);
+    expect(resolveBookingListStatuses({})).toBeUndefined();
+  });
+});
+
+describe('BookingListItemSchema / BookingDetailSchema', () => {
+  const listItem = {
+    id: '77777777-7777-4777-8777-777777777777',
+    reference: 'CS-20260906-A7B2',
+    status: 'pending_provider' as const,
+    slotStart: '2026-09-06T08:00:00.000Z',
+    slotEnd: '2026-09-06T09:30:00.000Z',
+    offerName: 'Lavage complet',
+    vehicleType: 'suv' as const,
+    totalCents: 9700,
+    currency: 'EUR' as const,
+    zone: { slug: 'lyon', name: 'Lyon' },
+    addressSnapshot: null,
+  };
+
+  it('autorise une adresse masquée (RG-SEC-02)', () => {
+    expect(BookingListItemSchema.parse(listItem).addressSnapshot).toBeNull();
+  });
+
+  it('valide le détail + timeline', () => {
+    expect(
+      BookingDetailSchema.parse({
+        ...listItem,
+        status: 'accepted',
+        addressSnapshot: {
+          street: '12 rue de la République',
+          complement: null,
+          city: 'Lyon',
+          postalCode: '69002',
+          country: 'FR',
+          lat: 45.76,
+          lng: 4.83,
+          instructions: null,
+        },
+        clientComment: 'Parking B2',
+        providerNotes: null,
+        pricingSnapshot: {
+          base: 8500,
+          vehicleSurcharge: 1000,
+          options: [],
+          serviceFee: 200,
+          totalCents: 9700,
+          currency: 'EUR',
+        },
+        timeline: [
+          {
+            fromStatus: null,
+            toStatus: 'draft',
+            actorType: 'system',
+            reason: null,
+            createdAt: '2026-09-06T07:00:00.000Z',
+          },
+        ],
+        photos: [],
+        provider: {
+          companyName: 'Marc Wash',
+          avatarUrl: null,
+          ratingAvg: 4.8,
+          washMethods: ['waterless'],
+        },
+        client: null,
+      }),
+    ).toMatchObject({ status: 'accepted', timeline: [{ toStatus: 'draft' }] });
   });
 });
 

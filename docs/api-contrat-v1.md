@@ -487,6 +487,77 @@ Erreurs : `VALIDATION_ERROR` (URLs invalides), `STRIPE_REQUEST_FAILED` / `STRIPE
 
 `status` = `pending_provider` si au moins un pro a été notifié, sinon `payment_authorized`.
 
+### GET `/bookings`
+
+JWT client ou provider. Liste paginée (max 50), tri `slotStart` desc. Hors `draft` par défaut.
+
+Query :
+
+| Param | Valeurs | Description |
+|-------|---------|-------------|
+| `status` | CSV `BookingStatus` | Filtre exact (prioritaire) |
+| `group` | `upcoming` \| `past` \| `cancelled` | Onglets C12 |
+
+`upcoming` = `payment_authorized`, `pending_provider`, `accepted`, `en_route`, `in_progress`  
+`past` = `completed`, `disputed`  
+`cancelled` = `cancelled_by_client`, `cancelled_by_provider`, `cancelled_by_admin`, `expired`, `unassigned`
+
+Client : ses bookings. Provider : missions **assignées** uniquement (`GET /bookings/available` pour le broadcast).
+
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "reference": "CS-20260906-A7B2",
+      "status": "accepted",
+      "slotStart": "...",
+      "slotEnd": "...",
+      "offerName": "Lavage complet",
+      "vehicleType": "suv",
+      "totalCents": 9700,
+      "currency": "EUR",
+      "zone": { "slug": "lyon", "name": "Lyon" },
+      "addressSnapshot": { "street": "...", "city": "Lyon", "lat": 45.76, "lng": 4.83 }
+    }
+  ]
+}
+```
+
+### GET `/bookings/:id`
+
+JWT client (propriétaire) ou provider (assigné, ou broadcast si `pending_provider`). Timeline = `booking_status_history`.
+
+RG-SEC-02 : `addressSnapshot` et `client.phone` uniquement pour le client propriétaire et le pro **assigné**. Un pro en broadcast voit `addressSnapshot: null` + zone.
+
+```json
+{
+  "data": {
+    "id": "uuid",
+    "reference": "CS-20260906-A7B2",
+    "status": "accepted",
+    "slotStart": "...",
+    "slotEnd": "...",
+    "offerName": "Lavage complet",
+    "vehicleType": "suv",
+    "totalCents": 9700,
+    "currency": "EUR",
+    "zone": { "slug": "lyon", "name": "Lyon" },
+    "addressSnapshot": { "street": "...", "city": "Lyon", "lat": 45.76, "lng": 4.83 },
+    "clientComment": "Parking B2",
+    "providerNotes": null,
+    "pricingSnapshot": { "totalCents": 9700, "currency": "EUR" },
+    "timeline": [
+      { "fromStatus": null, "toStatus": "draft", "actorType": "system", "reason": null, "createdAt": "..." },
+      { "fromStatus": "pending_provider", "toStatus": "accepted", "actorType": "provider", "reason": null, "createdAt": "..." }
+    ],
+    "photos": [],
+    "provider": { "companyName": "Marc Wash", "avatarUrl": null, "ratingAvg": 4.8, "washMethods": ["waterless"] },
+    "client": { "firstName": "Ada", "lastName": "Lovelace", "phone": "+336..." }
+  }
+}
+```
+
 ### GET `/bookings/available`
 
 JWT provider + KYC approved. Missions `pending_provider` du broadcast (top 8, RG-MATCH-03).

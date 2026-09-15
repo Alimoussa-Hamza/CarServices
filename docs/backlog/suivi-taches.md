@@ -18,7 +18,7 @@
 | E — Catalogue & zones (M03) | 7/7 | — terminé |
 | F — Apps clientes | 3/6 | — en attente maquettes |
 | G — Backend Pros & KYC (M04) | 8/8 | — terminé |
-| H — Bookings (M05) | 8/10 | CS-M05-S09 Liste + détail |
+| H — Bookings (M05) | 9/10 | CS-M05-S10 Créneaux |
 
 ---
 
@@ -227,7 +227,11 @@
   - [x] Motif obligatoire pro (RG-CANCEL-01) ; client `in_progress` → litige (RG-CANCEL-02)
   - [x] Pénalité `acceptanceRate` pro + rematch urgent si < 2 h
   - [x] Postman Cancel + `api.bookings.cancel`
-- [ ] **CS-M05-S09** GET bookings list + detail + timeline
+- [x] **CS-M05-S09** GET bookings list + detail + timeline
+  - [x] `GET /bookings` client/pro, filtres `status` + `group` (C12)
+  - [x] `GET /bookings/:id` + timeline `booking_status_history`
+  - [x] RG-SEC-02 : adresse/tel masqués tant que le pro n’a pas accepté
+  - [x] Postman List/Get + `api.bookings.list` / `get`
 - [ ] **CS-M05-S10** Créneaux disponibles (slot picker API)
 
 ---

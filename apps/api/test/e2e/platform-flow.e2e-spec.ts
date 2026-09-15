@@ -712,6 +712,108 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
       'BOOKING_CANCEL_VIA_DISPUTE',
     );
   });
+
+  it('CS-M05-S09 liste + détail + timeline (RG-SEC-02)', async () => {
+    const listed = await http()
+      .get('/api/v1/bookings?group=past')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .expect(200);
+    const past = (
+      listed.body as Envelope<
+        Array<{ id: string; status: string; addressSnapshot: { city: string } | null }>
+      >
+    ).data;
+    expect(past.some((row) => row.id === bookingId && row.status === 'completed')).toBe(
+      true,
+    );
+    expect(past.find((row) => row.id === bookingId)?.addressSnapshot?.city).toBe(
+      'Lyon',
+    );
+
+    const cancelled = await http()
+      .get('/api/v1/bookings?group=cancelled')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .expect(200);
+    expect(
+      (cancelled.body as Envelope<Array<{ status: string }>>).data.some((row) =>
+        row.status.startsWith('cancelled_'),
+      ),
+    ).toBe(true);
+
+    const detail = await http()
+      .get(`/api/v1/bookings/${bookingId}`)
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .expect(200);
+    const payload = (
+      detail.body as Envelope<{
+        status: string;
+        addressSnapshot: { street: string };
+        timeline: Array<{ toStatus: string }>;
+        provider: { companyName: string | null } | null;
+      }>
+    ).data;
+    expect(payload.status).toBe('completed');
+    expect(payload.addressSnapshot.street).toContain('République');
+    expect(payload.timeline.map((row) => row.toStatus)).toEqual(
+      expect.arrayContaining([
+        'draft',
+        'pending_provider',
+        'accepted',
+        'completed',
+      ]),
+    );
+    expect(payload.provider).not.toBeNull();
+
+    const assigned = await http()
+      .get(`/api/v1/bookings/${bookingId}`)
+      .set('Authorization', `Bearer ${tokens.providerA}`)
+      .expect(200);
+    expect(
+      (assigned.body as Envelope<{ client: { phone: string } | null }>).data.client
+        ?.phone,
+    ).toBe(phones.client);
+
+    const pending = await http()
+      .post('/api/v1/bookings')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({
+        offerId,
+        vehicleType: 'suv',
+        optionIds: [],
+        addressId: clientAddressId,
+        slotStart: futureSlotIso(),
+      })
+      .expect(201);
+    const pendingId = (
+      pending.body as Envelope<{ booking: { id: string } }>
+    ).data.booking.id;
+
+    const broadcast = await http()
+      .get(`/api/v1/bookings/${pendingId}`)
+      .set('Authorization', `Bearer ${tokens.providerB}`)
+      .expect(200);
+    expect(
+      (
+        broadcast.body as Envelope<{
+          addressSnapshot: unknown;
+          client: unknown;
+          zone: { slug: string };
+        }>
+      ).data,
+    ).toMatchObject({
+      addressSnapshot: null,
+      client: null,
+      zone: { slug: 'lyon' },
+    });
+
+    const forbidden = await http()
+      .get(`/api/v1/bookings/${bookingId}`)
+      .set('Authorization', `Bearer ${tokens.providerB}`)
+      .expect(403);
+    expect((forbidden.body as ErrorEnvelope).error.code).toBe(
+      'BOOKING_NOT_ASSIGNED',
+    );
+  });
 });
 
 async function login(

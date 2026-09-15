@@ -4,6 +4,8 @@ import {
   CatalogQuoteResponseSchema,
   AcceptedBookingSchema,
   AvailableBookingSchema,
+  BookingDetailSchema,
+  BookingListItemSchema,
   BookingStatusUpdateSchema,
   CancelBookingDto,
   CancelledBookingSchema,
@@ -11,6 +13,7 @@ import {
   CreateBookingResponseSchema,
   DeclineBookingDto,
   DeclinedBookingSchema,
+  ListBookingsQuery,
   PatchBookingStatusDto,
   CreateStripeOnboardingLinkDto,
   HealthResponseSchema,
@@ -228,6 +231,23 @@ export const api = {
       apiRequest('/api/v1/bookings/available').then((data) =>
         AvailableBookingSchema.array().parse(data),
       ),
+    list: (query: ListBookingsQuery = {}) => {
+      const params = new URLSearchParams();
+      if (query.status?.length) {
+        params.set('status', query.status.join(','));
+      }
+      if (query.group) {
+        params.set('group', query.group);
+      }
+      const qs = params.toString();
+      return apiRequest(`/api/v1/bookings${qs ? `?${qs}` : ''}`).then((data) =>
+        BookingListItemSchema.array().parse(data),
+      );
+    },
+    get: (bookingId: string) =>
+      apiRequest(`/api/v1/bookings/${bookingId}`).then((data) =>
+        BookingDetailSchema.parse(data),
+      ),
     accept: (bookingId: string) =>
       apiRequest(`/api/v1/bookings/${bookingId}/accept`, {
         method: 'POST',
@@ -256,6 +276,7 @@ export type {
   DeclineBookingDto,
   PatchBookingStatusDto,
   CancelBookingDto,
+  ListBookingsQuery,
   CreateStripeOnboardingLinkDto,
   OutOfZoneLeadDto,
   SubmitKycDto,
