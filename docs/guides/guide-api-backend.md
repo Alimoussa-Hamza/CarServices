@@ -134,8 +134,11 @@ Schéma : [schema-base-de-donnees.md](../schema-base-de-donnees.md)
 | `JWT_REFRESH_SECRET` | yes | |
 | `STRIPE_SECRET_KEY` | yes | |
 | `STRIPE_WEBHOOK_SECRET` | yes | |
-| `S3_ENDPOINT` | yes | Object storage |
-| `S3_BUCKET` | yes | |
+| `S3_ENDPOINT` | yes (prod) | Object storage S3-compatible ; vide = mock local |
+| `S3_BUCKET` | yes (prod) | Bucket privé |
+| `S3_REGION` | no | Défaut `fr-par` (Scaleway) |
+| `S3_ACCESS_KEY` | yes (prod) | IAM / API key |
+| `S3_SECRET_KEY` | yes (prod) | |
 | `TWILIO_*` or `BREVO_SMS_*` | yes | OTP |
 | `GOOGLE_MAPS_SERVER_KEY` | no | Géocoding serveur |
 

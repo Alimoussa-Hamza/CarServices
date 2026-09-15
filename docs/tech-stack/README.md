@@ -41,6 +41,7 @@
 | BullMQ | 5 | https://docs.bullmq.io/ |
 | Zod | 3.23 | https://zod.dev/ |
 | Stripe Connect | API latest | https://docs.stripe.com/connect |
+| AWS SDK S3 | 3.x | https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3/ |
 | Expo SDK | 52 | https://docs.expo.dev/ |
 | React Native | 0.76 | https://reactnative.dev/docs/getting-started |
 | React | 19 | https://react.dev/learn |

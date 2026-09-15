@@ -20,6 +20,7 @@
 | G — Backend Pros & KYC (M04) | 8/8 | — terminé |
 | H — Bookings (M05) | 10/10 | — terminé |
 | I — Paiements Stripe (M06) | 6/6 | — terminé |
+| J — Médias & preuves (M07) | 1/4 | CS-M07-S02 upload-url |
 
 ---
 
@@ -269,6 +270,17 @@
   - [x] Webhook `account.updated` → `provider_profiles.charges_enabled`
   - [x] Matching + missions bloqués si `charges_enabled=false` (`STRIPE_CHARGES_DISABLED`)
 - [x] Gate fin M06 — `test/e2e/m06-payments.e2e-spec.ts`
+
+---
+
+## Piste J — Médias & preuves · Module M07
+
+- [x] **CS-M07-S01** Config S3 Scaleway/R2
+  - [x] `MediaModule` + `S3Service` (`@aws-sdk/client-s3`)
+  - [x] Env `S3_ENDPOINT` / `S3_BUCKET` / `S3_REGION` / `S3_ACCESS_KEY` / `S3_SECRET_KEY` — vide = mock local
+- [ ] **CS-M07-S02** POST `/media/upload-url` presigned
+- [ ] **CS-M07-S03** POST `/media/confirm` + link booking
+- [ ] **CS-M07-S04** Validation min photos clôture
 
 ---
 

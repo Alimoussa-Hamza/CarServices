@@ -23,6 +23,7 @@
 | **Expo SDK** | **52** | 52 | 53 | RN 0.76 |
 | **React Native** | **0.76.x** | 0.76 | via Expo | Managed workflow |
 | **Stripe** | **API 2024-11-20.acacia** | — | — | SDK `@stripe/stripe-js` latest |
+| **AWS SDK S3** | **3.x** | 3.0 | latest | Scaleway / R2 (`@aws-sdk/client-s3`) |
 | **Zod** | **3.23+** | 3.22 | 3.x | shared-types |
 | **TanStack Query** | **5.x** | 5.0 | latest | Mobile + admin |
 

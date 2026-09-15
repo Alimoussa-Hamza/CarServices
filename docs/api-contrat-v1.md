@@ -755,6 +755,8 @@ Handlers idempotents, retry 3×. Worker désactivé si `NODE_ENV=test` (sauf `MA
 
 ## Media
 
+Object storage **S3-compatible** (Scaleway Object Storage ou Cloudflare R2). Config Nest `MediaModule` / `S3Service` : `S3_ENDPOINT`, `S3_BUCKET`, `S3_REGION` (défaut `fr-par`), `S3_ACCESS_KEY`, `S3_SECRET_KEY`. Sans clés valides : **mock local** (CS-M07-S01) — les endpoints d’upload arrivent en CS-M07-S02.
+
 | Method | Path | Rôle | Description |
 |--------|------|------|-------------|
 | POST | `/media/upload-url` | auth | Signed URL upload |
