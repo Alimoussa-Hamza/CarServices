@@ -1394,6 +1394,69 @@ describe('api-client', () => {
       ).resolves.toMatchObject({ isActive: false });
     });
 
+    it('CRUD zones + pricing admin', async () => {
+      initApiClient({
+        baseUrl: 'http://api.test',
+        getAccessToken: jest.fn().mockResolvedValue('admin.jwt'),
+      });
+
+      const zone = {
+        id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+        name: 'Villeurbanne',
+        slug: 'villeurbanne',
+        isActive: false,
+        priceCoefficient: 1.1,
+        minBookingLeadHours: 3,
+        polygon: [
+          { lat: 45.75, lng: 4.85 },
+          { lat: 45.75, lng: 4.9 },
+          { lat: 45.8, lng: 4.9 },
+          { lat: 45.8, lng: 4.85 },
+        ],
+        createdAt: '2026-09-16T10:00:00.000Z',
+      };
+      fetchMock.mockResolvedValueOnce(mockFetchResponse({ data: zone }));
+      await expect(
+        api.admin.createZone({
+          name: 'Villeurbanne',
+          slug: 'villeurbanne',
+          polygon: zone.polygon,
+          isActive: false,
+          priceCoefficient: 1.1,
+          minBookingLeadHours: 3,
+        }),
+      ).resolves.toMatchObject({ slug: 'villeurbanne' });
+
+      fetchMock.mockResolvedValueOnce(
+        mockFetchResponse({ data: { ...zone, isActive: true } }),
+      );
+      await expect(
+        api.admin.updateZone(zone.id, { isActive: true }),
+      ).resolves.toMatchObject({ isActive: true });
+
+      const pricing = {
+        zoneId: zone.id,
+        offerId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        offerSlug: 'wash-complete',
+        offerName: 'Lavage complet',
+        priceOverrideCents: 9000,
+        vehicleSurcharges: {
+          citadine: 0,
+          berline: 500,
+          suv: 1000,
+          utilitaire: 1500,
+          moto: 0,
+        },
+      };
+      fetchMock.mockResolvedValueOnce(mockFetchResponse({ data: pricing }));
+      await expect(
+        api.admin.upsertZonePricing(zone.id, pricing.offerId, {
+          priceOverrideCents: 9000,
+          vehicleSurcharges: pricing.vehicleSurcharges,
+        }),
+      ).resolves.toMatchObject({ priceOverrideCents: 9000 });
+    });
+
     it('rembourse un booking (admin)', async () => {
       const refunded = {
         bookingId: '77777777-7777-4777-8777-777777777777',

@@ -88,6 +88,10 @@ import {
   AdminUpdateOfferSchema,
   AdminCreateOfferOptionSchema,
   AdminUpdateCategorySchema,
+  AdminCreateZoneSchema,
+  AdminUpdateZoneSchema,
+  AdminUpsertZonePricingSchema,
+  AdminZoneSchema,
   StripeOnboardingLinkResponseSchema,
   SubmitKycSchema,
   UpdateProviderAvailabilitySchema,
@@ -972,6 +976,70 @@ describe('Admin catalog schemas (CS-M10-S04)', () => {
       durationDeltaMinutes: 0,
       isActive: true,
     });
+  });
+});
+
+describe('AdminZone schemas', () => {
+  const polygon = [
+    { lat: 45.707, lng: 4.771 },
+    { lat: 45.707, lng: 4.902 },
+    { lat: 45.815, lng: 4.902 },
+    { lat: 45.815, lng: 4.771 },
+  ];
+
+  it('valide création zone avec defaults', () => {
+    expect(
+      AdminCreateZoneSchema.parse({
+        name: 'Villeurbanne',
+        slug: 'villeurbanne',
+        polygon,
+      }),
+    ).toMatchObject({
+      isActive: false,
+      priceCoefficient: 1,
+      minBookingLeadHours: 2,
+    });
+  });
+
+  it('refuse un polygone trop court', () => {
+    expect(
+      AdminCreateZoneSchema.safeParse({
+        name: 'X',
+        slug: 'x',
+        polygon: polygon.slice(0, 2),
+      }).success,
+    ).toBe(false);
+  });
+
+  it('valide update zone et pricing upsert', () => {
+    expect(AdminUpdateZoneSchema.parse({ isActive: true })).toEqual({
+      isActive: true,
+    });
+    expect(AdminUpdateZoneSchema.safeParse({}).success).toBe(false);
+    expect(
+      AdminUpsertZonePricingSchema.parse({
+        priceOverrideCents: 9000,
+        vehicleSurcharges: {
+          citadine: 0,
+          berline: 500,
+          suv: 1000,
+          utilitaire: 1500,
+          moto: 0,
+        },
+      }),
+    ).toMatchObject({ priceOverrideCents: 9000 });
+    expect(
+      AdminZoneSchema.parse({
+        id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        name: 'Lyon',
+        slug: 'lyon',
+        isActive: true,
+        priceCoefficient: 1,
+        minBookingLeadHours: 2,
+        polygon,
+        createdAt: '2026-09-16T10:00:00.000Z',
+      }),
+    ).toMatchObject({ slug: 'lyon' });
   });
 });
 

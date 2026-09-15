@@ -1209,6 +1209,104 @@
           }
         },
         {
+          "name": "List Zones",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/admin/zones"
+          }
+        },
+        {
+          "name": "Create Zone",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Villeurbanne\",\n  \"slug\": \"villeurbanne\",\n  \"polygon\": [\n    { \"lat\": 45.75, \"lng\": 4.85 },\n    { \"lat\": 45.75, \"lng\": 4.9 },\n    { \"lat\": 45.8, \"lng\": 4.9 },\n    { \"lat\": 45.8, \"lng\": 4.85 }\n  ],\n  \"isActive\": false,\n  \"priceCoefficient\": 1.1,\n  \"minBookingLeadHours\": 3\n}"
+            },
+            "url": "{{baseUrl}}/admin/zones"
+          }
+        },
+        {
+          "name": "Update Zone",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/admin/zones/{{zoneId}}"
+          }
+        },
+        {
+          "name": "Upsert Zone Pricing",
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"priceOverrideCents\": 9000,\n  \"vehicleSurcharges\": {\n    \"citadine\": 0,\n    \"berline\": 500,\n    \"suv\": 1000,\n    \"utilitaire\": 1500,\n    \"moto\": 0\n  }\n}"
+            },
+            "url": "{{baseUrl}}/admin/zones/{{zoneId}}/pricing/{{offerId}}"
+          }
+        },
+        {
           "name": "Refund Booking",
           "request": {
             "method": "POST",

@@ -370,6 +370,89 @@ export type AdminUpdateOfferOptionDto = z.infer<
   typeof AdminUpdateOfferOptionSchema
 >;
 
+/** Admin zones + pricing — CS-M10-S05 */
+export const AdminGeoPointSchema = z.object({
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
+});
+export type AdminGeoPoint = z.infer<typeof AdminGeoPointSchema>;
+
+export const AdminZonePolygonSchema = z
+  .array(AdminGeoPointSchema)
+  .min(3, 'Polygone : au moins 3 points.');
+export type AdminZonePolygon = z.infer<typeof AdminZonePolygonSchema>;
+
+export const AdminZoneSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  slug: z.string(),
+  isActive: z.boolean(),
+  priceCoefficient: z.number().positive(),
+  minBookingLeadHours: z.number().int().nonnegative(),
+  polygon: AdminZonePolygonSchema,
+  createdAt: z.string().datetime(),
+});
+export type AdminZone = z.infer<typeof AdminZoneSchema>;
+
+export const AdminCreateZoneSchema = z.object({
+  name: z.string().trim().min(2).max(100),
+  slug: z
+    .string()
+    .trim()
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug kebab-case invalide.')
+    .max(100),
+  polygon: AdminZonePolygonSchema,
+  isActive: z.boolean().default(false),
+  priceCoefficient: z.number().positive().max(10).default(1),
+  minBookingLeadHours: z.number().int().min(0).max(168).default(2),
+});
+export type AdminCreateZoneDto = z.infer<typeof AdminCreateZoneSchema>;
+export type AdminCreateZoneInput = z.input<typeof AdminCreateZoneSchema>;
+
+export const AdminUpdateZoneSchema = z
+  .object({
+    name: z.string().trim().min(2).max(100).optional(),
+    slug: z
+      .string()
+      .trim()
+      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug kebab-case invalide.')
+      .max(100)
+      .optional(),
+    polygon: AdminZonePolygonSchema.optional(),
+    isActive: z.boolean().optional(),
+    priceCoefficient: z.number().positive().max(10).optional(),
+    minBookingLeadHours: z.number().int().min(0).max(168).optional(),
+  })
+  .refine((dto) => Object.keys(dto).length > 0, 'Aucun champ à mettre à jour.');
+export type AdminUpdateZoneDto = z.infer<typeof AdminUpdateZoneSchema>;
+
+export const VehicleSurchargesSchema = z.object({
+  citadine: z.number().int().nonnegative(),
+  berline: z.number().int().nonnegative(),
+  suv: z.number().int().nonnegative(),
+  utilitaire: z.number().int().nonnegative(),
+  moto: z.number().int().nonnegative(),
+});
+export type VehicleSurcharges = z.infer<typeof VehicleSurchargesSchema>;
+
+export const AdminZonePricingSchema = z.object({
+  zoneId: z.string().uuid(),
+  offerId: z.string().uuid(),
+  offerSlug: z.string(),
+  offerName: z.string(),
+  priceOverrideCents: z.number().int().nonnegative().nullable(),
+  vehicleSurcharges: VehicleSurchargesSchema,
+});
+export type AdminZonePricing = z.infer<typeof AdminZonePricingSchema>;
+
+export const AdminUpsertZonePricingSchema = z.object({
+  priceOverrideCents: z.number().int().nonnegative().nullable().optional(),
+  vehicleSurcharges: VehicleSurchargesSchema,
+});
+export type AdminUpsertZonePricingDto = z.infer<
+  typeof AdminUpsertZonePricingSchema
+>;
+
 export const CatalogQuoteSchema = z.object({
   offerId: z.string().uuid(),
   vehicleType: VehicleTypeSchema,

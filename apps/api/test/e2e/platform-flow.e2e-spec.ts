@@ -168,6 +168,79 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
     await prisma.serviceOffer.delete({ where: { id: createdOffer.id } });
   });
 
+  it('CS-M10-S05 admin zones create + activate + pricing upsert', async () => {
+    const adminPhone = `+33692${suffix}`;
+    const adminToken = await loginAdmin(http, adminPhone, userIds, prisma);
+    const slug = `zone-e2e-${suffix}`;
+    const polygon = [
+      { lat: 45.75, lng: 4.85 },
+      { lat: 45.75, lng: 4.9 },
+      { lat: 45.8, lng: 4.9 },
+      { lat: 45.8, lng: 4.85 },
+    ];
+
+    const created = await http()
+      .post('/api/v1/admin/zones')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        name: `Zone e2e ${suffix}`,
+        slug,
+        polygon,
+        isActive: false,
+        priceCoefficient: 1.05,
+        minBookingLeadHours: 3,
+      })
+      .expect(201);
+    const zone = (
+      created.body as Envelope<{
+        id: string;
+        slug: string;
+        isActive: boolean;
+        polygon: Array<{ lat: number; lng: number }>;
+      }>
+    ).data;
+    expect(zone).toMatchObject({ slug, isActive: false });
+    expect(zone.polygon).toHaveLength(4);
+
+    await http()
+      .patch(`/api/v1/admin/zones/${zone.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ isActive: true })
+      .expect(200);
+
+    await http()
+      .put(`/api/v1/admin/zones/${zone.id}/pricing/${offerId}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        priceOverrideCents: 9100,
+        vehicleSurcharges: {
+          citadine: 0,
+          berline: 400,
+          suv: 900,
+          utilitaire: 1400,
+          moto: 0,
+        },
+      })
+      .expect(200);
+
+    const pricing = await http()
+      .get(`/api/v1/admin/zones/${zone.id}/pricing`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+    expect(
+      (
+        pricing.body as Envelope<
+          Array<{ offerId: string; priceOverrideCents: number | null }>
+        >
+      ).data.some(
+        (row) => row.offerId === offerId && row.priceOverrideCents === 9100,
+      ),
+    ).toBe(true);
+
+    await prisma.zonePricing.deleteMany({ where: { zoneId: zone.id } });
+    await prisma.$executeRaw`DELETE FROM service_zones WHERE id = ${zone.id}::uuid`;
+  });
+
   it('CS-M02 auth OTP mock → JWT client + providers', async () => {
     tokens.client = await login(http, phones.client, 'client', userIds, prisma);
     tokens.providerA = await login(

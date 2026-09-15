@@ -23,7 +23,7 @@
 | J — Médias & preuves (M07) | 4/4 | — terminé |
 | K — Avis & litiges (M08) | 4/4 | — terminé |
 | L — Notifications (M09) | 4/4 | — terminé |
-| M — Admin API (M10) | 4/8 | CS-M10-S05 zones + pricing |
+| M — Admin API (M10) | 5/8 | CS-M10-S06 bookings + refund |
 | N — Mobile client (M11) | 0/12 | — en attente maquettes |
 | O — Mobile pro (M12) | 0/11 | — en attente maquettes |
 | P — Admin web (M13) | 0/8 | — après M10 |
@@ -342,7 +342,8 @@ Détail écrans → pistes **N** (M11) et **O** (M12).
   - [x] `GET /admin/providers/pending` + `POST .../approve` + `POST .../reject`
 - [x] **CS-M10-S04** CRUD catalog admin
   - [x] Categories / offers / options (soft-disable `isActive` / `isEnabled`)
-- [ ] **CS-M10-S05** CRUD zones + pricing
+- [x] **CS-M10-S05** CRUD zones + pricing
+  - [x] Zones polygone + soft `isActive` + upsert pricing offre/zone
 - [ ] **CS-M10-S06** Admin bookings search + refund
 - [ ] **CS-M10-S07** Resolve disputes
 - [ ] **CS-M10-S08** PATCH `/admin/config` (commission, timeouts)

@@ -12,6 +12,11 @@ import {
   AdminUpdateOfferDto,
   AdminCreateOfferOptionInput,
   AdminUpdateOfferOptionDto,
+  AdminCreateZoneInput,
+  AdminUpdateZoneDto,
+  AdminUpsertZonePricingDto,
+  AdminZoneSchema,
+  AdminZonePricingSchema,
   AdminRefundBookingDto,
   AdminRefundResponseSchema,
   AuthTokensResponseSchema,
@@ -362,6 +367,37 @@ export const api = {
         method: 'PATCH',
         body: JSON.stringify(dto),
       }).then((data) => AdminOfferOptionSchema.parse(data)),
+    listZones: () =>
+      apiRequest('/api/v1/admin/zones').then((data) =>
+        AdminZoneSchema.array().parse(data),
+      ),
+    getZone: (zoneId: string) =>
+      apiRequest(`/api/v1/admin/zones/${zoneId}`).then((data) =>
+        AdminZoneSchema.parse(data),
+      ),
+    createZone: (dto: AdminCreateZoneInput) =>
+      apiRequest('/api/v1/admin/zones', {
+        method: 'POST',
+        body: JSON.stringify(dto),
+      }).then((data) => AdminZoneSchema.parse(data)),
+    updateZone: (zoneId: string, dto: AdminUpdateZoneDto) =>
+      apiRequest(`/api/v1/admin/zones/${zoneId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(dto),
+      }).then((data) => AdminZoneSchema.parse(data)),
+    listZonePricing: (zoneId: string) =>
+      apiRequest(`/api/v1/admin/zones/${zoneId}/pricing`).then((data) =>
+        AdminZonePricingSchema.array().parse(data),
+      ),
+    upsertZonePricing: (
+      zoneId: string,
+      offerId: string,
+      dto: AdminUpsertZonePricingDto,
+    ) =>
+      apiRequest(`/api/v1/admin/zones/${zoneId}/pricing/${offerId}`, {
+        method: 'PUT',
+        body: JSON.stringify(dto),
+      }).then((data) => AdminZonePricingSchema.parse(data)),
     refundBooking: (bookingId: string, dto: AdminRefundBookingDto = {}) =>
       apiRequest(`/api/v1/admin/bookings/${bookingId}/refund`, {
         method: 'POST',

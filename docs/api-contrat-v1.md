@@ -1028,11 +1028,12 @@ Erreurs : `STRIPE_WEBHOOK_INVALID_SIGNATURE` (400), `VALIDATION_ERROR` (400).
 | POST | `/admin/providers/:id/approve` | admin | Approuver KYC |
 | POST | `/admin/providers/:id/reject` | admin | Rejeter KYC |
 | CRUD | `/admin/catalog/*` | admin | Catégories, offres, options |
+| CRUD | `/admin/zones*` | admin | Zones + pricing |
 | GET | `/admin/bookings` | admin | Tous bookings |
 
 ### Admin catalog (CS-M10-S04)
 
-JWT **admin**. Soft-disable via `isActive` / `isEnabled` (pas de hard delete — bookings historiques intacts). Zones/pricing = CS-M10-S05.
+JWT **admin**. Soft-disable via `isActive` / `isEnabled` (pas de hard delete — bookings historiques intacts).
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -1064,6 +1065,50 @@ JWT **admin**. Soft-disable via `isActive` / `isEnabled` (pas de hard delete —
 ```
 
 Erreurs : `CATEGORY_NOT_FOUND` / `OFFER_NOT_FOUND` / `OPTION_NOT_FOUND` (404), `OFFER_SLUG_TAKEN` / `OPTION_SLUG_TAKEN` (409), `VALIDATION_ERROR` (400).
+
+### Admin zones + pricing (CS-M10-S05)
+
+JWT **admin**. Polygone GeoJSON-like `{ lat, lng }[]` (≥ 3 points, ring auto-fermé en WKT `POLYGON((lng lat, …))`). Soft-disable via `isActive`.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/admin/zones` | Liste zones + polygones |
+| GET | `/admin/zones/:id` | Détail zone |
+| POST | `/admin/zones` | Créer zone |
+| PATCH | `/admin/zones/:id` | Update partiel / activer |
+| GET | `/admin/zones/:id/pricing` | Pricing par offre |
+| PUT | `/admin/zones/:id/pricing/:offerId` | Upsert override + surcharges véhicule |
+
+```json
+// POST /admin/zones
+{
+  "name": "Villeurbanne",
+  "slug": "villeurbanne",
+  "polygon": [
+    { "lat": 45.75, "lng": 4.85 },
+    { "lat": 45.75, "lng": 4.9 },
+    { "lat": 45.8, "lng": 4.9 },
+    { "lat": 45.8, "lng": 4.85 }
+  ],
+  "isActive": false,
+  "priceCoefficient": 1.1,
+  "minBookingLeadHours": 3
+}
+
+// PUT /admin/zones/:id/pricing/:offerId
+{
+  "priceOverrideCents": 9000,
+  "vehicleSurcharges": {
+    "citadine": 0,
+    "berline": 500,
+    "suv": 1000,
+    "utilitaire": 1500,
+    "moto": 0
+  }
+}
+```
+
+Erreurs : `ZONE_NOT_FOUND` / `OFFER_NOT_FOUND` (404), `ZONE_SLUG_TAKEN` (409), `VALIDATION_ERROR` (400).
 
 ### GET `/admin/dashboard`
 
