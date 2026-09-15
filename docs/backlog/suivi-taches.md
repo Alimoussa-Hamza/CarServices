@@ -22,7 +22,7 @@
 | I — Paiements Stripe (M06) | 6/6 | — terminé |
 | J — Médias & preuves (M07) | 4/4 | — terminé |
 | K — Avis & litiges (M08) | 4/4 | — terminé |
-| L — Notifications (M09) | 2/4 | CS-M09-S03 SMS/email |
+| L — Notifications (M09) | 3/4 | CS-M09-S04 events statut |
 | M — Admin API (M10) | 0/8 | CS-M10-S01 auth admin |
 | N — Mobile client (M11) | 0/12 | — en attente maquettes |
 | O — Mobile pro (M12) | 0/11 | — en attente maquettes |
@@ -322,10 +322,10 @@ Détail écrans → pistes **N** (M11) et **O** (M12).
 - [x] **CS-M09-S02** Worker send-push (Expo API)
   - [x] Queue BullMQ `notifications` + job `send-push`
   - [x] Appel Expo Push API (mock local sans `EXPO_ACCESS_TOKEN`)
-- [ ] **CS-M09-S03** SMS + email templates booking
-  - [ ] Templates email (Brevo)
-  - [ ] Templates SMS
-  - [ ] Queue notifications multi-canal
+- [x] **CS-M09-S03** SMS + email templates booking
+  - [x] Templates email (Brevo) + SMS booking
+  - [x] Templates SMS
+  - [x] Queue notifications multi-canal (`send-sms`, `send-email`)
 - [ ] **CS-M09-S04** Events : pro trouvé, en route, terminé, nouvelle mission
   - [ ] Triggers sur changements de statut booking
 

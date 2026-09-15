@@ -3,8 +3,17 @@ import type {
   PushPlatform,
   RegisterPushTokenDto,
 } from '@carservice/shared-types';
+import { SmsService } from '../auth/sms.service';
 import { AuthPayload } from '../../common/decorators/current-user.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
+import {
+  type BookingNotificationTemplateId,
+  type BookingNotificationVars,
+  BOOKING_NOTIFICATION_TEMPLATES,
+  renderBookingEmail,
+  renderBookingSms,
+} from './booking-notification.templates';
+import { EmailService } from './email.service';
 import { ExpoPushService } from './expo-push.service';
 
 export type SendPushJobData = {
@@ -15,11 +24,27 @@ export type SendPushJobData = {
   dedupeKey?: string;
 };
 
+export type SendSmsJobData = {
+  phone: string;
+  body: string;
+  dedupeKey?: string;
+};
+
+export type SendEmailJobData = {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+  dedupeKey?: string;
+};
+
 @Injectable()
 export class NotificationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly expoPush: ExpoPushService,
+    private readonly email: EmailService,
+    private readonly sms: SmsService,
   ) {}
 
   async registerPushToken(user: AuthPayload, dto: RegisterPushTokenDto) {
@@ -67,5 +92,34 @@ export class NotificationsService {
     );
 
     return { sent: tokens.length, tickets };
+  }
+
+  async processSendSms(job: SendSmsJobData) {
+    await this.sms.send(job.phone, job.body);
+    return { sent: 1 as const };
+  }
+
+  async processSendEmail(job: SendEmailJobData) {
+    const result = await this.email.send({
+      to: job.to,
+      subject: job.subject,
+      html: job.html,
+      text: job.text,
+    });
+    return { sent: 1 as const, messageId: result.messageId };
+  }
+
+  /** Rend un template booking et retourne les payloads SMS/email prêts à enqueue. */
+  buildBookingNotification(
+    templateId: BookingNotificationTemplateId,
+    vars: BookingNotificationVars,
+  ) {
+    const definition = BOOKING_NOTIFICATION_TEMPLATES[templateId];
+    return {
+      templateId,
+      channels: definition.channels,
+      email: renderBookingEmail(templateId, vars),
+      sms: renderBookingSms(templateId, vars),
+    };
   }
 }

@@ -1578,4 +1578,20 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
     });
     expect(result).toMatchObject({ queued: false, sent: 1 });
   });
+
+  it('CS-M09-S03 templates SMS/email booking via queue', async () => {
+    const result = await notificationsQueue.enqueueBookingTemplate({
+      templateId: 'provider_assigned',
+      vars: { reference: `CS-E2E-${suffix}` },
+      emailTo: 'client@carservice.test',
+      smsTo: phones.client,
+      dedupeKey: `e2e-m09-s03-${suffix}`,
+    });
+    expect(result.templateId).toBe('provider_assigned');
+    expect(result.results).toHaveLength(2);
+    expect(result.results.map((row) => row.channel).sort()).toEqual([
+      'email',
+      'sms',
+    ]);
+  });
 });

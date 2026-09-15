@@ -8,19 +8,26 @@ export class SmsService {
   constructor(private readonly config: ConfigService) {}
 
   async sendOtp(phone: string, code: string): Promise<void> {
+    await this.send(
+      phone,
+      `CARSERVICE — votre code : ${code}. Valide 5 minutes.`,
+    );
+  }
+
+  async send(phone: string, body: string): Promise<void> {
     const accountSid = this.config.get<string>('TWILIO_ACCOUNT_SID');
     const authToken = this.config.get<string>('TWILIO_AUTH_TOKEN');
     const fromNumber = this.config.get<string>('TWILIO_PHONE_NUMBER');
 
     if (!accountSid || !authToken || !fromNumber) {
-      this.logger.warn(`SMS non configuré — OTP dev only pour ${phone}`);
+      this.logger.warn(`SMS non configuré — mock pour ${phone}: ${body}`);
       return;
     }
 
-    const body = new URLSearchParams({
+    const payload = new URLSearchParams({
       To: phone,
       From: fromNumber,
-      Body: `CARSERVICE — votre code : ${code}. Valide 5 minutes.`,
+      Body: body,
     });
 
     const credentials = Buffer.from(`${accountSid}:${authToken}`).toString(
@@ -35,7 +42,7 @@ export class SmsService {
           Authorization: `Basic ${credentials}`,
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body,
+        body: payload,
       },
     );
 
