@@ -80,6 +80,7 @@
 - [x] `pnpm test` branché dans la CI
 - [x] E2E API (`pnpm --filter @carservice/api test:e2e`) — Postgres réelle, OTP/SMS/Stripe mock, parcours M02→M05
 - [x] Gate fin M05 — `test/e2e/m05-bookings.e2e-spec.ts` (parcours isolé + erreurs P0)
+- [x] Gate fin M06 — `test/e2e/m06-payments.e2e-spec.ts` (pre-auth, capture, refund, webhook, charges_enabled)
 
 **Vérifié automatiquement :**
 - `@carservice/shared-types` : 109 tests passés
@@ -267,6 +268,7 @@
 - [x] **CS-M06-S06** Sync stripe_account charges_enabled
   - [x] Webhook `account.updated` → `provider_profiles.charges_enabled`
   - [x] Matching + missions bloqués si `charges_enabled=false` (`STRIPE_CHARGES_DISABLED`)
+- [x] Gate fin M06 — `test/e2e/m06-payments.e2e-spec.ts`
 
 ---
 
