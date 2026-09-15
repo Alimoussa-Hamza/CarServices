@@ -24,6 +24,7 @@
 | # | Document | Couche | Statut |
 |---|----------|--------|--------|
 | 1 | [Cahier des charges](cahier-des-charges.md) | Produit | ✅ Fait |
+| 1b | [Cahier fermeture backend M15](cahier-fermeture-backend.md) | Backend | ✅ Fait |
 | 2 | [Règles de gestion](regles-de-gestion.md) | Métier | ✅ Fait |
 | 3 | [Backlog MVP](backlog-mvp.md) | Produit | ✅ Fait |
 | 3b | [Backlog Jira (Epic→Task)](backlog-jira.md) | Produit / Dev | ✅ Fait |
@@ -44,6 +45,7 @@
 | 17 | [Guide intégrations](guides/guide-integrations.md) | Intégrations | ✅ Fait |
 | 18 | [Guide Infra & DevOps](guides/guide-infra-devops.md) | Infra | ✅ Fait |
 | 19 | [Guide QA & tests](guides/guide-qa.md) | QA | ✅ Fait |
+| 19b | [Cahier + matrice API](qa/README.md) | QA | ✅ Fait |
 | 20 | [Guide sécurité & RGPD](guides/guide-securite-conformite.md) | Sécurité | ✅ Fait |
 | 21 | [Checklist pré-développement](checklist-pre-developpement.md) | Go/No-Go | ✅ Fait |
 | 22 | [Standards développement](standards-developpement.md) | Code | ✅ Fait |
@@ -72,6 +74,11 @@ docs/
 ├── etude-architecture-technique.md
 ├── schema-base-de-donnees.md
 ├── api-contrat-v1.md
+├── qa/                                # Cahier de tests + matrice + procédures API
+│   ├── README.md
+│   ├── cahier-de-tests-api.md
+│   ├── matrice-couverture-api.md
+│   └── procedure-execution.md
 ├── standards-developpement.md
 ├── guides/
 │   ├── guide-ux-design.md
@@ -105,5 +112,5 @@ docs/
 | **Dev Mobile** | Wireframes, spec Figma, guide mobile client/pro, contrat API, packages |
 | **Dev Admin** | Wireframes A01–A09, guide admin, contrat API |
 | **DevOps** | Guide infra, sécurité, intégrations |
-| **QA** | Backlog (critères acceptation), guide QA, RG |
+| **QA** | [docs/qa/](qa/README.md), guide QA, RG, contrat API, Postman |
 | **Juridique / DPO** | Guide sécurité RGPD, règles de gestion |

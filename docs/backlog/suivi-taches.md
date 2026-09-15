@@ -28,6 +28,7 @@
 | O — Mobile pro (M12) | 0/11 | — en attente maquettes |
 | P — Admin web (M13) | 0/8 | — après M10 |
 | Q — QA & launch (M14) | 0/6 | — fin de parcours |
+| R — Fermeture backend (M15) | 0/6 | CS-M15-S01 addresses |
 
 ---
 
@@ -408,6 +409,20 @@ Détail écrans → pistes **N** (M11) et **O** (M12).
 - [ ] **CS-M14-S04** Prod deploy + smoke tests
 - [ ] **CS-M14-S05** App Store + Play Store submission
 - [ ] **CS-M14-S06** Runbook incident + monitoring alertes
+
+---
+
+## Piste R — Fermeture backend · Module M15
+
+Cahier : [cahier-fermeture-backend.md](../cahier-fermeture-backend.md)
+
+- [ ] **CS-M15-S01** CRUD `/addresses`
+- [ ] **CS-M15-S02** Profil client + suppression compte (RG-SEC-03)
+- [ ] **CS-M15-S03** Admin soft-disable users
+- [ ] **CS-M15-S04** Sentry + logging Pino (API)
+- [ ] **CS-M15-S05** Helmet + Throttler Nest
+- [ ] **CS-M15-S06** Pack QA + smoke + charge k6
+- [ ] Gate fin M15 — `test/e2e/m15-backend-closure.e2e-spec.ts`
 
 ---
 

@@ -445,6 +445,42 @@
 | CS-M14-S04 | Prod deploy + smoke tests | P0 | 5 | S11 |
 | CS-M14-S05 | App Store + Play Store submission | P0 | 5 | S12 |
 | CS-M14-S06 | Runbook incident + monitoring alertes | P1 | 3 | S12 |
+| CS-M14-S07 | Cahier de tests API + matrice couverture | P0 | 3 | S10 |
+| CS-M14-S08 | Gates E2E M02–M10 + smoke script | P0 | 5 | S10 |
+| CS-M14-S09 | CI job `test:e2e` (migrate + seed) | P1 | 3 | S11 |
+
+### Tasks M14 QA API
+
+| ID | Task | Est |
+|----|------|-----|
+| CS-M14-S07-T01 | Rédiger cahier TC-* (auth→admin) | 3h |
+| CS-M14-S07-T02 | Matrice endpoint × TU/E2E/Postman/Smoke | 2h |
+| CS-M14-S07-T03 | Procédure exécution + critères sortie release | 1h |
+| CS-M14-S08-T01 | Gates e2e m02/m03/m04/m10 isolées | 5h |
+| CS-M14-S08-T02 | `tools/smoke-api.sh` health+catalog+zones(+admin) | 2h |
+| CS-M14-S08-T03 | Aligner Postman sur contrat v1 | 2h |
+| CS-M14-S02-T01 | Exécuter SC-01 happy path client staging | 2h |
+| CS-M14-S02-T02 | Exécuter SC-02 pro clôture | 2h |
+| CS-M14-S02-T03 | SC-03 à SC-06 edge cases + feuille GO/NOGO | 2h |
+| CS-M14-S04-T01 | Smoke staging post-deploy (`smoke-api.sh`) | 1h |
+| CS-M14-S09-T01 | Workflow CI e2e Postgres/Redis + seed | 3h |
+
+---
+
+# CS-EP-15 — Fermeture backend MVP
+
+## Module M15 — Backend closure
+
+Cahier : [cahier-fermeture-backend.md](cahier-fermeture-backend.md)
+
+| ID | Story | P | Pts | Sprint |
+|----|-------|---|-----|--------|
+| CS-M15-S01 | CRUD `/addresses` | P0 | 5 | S10 |
+| CS-M15-S02 | Profil client + suppression RG-SEC-03 | P0 | 5 | S10 |
+| CS-M15-S03 | Admin soft-disable users | P1 | 3 | S10 |
+| CS-M15-S04 | Sentry + logging Pino API | P1 | 3 | S10 |
+| CS-M15-S05 | Helmet + Throttler Nest | P1 | 2 | S10 |
+| CS-M15-S06 | Pack QA + smoke + charge k6 | P0 | 5 | S10 |
 
 ---
 
