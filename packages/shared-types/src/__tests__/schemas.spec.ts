@@ -21,6 +21,8 @@ import {
   StripeWebhookEventSchema,
   AdminRefundBookingSchema,
   AdminRefundResponseSchema,
+  ConfirmMediaUploadSchema,
+  ConfirmedMediaUploadSchema,
   CreateMediaUploadUrlSchema,
   MEDIA_UPLOAD_TTL_SECONDS,
   MEDIA_MAX_PHOTO_BYTES,
@@ -1603,5 +1605,50 @@ describe('CreateMediaUploadUrlSchema / MediaUploadUrlResponseSchema', () => {
         expiresAt: '2026-09-15T10:15:00.000Z',
       }),
     ).toMatchObject({ fileKey: 'bookings/b/before/id.jpg' });
+  });
+});
+
+describe('ConfirmMediaUploadSchema / ConfirmedMediaUploadSchema', () => {
+  it('exige une fileKey non vide', () => {
+    expect(ConfirmMediaUploadSchema.safeParse({ fileKey: '' }).success).toBe(
+      false,
+    );
+    expect(
+      ConfirmMediaUploadSchema.parse({
+        fileKey: 'bookings/77777777-7777-4777-8777-777777777777/before/id.jpg',
+      }),
+    ).toMatchObject({
+      fileKey: 'bookings/77777777-7777-4777-8777-777777777777/before/id.jpg',
+    });
+  });
+
+  it('valide une confirmation photo de mission', () => {
+    expect(
+      ConfirmedMediaUploadSchema.parse({
+        id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+        bookingId: '77777777-7777-4777-8777-777777777777',
+        photoType: 'before',
+        uploadedBy: 'client',
+        fileKey: 'bookings/77777777-7777-4777-8777-777777777777/before/id.jpg',
+        fileUrl:
+          'https://cdn.carservice.test/bookings/77777777-7777-4777-8777-777777777777/before/id.jpg',
+        createdAt: '2026-09-15T10:00:00.000Z',
+      }),
+    ).toMatchObject({ photoType: 'before', uploadedBy: 'client' });
+  });
+
+  it('autorise une confirmation KYC sans booking_photo', () => {
+    expect(
+      ConfirmedMediaUploadSchema.parse({
+        id: null,
+        bookingId: null,
+        photoType: null,
+        uploadedBy: 'provider',
+        fileKey: 'kyc/88888888-8888-4888-8888-888888888888/id.pdf',
+        fileUrl:
+          'https://cdn.carservice.test/kyc/88888888-8888-4888-8888-888888888888/id.pdf',
+        createdAt: '2026-09-15T10:00:00.000Z',
+      }),
+    ).toMatchObject({ id: null, bookingId: null });
   });
 });

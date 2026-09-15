@@ -1077,4 +1077,129 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
       'VALIDATION_ERROR',
     );
   });
+
+  it('CS-M07-S03 POST /media/confirm attache booking_photos', async () => {
+    const created = await http()
+      .post('/api/v1/bookings')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({
+        offerId,
+        vehicleType: 'suv',
+        optionIds: [],
+        addressId: clientAddressId,
+        slotStart: futureSlotIso(12),
+      })
+      .expect(201);
+    const bookingId = (
+      created.body as Envelope<{ booking: { id: string } }>
+    ).data.booking.id;
+
+    const uploaded = await http()
+      .post('/api/v1/media/upload-url')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({
+        mimeType: 'image/jpeg',
+        context: 'booking_photo',
+        bookingId,
+        photoType: 'before',
+      })
+      .expect(200);
+    const fileKey = (
+      uploaded.body as Envelope<{ fileKey: string }>
+    ).data.fileKey;
+
+    const confirmed = await http()
+      .post('/api/v1/media/confirm')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({ fileKey })
+      .expect(200);
+    const photo = (
+      confirmed.body as Envelope<{
+        id: string;
+        bookingId: string;
+        photoType: string;
+        uploadedBy: string;
+        fileUrl: string;
+      }>
+    ).data;
+    expect(photo).toMatchObject({
+      bookingId,
+      photoType: 'before',
+      uploadedBy: 'client',
+      fileUrl: `https://cdn.carservice.test/${fileKey}`,
+    });
+    expect(photo.id).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+    );
+
+    const again = await http()
+      .post('/api/v1/media/confirm')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({ fileKey })
+      .expect(200);
+    expect((again.body as Envelope<{ id: string }>).data.id).toBe(photo.id);
+
+    const detail = await http()
+      .get(`/api/v1/bookings/${bookingId}`)
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .expect(200);
+    expect(
+      (
+        detail.body as Envelope<{
+          photos: Array<{ photoType: string; uploadedBy: string }>;
+        }>
+      ).data.photos,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          photoType: 'before',
+          uploadedBy: 'client',
+        }),
+      ]),
+    );
+
+    const invalidKey = await http()
+      .post('/api/v1/media/confirm')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({ fileKey: 'not-a-key.jpg' })
+      .expect(400);
+    expect((invalidKey.body as ErrorEnvelope).error.code).toBe(
+      'MEDIA_FILE_KEY_INVALID',
+    );
+
+    const kycUploaded = await http()
+      .post('/api/v1/media/upload-url')
+      .set('Authorization', `Bearer ${tokens.providerA}`)
+      .send({ mimeType: 'application/pdf', context: 'kyc_document' })
+      .expect(200);
+    const kycKey = (
+      kycUploaded.body as Envelope<{ fileKey: string }>
+    ).data.fileKey;
+
+    const kycConfirmed = await http()
+      .post('/api/v1/media/confirm')
+      .set('Authorization', `Bearer ${tokens.providerA}`)
+      .send({ fileKey: kycKey })
+      .expect(200);
+    expect(
+      (
+        kycConfirmed.body as Envelope<{
+          id: string | null;
+          bookingId: string | null;
+          uploadedBy: string | null;
+        }>
+      ).data,
+    ).toMatchObject({
+      id: null,
+      bookingId: null,
+      uploadedBy: 'provider',
+    });
+
+    const forbiddenKyc = await http()
+      .post('/api/v1/media/confirm')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({ fileKey: kycKey })
+      .expect(403);
+    expect((forbiddenKyc.body as ErrorEnvelope).error.code).toBe('FORBIDDEN');
+  });
 });

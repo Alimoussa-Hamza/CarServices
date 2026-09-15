@@ -776,6 +776,46 @@ JWT. Génère une URL **PUT presignée** (TTL 15 min). MIME whitelist : `image/j
 
 Erreurs : `VALIDATION_ERROR` (400), `FORBIDDEN` (403), `BOOKING_NOT_FOUND` (404).
 
+### POST `/media/confirm`
+
+JWT. Vérifie que l’objet existe (HeadObject S3, no-op en mock local), puis :
+
+- `booking_photo` : crée une ligne `booking_photos` (`uploadedBy` = `client` si rôle client, sinon `provider` — un admin est mappé `provider`). Idempotent sur `fileUrl`.
+- `kyc_document` : pas d’écriture `booking_photos` ; `id` / `bookingId` / `photoType` = `null`. Réservé au prestataire propriétaire de la clé.
+
+```json
+// Request
+{ "fileKey": "bookings/{bookingId}/before/{uuid}.jpg" }
+
+// Response 200 (photo mission)
+{
+  "data": {
+    "id": "uuid",
+    "bookingId": "uuid",
+    "photoType": "before",
+    "uploadedBy": "client",
+    "fileKey": "bookings/{bookingId}/before/{uuid}.jpg",
+    "fileUrl": "https://cdn.carservice.test/...",
+    "createdAt": "..."
+  }
+}
+
+// Response 200 (KYC)
+{
+  "data": {
+    "id": null,
+    "bookingId": null,
+    "photoType": null,
+    "uploadedBy": "provider",
+    "fileKey": "kyc/{userId}/{uuid}.pdf",
+    "fileUrl": "https://cdn.carservice.test/...",
+    "createdAt": "..."
+  }
+}
+```
+
+Erreurs : `VALIDATION_ERROR` (400), `MEDIA_FILE_KEY_INVALID` (400), `MEDIA_OBJECT_NOT_FOUND` (400), `FORBIDDEN` (403), `BOOKING_NOT_FOUND` (404).
+
 ---
 
 ## Reviews

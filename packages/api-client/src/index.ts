@@ -11,6 +11,8 @@ import {
   BookingStatusUpdateSchema,
   CancelBookingDto,
   CancelledBookingSchema,
+  ConfirmMediaUploadDto,
+  ConfirmedMediaUploadSchema,
   CreateBookingDto,
   CreateBookingResponseSchema,
   CreateMediaUploadUrlDto,
@@ -292,12 +294,18 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(dto),
       }).then((data) => MediaUploadUrlResponseSchema.parse(data)),
+    confirmUpload: (dto: ConfirmMediaUploadDto) =>
+      apiRequest('/api/v1/media/confirm', {
+        method: 'POST',
+        body: JSON.stringify(dto),
+      }).then((data) => ConfirmedMediaUploadSchema.parse(data)),
   },
 };
 
 export type {
   AdminRefundBookingDto,
   CatalogQuoteDto,
+  ConfirmMediaUploadDto,
   CreateBookingDto,
   CreateMediaUploadUrlDto,
   DeclineBookingDto,

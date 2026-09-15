@@ -808,6 +808,34 @@
             },
             "url": "{{baseUrl}}/media/upload-url"
           }
+        },
+        {
+          "name": "Confirm Upload",
+          "request": {
+            "method": "POST",
+            "description": "JWT. Confirme l’objet (HeadObject S3, skip mock) et attache booking_photos. KYC: pas d’écriture booking_photos.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fileKey\": \"bookings/{{bookingId}}/before/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa.jpg\"\n}"
+            },
+            "url": "{{baseUrl}}/media/confirm"
+          }
         }
       ]
     },

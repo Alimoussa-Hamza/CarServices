@@ -1,5 +1,7 @@
 import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
 import {
+  ConfirmMediaUploadDto,
+  ConfirmMediaUploadSchema,
   CreateMediaUploadUrlDto,
   CreateMediaUploadUrlSchema,
 } from '@carservice/shared-types';
@@ -24,5 +26,15 @@ export class MediaController {
     dto: CreateMediaUploadUrlDto,
   ) {
     return this.media.createUploadUrl(user, dto);
+  }
+
+  @Post('confirm')
+  @HttpCode(200)
+  confirmUpload(
+    @CurrentUser() user: AuthPayload,
+    @Body(new ZodValidationPipe(ConfirmMediaUploadSchema))
+    dto: ConfirmMediaUploadDto,
+  ) {
+    return this.media.confirmUpload(user, dto);
   }
 }

@@ -1262,5 +1262,44 @@ describe('api-client', () => {
         },
       );
     });
+
+    it('confirme un upload et attache une booking_photo', async () => {
+      const payload = {
+        id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+        bookingId: '77777777-7777-4777-8777-777777777777',
+        photoType: 'before',
+        uploadedBy: 'client',
+        fileKey: 'bookings/77777777-7777-4777-8777-777777777777/before/id.jpg',
+        fileUrl:
+          'https://cdn.carservice.test/bookings/77777777-7777-4777-8777-777777777777/before/id.jpg',
+        createdAt: '2026-09-15T10:00:00.000Z',
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: payload }));
+      initApiClient({
+        baseUrl: 'http://api.test',
+        getAccessToken: jest.fn().mockResolvedValue('client.jwt'),
+      });
+
+      await expect(
+        api.media.confirmUpload({
+          fileKey:
+            'bookings/77777777-7777-4777-8777-777777777777/before/id.jpg',
+        }),
+      ).resolves.toEqual(payload);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/media/confirm',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer client.jwt',
+          },
+          body: JSON.stringify({
+            fileKey:
+              'bookings/77777777-7777-4777-8777-777777777777/before/id.jpg',
+          }),
+        },
+      );
+    });
   });
 });

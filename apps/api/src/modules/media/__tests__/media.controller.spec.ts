@@ -30,4 +30,23 @@ describe('MediaController', () => {
     });
     expect(media.createUploadUrl).toHaveBeenCalledWith(user, dto);
   });
+
+  it('délègue POST /media/confirm au service', async () => {
+    const media = {
+      confirmUpload: jest.fn().mockResolvedValue({
+        data: { id: 'photo-1', fileKey: 'bookings/b/before/id.jpg' },
+      }),
+    };
+    const controller = new MediaController(media as unknown as MediaService);
+    const user = {
+      sub: '11111111-1111-4111-8111-111111111111',
+      role: UserRole.client,
+    };
+    const dto = { fileKey: 'bookings/b/before/id.jpg' };
+
+    await expect(controller.confirmUpload(user, dto)).resolves.toMatchObject({
+      data: { id: 'photo-1' },
+    });
+    expect(media.confirmUpload).toHaveBeenCalledWith(user, dto);
+  });
 });

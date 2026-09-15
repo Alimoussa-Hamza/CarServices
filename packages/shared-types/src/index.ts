@@ -1037,3 +1037,19 @@ export const MediaUploadUrlResponseSchema = z.object({
   expiresAt: z.string().datetime(),
 });
 export type MediaUploadUrlResponse = z.infer<typeof MediaUploadUrlResponseSchema>;
+
+export const ConfirmMediaUploadSchema = z.object({
+  fileKey: z.string().min(1).max(500),
+});
+export type ConfirmMediaUploadDto = z.infer<typeof ConfirmMediaUploadSchema>;
+
+export const ConfirmedMediaUploadSchema = z.object({
+  id: z.string().uuid().nullable(),
+  bookingId: z.string().uuid().nullable(),
+  photoType: BookingPhotoTypeSchema.nullable(),
+  uploadedBy: BookingPhotoUploaderSchema.nullable(),
+  fileKey: z.string().min(1).max(500),
+  fileUrl: z.string().url(),
+  createdAt: z.string().datetime(),
+});
+export type ConfirmedMediaUpload = z.infer<typeof ConfirmedMediaUploadSchema>;

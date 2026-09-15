@@ -20,7 +20,7 @@
 | G — Backend Pros & KYC (M04) | 8/8 | — terminé |
 | H — Bookings (M05) | 10/10 | — terminé |
 | I — Paiements Stripe (M06) | 6/6 | — terminé |
-| J — Médias & preuves (M07) | 2/4 | CS-M07-S03 confirm |
+| J — Médias & preuves (M07) | 3/4 | CS-M07-S04 min photos |
 
 ---
 
@@ -281,7 +281,10 @@
 - [x] **CS-M07-S02** POST `/media/upload-url` presigned
   - [x] PUT URL TTL 15 min (mock `cdn.carservice.test` sans clés)
   - [x] MIME whitelist + max 10 Mo photo / 5 Mo PDF
-- [ ] **CS-M07-S03** POST `/media/confirm` + link booking
+- [x] **CS-M07-S03** POST `/media/confirm` + link booking
+  - [x] Parse `fileKey` (`bookings/{id}/{type}/{uuid}.ext` / `kyc/{userId}/{uuid}.ext`)
+  - [x] HeadObject S3 (skip mock) + `booking_photos` idempotent sur `fileUrl`
+  - [x] KYC confirm sans écriture `booking_photos`
 - [ ] **CS-M07-S04** Validation min photos clôture
 
 ---
