@@ -21,7 +21,7 @@
 | H — Bookings (M05) | 10/10 | — terminé |
 | I — Paiements Stripe (M06) | 6/6 | — terminé |
 | J — Médias & preuves (M07) | 4/4 | — terminé |
-| K — Avis & litiges (M08) | 2/4 | CS-M08-S03 GET reviews |
+| K — Avis & litiges (M08) | 3/4 | CS-M08-S04 fenêtre 72h/48h |
 
 ---
 
@@ -301,7 +301,8 @@
 - [x] **CS-M08-S02** POST `/disputes` + freeze payout
   - [x] Table `disputes` + `payments.payout_frozen_at`
   - [x] Fenêtre 48 h + `completed` → `disputed` (RG-DISPUTE-01/03)
-- [ ] **CS-M08-S03** GET reviews public pro
+- [x] **CS-M08-S03** GET reviews public pro
+  - [x] GET `/reviews/provider/:id` public, avis non masqués, pagination
 - [ ] **CS-M08-S04** Fenêtre 72h avis / 48h litige
 
 ---

@@ -9,7 +9,15 @@ import { PrismaService } from '../../src/prisma/prisma.service';
 export const E2E_OTP = '123456';
 export const E2E_LYON = { lat: 45.764, lng: 4.8357 };
 
-export type Envelope<T> = { data: T; meta?: { requestId: string } };
+export type Envelope<T> = {
+  data: T;
+  meta?: {
+    requestId: string;
+    page?: number;
+    pageSize?: number;
+    total?: number;
+  };
+};
 export type ErrorEnvelope = {
   error: { code: string; message: string };
   meta?: { requestId: string };

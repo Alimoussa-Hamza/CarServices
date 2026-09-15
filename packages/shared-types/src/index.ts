@@ -1099,6 +1099,38 @@ export const CreatedReviewSchema = z.object({
 });
 export type CreatedReview = z.infer<typeof CreatedReviewSchema>;
 
+export const ListProviderReviewsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(50).default(20),
+});
+export type ListProviderReviewsQuery = z.infer<
+  typeof ListProviderReviewsQuerySchema
+>;
+
+export const PublicReviewSchema = z.object({
+  id: z.string().uuid(),
+  rating: z.number().int().min(1).max(5),
+  comment: z.string().nullable(),
+  tags: z.array(ReviewTagSchema),
+  createdAt: z.string().datetime(),
+});
+export type PublicReview = z.infer<typeof PublicReviewSchema>;
+
+export const ProviderReviewsResponseSchema = z.object({
+  provider: z.object({
+    id: z.string().uuid(),
+    ratingAvg: z.number(),
+    ratingCount: z.number().int().nonnegative(),
+  }),
+  items: z.array(PublicReviewSchema),
+  page: z.number().int().min(1),
+  pageSize: z.number().int().min(1),
+  total: z.number().int().nonnegative(),
+});
+export type ProviderReviewsResponse = z.infer<
+  typeof ProviderReviewsResponseSchema
+>;
+
 export const DisputeReasonSchema = z.enum([
   'quality',
   'delay',

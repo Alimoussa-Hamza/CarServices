@@ -32,4 +32,24 @@ describe('ReviewsController', () => {
       tags: [...dto.tags],
     });
   });
+
+  it('délègue GET /reviews/provider/:id au service', async () => {
+    const reviews = {
+      listByProvider: jest.fn().mockResolvedValue({
+        data: { items: [], total: 0 },
+      }),
+    };
+    const controller = new ReviewsController(
+      reviews as unknown as ReviewsService,
+    );
+    const providerId = '33333333-3333-4333-8333-333333333333';
+    const query = { page: 1, pageSize: 20 };
+
+    await expect(
+      controller.listByProvider(providerId, query),
+    ).resolves.toMatchObject({
+      data: { total: 0 },
+    });
+    expect(reviews.listByProvider).toHaveBeenCalledWith(providerId, query);
+  });
 });

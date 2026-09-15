@@ -1342,6 +1342,45 @@ describe('api-client', () => {
         }),
       });
     });
+
+    it('liste les avis publics d’un pro sans JWT', async () => {
+      const payload = {
+        provider: {
+          id: '33333333-3333-4333-8333-333333333333',
+          ratingAvg: 5,
+          ratingCount: 1,
+        },
+        items: [
+          {
+            id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+            rating: 5,
+            comment: 'Impeccable',
+            tags: ['quality'],
+            createdAt: '2026-09-15T21:00:00.000Z',
+          },
+        ],
+        page: 1,
+        pageSize: 20,
+        total: 1,
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: payload }));
+      initApiClient({ baseUrl: 'http://api.test' });
+
+      await expect(
+        api.reviews.listByProvider('33333333-3333-4333-8333-333333333333', {
+          page: 1,
+          pageSize: 20,
+        }),
+      ).resolves.toEqual(payload);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/reviews/provider/33333333-3333-4333-8333-333333333333?page=1&pageSize=20',
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+    });
   });
 
   describe('api.disputes', () => {

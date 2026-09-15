@@ -6,7 +6,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import type { CreateReviewDto, ReviewTag } from '@carservice/shared-types';
+import type {
+  CreateReviewDto,
+  ListProviderReviewsQuery,
+  ReviewTag,
+} from '@carservice/shared-types';
 import { AuthPayload } from '../../common/decorators/current-user.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
 
@@ -138,5 +142,64 @@ export class ReviewsService {
       }
       throw error;
     }
+  }
+
+  async listByProvider(providerId: string, query: ListProviderReviewsQuery) {
+    const provider = await this.prisma.providerProfile.findUnique({
+      where: { id: providerId },
+      select: { id: true, ratingAvg: true, ratingCount: true },
+    });
+
+    if (!provider) {
+      throw new NotFoundException({
+        code: 'PROVIDER_NOT_FOUND',
+        message: 'Prestataire introuvable.',
+        details: [],
+      });
+    }
+
+    const where = { providerId, isHidden: false };
+    const skip = (query.page - 1) * query.pageSize;
+    const [rows, total] = await this.prisma.$transaction([
+      this.prisma.review.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: query.pageSize,
+        select: {
+          id: true,
+          rating: true,
+          comment: true,
+          tags: true,
+          createdAt: true,
+        },
+      }),
+      this.prisma.review.count({ where }),
+    ]);
+
+    return {
+      data: {
+        provider: {
+          id: provider.id,
+          ratingAvg: Number(provider.ratingAvg),
+          ratingCount: provider.ratingCount,
+        },
+        items: rows.map((row) => ({
+          id: row.id,
+          rating: row.rating,
+          comment: row.comment,
+          tags: row.tags as ReviewTag[],
+          createdAt: row.createdAt.toISOString(),
+        })),
+        page: query.page,
+        pageSize: query.pageSize,
+        total,
+      },
+      meta: {
+        page: query.page,
+        pageSize: query.pageSize,
+        total,
+      },
+    };
   }
 }

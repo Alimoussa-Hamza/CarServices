@@ -147,3 +147,105 @@ describe('ReviewsService.create', () => {
     ).rejects.toBeInstanceOf(ConflictException);
   });
 });
+
+describe('ReviewsService.listByProvider', () => {
+  const providerId = '33333333-3333-4333-8333-333333333333';
+  const now = new Date('2026-09-15T21:00:00.000Z');
+
+  function buildListService(provider: object | null) {
+    const prisma = {
+      providerProfile: {
+        findUnique: jest.fn().mockResolvedValue(provider),
+      },
+      review: {
+        findMany: jest.fn().mockResolvedValue([
+          {
+            id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+            rating: 5,
+            comment: 'Impeccable',
+            tags: ['quality'],
+            createdAt: now,
+          },
+        ]),
+        count: jest.fn().mockResolvedValue(1),
+      },
+      $transaction: jest.fn(),
+    };
+    prisma.$transaction.mockImplementation((ops: unknown[]) =>
+      Promise.all(ops as Promise<unknown>[]),
+    );
+
+    return {
+      service: new ReviewsService(prisma as unknown as PrismaService),
+      prisma,
+    };
+  }
+
+  it('liste les avis publics non masqués (RG-QUAL-02)', async () => {
+    const { service, prisma } = buildListService({
+      id: providerId,
+      ratingAvg: 5,
+      ratingCount: 1,
+    });
+
+    const result = await service.listByProvider(providerId, {
+      page: 1,
+      pageSize: 20,
+    });
+
+    expect(result.data.provider).toEqual({
+      id: providerId,
+      ratingAvg: 5,
+      ratingCount: 1,
+    });
+    expect(result.data.items).toEqual([
+      {
+        id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        rating: 5,
+        comment: 'Impeccable',
+        tags: ['quality'],
+        createdAt: now.toISOString(),
+      },
+    ]);
+    expect(result.meta).toEqual({ page: 1, pageSize: 20, total: 1 });
+    expect(prisma.review.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { providerId, isHidden: false },
+        orderBy: { createdAt: 'desc' },
+        skip: 0,
+        take: 20,
+      }),
+    );
+  });
+
+  it('exclut les avis masqués du total', async () => {
+    const { service, prisma } = buildListService({
+      id: providerId,
+      ratingAvg: 5,
+      ratingCount: 1,
+    });
+    prisma.review.findMany.mockResolvedValue([]);
+    prisma.review.count.mockResolvedValue(0);
+
+    const result = await service.listByProvider(providerId, {
+      page: 1,
+      pageSize: 20,
+    });
+
+    expect(result.data.items).toEqual([]);
+    expect(result.data.total).toBe(0);
+    expect(prisma.review.count).toHaveBeenCalledWith({
+      where: { providerId, isHidden: false },
+    });
+  });
+
+  it('refuse un prestataire introuvable', async () => {
+    const { service } = buildListService(null);
+
+    await expect(
+      service.listByProvider(providerId, { page: 1, pageSize: 20 }),
+    ).rejects.toMatchObject({
+      response: { code: 'PROVIDER_NOT_FOUND' },
+    });
+  });
+});

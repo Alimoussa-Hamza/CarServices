@@ -849,6 +849,34 @@ JWT **client**. 1 avis / booking (`REVIEW_ALREADY_EXISTS`). Booking `completed` 
 
 Erreurs : `VALIDATION_ERROR` (400), `REVIEW_BOOKING_NOT_COMPLETED` (400), `FORBIDDEN` (403), `BOOKING_NOT_FOUND` (404), `REVIEW_ALREADY_EXISTS` (409), `BOOKING_NOT_ASSIGNED` (409).
 
+### GET `/reviews/provider/:id`
+
+**Public** (pas de JWT). `:id` = `provider_profiles.id`. Liste les avis **non masqués** (RG-QUAL-02), plus récents d’abord. Pas d’identité client. Pagination offset `page` (défaut 1) / `pageSize` (défaut 20, max 50).
+
+```json
+// Response 200
+{
+  "data": {
+    "provider": { "id": "uuid", "ratingAvg": 5, "ratingCount": 1 },
+    "items": [
+      {
+        "id": "uuid",
+        "rating": 5,
+        "comment": "Impeccable",
+        "tags": ["quality", "punctuality"],
+        "createdAt": "..."
+      }
+    ],
+    "page": 1,
+    "pageSize": 20,
+    "total": 1
+  },
+  "meta": { "page": 1, "pageSize": 20, "total": 1, "requestId": "..." }
+}
+```
+
+Erreurs : `VALIDATION_ERROR` (400), `PROVIDER_NOT_FOUND` (404).
+
 ---
 
 ## Disputes
@@ -987,6 +1015,7 @@ Erreurs : `FORBIDDEN` (403), `BOOKING_NOT_FOUND` (404), `PAYMENT_NOT_FOUND` / `P
 | `BOOKING_DISPUTE_WINDOW_EXPIRED` | 409 | Litige hors délai 48 h |
 | `REVIEW_BOOKING_NOT_COMPLETED` | 400 | Avis hors mission `completed` |
 | `REVIEW_ALREADY_EXISTS` | 409 | Un avis existe déjà pour ce booking |
+| `PROVIDER_NOT_FOUND` | 404 | Prestataire introuvable |
 | `DISPUTE_ALREADY_EXISTS` | 409 | Un litige existe déjà pour ce booking |
 | `BOOKING_ALREADY_ACCEPTED` | 409 | Mission déjà prise |
 | `BOOKING_NOT_OFFERED` | 403 | Mission hors broadcast du pro |

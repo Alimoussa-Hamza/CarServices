@@ -1380,4 +1380,69 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
       'BOOKING_NOT_ASSIGNED',
     );
   });
+
+  it('CS-M08-S03 GET /reviews/provider/:id public', async () => {
+    const booking = await prisma.booking.findUniqueOrThrow({
+      where: { id: bookingId },
+      select: { providerId: true },
+    });
+    const providerId = booking.providerId;
+    expect(providerId).toBeTruthy();
+
+    const listed = await http()
+      .get(`/api/v1/reviews/provider/${providerId}`)
+      .expect(200);
+    const payload = (
+      listed.body as Envelope<{
+        provider: { id: string; ratingAvg: number; ratingCount: number };
+        items: Array<{
+          rating: number;
+          comment: string | null;
+          clientId?: string;
+        }>;
+        total: number;
+      }>
+    ).data;
+    expect(payload.provider).toMatchObject({
+      id: providerId,
+      ratingAvg: 5,
+      ratingCount: 1,
+    });
+    expect(payload.items).toHaveLength(1);
+    expect(payload.items[0]).toMatchObject({
+      rating: 5,
+      comment: 'Impeccable',
+    });
+    expect(payload.items[0]).not.toHaveProperty('clientId');
+    expect(listed.body.meta).toMatchObject({
+      page: 1,
+      pageSize: 20,
+      total: 1,
+    });
+
+    await prisma.review.updateMany({
+      where: { providerId: providerId! },
+      data: { isHidden: true },
+    });
+    const hidden = await http()
+      .get(`/api/v1/reviews/provider/${providerId}`)
+      .expect(200);
+    expect(
+      (hidden.body as Envelope<{ items: unknown[]; total: number }>).data.items,
+    ).toHaveLength(0);
+    expect((hidden.body as Envelope<{ total: number }>).data.total).toBe(0);
+    await prisma.review.updateMany({
+      where: { providerId: providerId! },
+      data: { isHidden: false },
+    });
+
+    const missing = await http()
+      .get(
+        '/api/v1/reviews/provider/00000000-0000-4000-8000-000000000000',
+      )
+      .expect(404);
+    expect((missing.body as ErrorEnvelope).error.code).toBe(
+      'PROVIDER_NOT_FOUND',
+    );
+  });
 });

@@ -18,6 +18,8 @@ import {
   CreateMediaUploadUrlDto,
   CreateReviewDto,
   CreatedReviewSchema,
+  ListProviderReviewsQuery,
+  ProviderReviewsResponseSchema,
   CreateDisputeDto,
   CreatedDisputeSchema,
   DeclineBookingDto,
@@ -310,6 +312,22 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(dto),
       }).then((data) => CreatedReviewSchema.parse(data)),
+    listByProvider: (
+      providerId: string,
+      query: Partial<ListProviderReviewsQuery> = {},
+    ) => {
+      const params = new URLSearchParams();
+      if (query.page !== undefined) {
+        params.set('page', String(query.page));
+      }
+      if (query.pageSize !== undefined) {
+        params.set('pageSize', String(query.pageSize));
+      }
+      const qs = params.toString();
+      return apiRequest(
+        `/api/v1/reviews/provider/${providerId}${qs ? `?${qs}` : ''}`,
+      ).then((data) => ProviderReviewsResponseSchema.parse(data));
+    },
   },
   disputes: {
     create: (dto: CreateDisputeDto) =>
@@ -327,6 +345,7 @@ export type {
   CreateBookingDto,
   CreateMediaUploadUrlDto,
   CreateReviewDto,
+  ListProviderReviewsQuery,
   CreateDisputeDto,
   DeclineBookingDto,
   PatchBookingStatusDto,

@@ -27,6 +27,8 @@ import {
   CreateMediaUploadUrlSchema,
   CreateReviewSchema,
   CreatedReviewSchema,
+  ListProviderReviewsQuerySchema,
+  ProviderReviewsResponseSchema,
   CreateDisputeSchema,
   CreatedDisputeSchema,
   MEDIA_UPLOAD_TTL_SECONDS,
@@ -1709,6 +1711,51 @@ describe('CreateReviewSchema / CreatedReviewSchema', () => {
         provider: { ratingAvg: 5, ratingCount: 1 },
       }),
     ).toMatchObject({ provider: { ratingCount: 1 } });
+  });
+});
+
+describe('ListProviderReviewsQuerySchema / ProviderReviewsResponseSchema', () => {
+  it('applique page=1 et pageSize=20 par défaut', () => {
+    expect(ListProviderReviewsQuerySchema.parse({})).toEqual({
+      page: 1,
+      pageSize: 20,
+    });
+  });
+
+  it('coerce les query strings', () => {
+    expect(
+      ListProviderReviewsQuerySchema.parse({ page: '2', pageSize: '10' }),
+    ).toEqual({ page: 2, pageSize: 10 });
+  });
+
+  it('refuse un pageSize trop grand', () => {
+    expect(
+      ListProviderReviewsQuerySchema.safeParse({ pageSize: 51 }).success,
+    ).toBe(false);
+  });
+
+  it('valide une liste publique sans identité client', () => {
+    expect(
+      ProviderReviewsResponseSchema.parse({
+        provider: {
+          id: '33333333-3333-4333-8333-333333333333',
+          ratingAvg: 5,
+          ratingCount: 1,
+        },
+        items: [
+          {
+            id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+            rating: 5,
+            comment: 'Impeccable',
+            tags: ['quality'],
+            createdAt: '2026-09-15T21:00:00.000Z',
+          },
+        ],
+        page: 1,
+        pageSize: 20,
+        total: 1,
+      }),
+    ).toMatchObject({ total: 1, provider: { ratingCount: 1 } });
   });
 });
 

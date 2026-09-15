@@ -869,6 +869,14 @@
             },
             "url": "{{baseUrl}}/reviews"
           }
+        },
+        {
+          "name": "List Provider Reviews",
+          "request": {
+            "method": "GET",
+            "description": "Public. Avis non masqués d’un pro (RG-QUAL-02). Pagination page / pageSize. Pas d’identité client.",
+            "url": "{{baseUrl}}/reviews/provider/{{providerId}}?page=1&pageSize=20"
+          }
         }
       ]
     },
