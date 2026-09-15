@@ -64,6 +64,40 @@ export async function login(
   return data.accessToken;
 }
 
+/** Admin OTP uses role `client`; existing admin users keep `UserRole.admin`. */
+export async function loginAdmin(
+  http: Http,
+  phone: string,
+  userIds: string[],
+  prisma: PrismaService,
+): Promise<string> {
+  await http()
+    .post('/api/v1/auth/otp/send')
+    .send({ phone, role: 'client' })
+    .expect(201);
+
+  const verified = await http()
+    .post('/api/v1/auth/otp/verify')
+    .send({ phone, role: 'client', code: E2E_OTP, acceptTerms: true })
+    .expect(201);
+
+  const data = (
+    verified.body as Envelope<{
+      accessToken: string;
+      user: { id: string; role: string };
+    }>
+  ).data;
+  userIds.push(data.user.id);
+
+  const user = await prisma.user.findUniqueOrThrow({
+    where: { id: data.user.id },
+  });
+  expect(user.role).toBe(UserRole.admin);
+  expect(data.user.role).toBe('admin');
+
+  return data.accessToken;
+}
+
 export function futureSlotIso(daysAhead = 7): string {
   const slot = new Date();
   slot.setUTCDate(slot.getUTCDate() + daysAhead);

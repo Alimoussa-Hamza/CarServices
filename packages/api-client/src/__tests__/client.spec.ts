@@ -1194,4 +1194,32 @@ describe('api-client', () => {
       });
     });
   });
+
+  describe('api.admin', () => {
+    it('rembourse un booking (admin)', async () => {
+      const refunded = {
+        bookingId: '77777777-7777-4777-8777-777777777777',
+        status: 'cancelled_by_admin' as const,
+        paymentStatus: 'refunded' as const,
+        refundCents: 9000,
+        currency: 'EUR' as const,
+        action: 'canceled_authorization' as const,
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: refunded }));
+
+      await expect(
+        api.admin.refundBooking('77777777-7777-4777-8777-777777777777', {
+          reason: 'Geste commercial',
+        }),
+      ).resolves.toEqual(refunded);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/admin/bookings/77777777-7777-4777-8777-777777777777/refund',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason: 'Geste commercial' }),
+        },
+      );
+    });
+  });
 });

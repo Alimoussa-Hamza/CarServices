@@ -716,7 +716,7 @@ JWT client ou provider. Motif obligatoire côté pro (RG-CANCEL-01). Impossible 
 }
 ```
 
-Grille client (sur `pricingSnapshot.totalCents`) :
+L’annulation client/pro libère l’auth Stripe (RG-PAY-05) : refund 100 % → cancel PaymentIntent ; frais RG-CANCEL → capture du seul `feeCents`.
 
 | Fenêtre | Délai | Frais |
 |---------|-------|-------|
@@ -826,7 +826,32 @@ Erreurs : `STRIPE_WEBHOOK_INVALID_SIGNATURE` (400), `VALIDATION_ERROR` (400).
 | POST | `/admin/providers/:id/reject` | admin | Rejeter KYC |
 | CRUD | `/admin/catalog/*` | admin | Offres, options, zones |
 | GET | `/admin/bookings` | admin | Tous bookings |
-| POST | `/admin/bookings/:id/refund` | admin | Remboursement |
+### POST `/admin/bookings/:id/refund`
+
+JWT **admin**. Remboursement total (RG-PAY-05) : si le paiement est `authorized`, **cancel** du PaymentIntent (libération d’auth) ; s’il est `captured`, **refund** Stripe. Le booking passe à `cancelled_by_admin` si la transition est autorisée (pas `in_progress` / `completed` / `disputed`). Sans `STRIPE_SECRET_KEY` : mock local.
+
+```json
+// Request
+{ "reason": "Geste commercial" }
+
+// Response 200
+{
+  "data": {
+    "bookingId": "uuid",
+    "status": "cancelled_by_admin",
+    "paymentStatus": "refunded",
+    "refundCents": 9700,
+    "currency": "EUR",
+    "action": "canceled_authorization"
+  }
+}
+```
+
+`action` : `canceled_authorization` | `refunded` | `partial_capture` | `noop`.
+
+L’annulation client/pro (`PATCH /bookings/:id/cancel`) appelle la même libération : refund 100 % → cancel PI ; frais RG-CANCEL → capture du seul `feeCents` (le reste de l’auth est relâché).
+
+Erreurs : `FORBIDDEN` (403), `BOOKING_NOT_FOUND` (404), `PAYMENT_NOT_FOUND` / `PAYMENT_NOT_REFUNDABLE` (409), `STRIPE_CANCEL_FAILED` / `STRIPE_REFUND_FAILED` / `STRIPE_REQUEST_FAILED` (503).
 | GET | `/admin/disputes` | admin | File litiges |
 | PATCH | `/admin/disputes/:id/resolve` | admin | Résoudre |
 | GET/PATCH | `/admin/config` | admin | Commission, timeouts |
@@ -862,6 +887,7 @@ Erreurs : `STRIPE_WEBHOOK_INVALID_SIGNATURE` (400), `VALIDATION_ERROR` (400).
 | `SLOT_UNAVAILABLE` | 409 | Créneau complet |
 | `PAYMENT_FAILED` | 402 | Paiement refusé |
 | `STRIPE_WEBHOOK_INVALID_SIGNATURE` | 400 | Signature webhook Stripe invalide |
+| `PAYMENT_NOT_REFUNDABLE` | 409 | Paiement failed / non remboursable |
 | `OTP_RATE_LIMITED` | 429 | Trop de tentatives OTP |
 
 ---

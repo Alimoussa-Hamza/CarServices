@@ -2,10 +2,12 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   PLATFORM_COMMISSION_RATE,
   computePaymentSplit,
+  type PaymentStatus,
   type StripeWebhookEvent,
 } from '@carservice/shared-types';
 import { Prisma } from '@prisma/client';
@@ -30,6 +32,25 @@ export type BookingPaymentCapture = {
   currency: 'EUR';
   status: 'captured';
   capturedAt: string;
+};
+
+export type PaymentReleaseResult = {
+  action:
+    | 'canceled_authorization'
+    | 'refunded'
+    | 'partial_capture'
+    | 'noop';
+  paymentStatus: PaymentStatus | null;
+  refundCents: number;
+};
+
+export type AdminRefundResult = {
+  bookingId: string;
+  status: string;
+  paymentStatus: PaymentStatus;
+  refundCents: number;
+  currency: 'EUR';
+  action: PaymentReleaseResult['action'];
 };
 
 @Injectable()
@@ -149,6 +170,201 @@ export class PaymentsService {
       currency: 'EUR',
       status: 'captured',
       capturedAt: (updated.capturedAt ?? now).toISOString(),
+    };
+  }
+
+  async releaseOrRefund(
+    bookingId: string,
+    refundCents: number,
+    now = new Date(),
+    options: { required?: boolean } = {},
+  ): Promise<PaymentReleaseResult> {
+    if (!Number.isInteger(refundCents) || refundCents < 0) {
+      throw new BadRequestException({
+        code: 'PAYMENT_AMOUNT_INVALID',
+        message: 'Montant de remboursement invalide.',
+        details: [],
+      });
+    }
+
+    const payment = await this.prisma.payment.findUnique({
+      where: { bookingId },
+    });
+
+    if (!payment) {
+      if (options.required) {
+        throw new ConflictException({
+          code: 'PAYMENT_NOT_FOUND',
+          message: 'Aucun paiement à rembourser pour cette réservation.',
+          details: [],
+        });
+      }
+      return { action: 'noop', paymentStatus: null, refundCents: 0 };
+    }
+
+    if (payment.status === 'refunded') {
+      return {
+        action: 'noop',
+        paymentStatus: 'refunded',
+        refundCents: payment.amountCents,
+      };
+    }
+
+    if (payment.status === 'failed') {
+      if (options.required) {
+        throw new ConflictException({
+          code: 'PAYMENT_NOT_REFUNDABLE',
+          message: 'Ce paiement ne peut pas être remboursé.',
+          details: { status: payment.status },
+        });
+      }
+      return { action: 'noop', paymentStatus: 'failed', refundCents: 0 };
+    }
+
+    const amount = payment.amountCents;
+    const toRefund = Math.min(refundCents, amount);
+
+    if (payment.status === 'authorized') {
+      if (toRefund >= amount) {
+        await this.stripe.cancelPaymentIntent(payment.stripePaymentIntentId);
+        await this.prisma.payment.update({
+          where: { id: payment.id },
+          data: { status: 'refunded', refundedAt: now },
+        });
+        return {
+          action: 'canceled_authorization',
+          paymentStatus: 'refunded',
+          refundCents: amount,
+        };
+      }
+
+      const feeCents = amount - toRefund;
+      await this.stripe.capturePaymentIntent({
+        paymentIntentId: payment.stripePaymentIntentId,
+        amountCents: feeCents,
+        applicationFeeCents: 0,
+      });
+      await this.prisma.payment.update({
+        where: { id: payment.id },
+        data: { status: 'captured', capturedAt: now },
+      });
+      return {
+        action: 'partial_capture',
+        paymentStatus: 'captured',
+        refundCents: toRefund,
+      };
+    }
+
+    if (toRefund <= 0) {
+      return {
+        action: 'noop',
+        paymentStatus: 'captured',
+        refundCents: 0,
+      };
+    }
+
+    await this.stripe.refundPaymentIntent({
+      paymentIntentId: payment.stripePaymentIntentId,
+      amountCents: toRefund,
+    });
+
+    if (toRefund >= amount) {
+      await this.prisma.payment.update({
+        where: { id: payment.id },
+        data: { status: 'refunded', refundedAt: now },
+      });
+      return {
+        action: 'refunded',
+        paymentStatus: 'refunded',
+        refundCents: amount,
+      };
+    }
+
+    return {
+      action: 'refunded',
+      paymentStatus: 'captured',
+      refundCents: toRefund,
+    };
+  }
+
+  async adminRefund(
+    bookingId: string,
+    reason: string | undefined,
+    adminUserId: string,
+    now = new Date(),
+  ): Promise<{ data: AdminRefundResult }> {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+    });
+
+    if (!booking) {
+      throw new NotFoundException({
+        code: 'BOOKING_NOT_FOUND',
+        message: 'Réservation introuvable.',
+        details: [],
+      });
+    }
+
+    const payment = await this.prisma.payment.findUnique({
+      where: { bookingId },
+    });
+    if (!payment) {
+      throw new ConflictException({
+        code: 'PAYMENT_NOT_FOUND',
+        message: 'Aucun paiement à rembourser pour cette réservation.',
+        details: [],
+      });
+    }
+
+    const released = await this.releaseOrRefund(
+      bookingId,
+      payment.amountCents,
+      now,
+      { required: true },
+    );
+
+    let status = booking.status;
+    if (
+      this.stateMachine.canTransition(
+        booking.status,
+        'cancelled_by_admin',
+        'admin',
+      )
+    ) {
+      const history = this.stateMachine.buildHistoryEntry(
+        booking.status,
+        'cancelled_by_admin',
+        'admin',
+        { actorId: adminUserId, reason },
+      );
+      await this.prisma.$transaction(async (tx) => {
+        await tx.booking.update({
+          where: { id: bookingId },
+          data: { status: 'cancelled_by_admin' },
+        });
+        await tx.bookingStatusHistory.create({
+          data: {
+            bookingId,
+            fromStatus: history.fromStatus,
+            toStatus: history.toStatus,
+            actorType: history.actorType,
+            actorId: history.actorId,
+            reason: history.reason,
+          },
+        });
+      });
+      status = 'cancelled_by_admin';
+    }
+
+    return {
+      data: {
+        bookingId,
+        status,
+        paymentStatus: released.paymentStatus ?? 'refunded',
+        refundCents: released.refundCents,
+        currency: 'EUR',
+        action: released.action,
+      },
     };
   }
 

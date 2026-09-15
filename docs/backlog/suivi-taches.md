@@ -19,7 +19,7 @@
 | F — Apps clientes | 3/6 | — en attente maquettes |
 | G — Backend Pros & KYC (M04) | 8/8 | — terminé |
 | H — Bookings (M05) | 10/10 | — terminé |
-| I — Paiements Stripe (M06) | 4/6 | CS-M06-S05 Refund |
+| I — Paiements Stripe (M06) | 5/6 | CS-M06-S06 charges_enabled |
 
 ---
 
@@ -261,7 +261,9 @@
   - [x] `POST /webhooks/stripe` — HMAC `Stripe-Signature` si `STRIPE_WEBHOOK_SECRET`
   - [x] Queue BullMQ `payments` / job `process-stripe-webhook`
   - [x] Table `stripe_events` (event id unique) + payment_failed → booking `expired`
-- [ ] **CS-M06-S05** Refund admin + annulation auth
+- [x] **CS-M06-S05** Refund admin + annulation auth
+  - [x] `POST /admin/bookings/:id/refund` — cancel PI si authorized, refund si captured
+  - [x] Cancel client/pro libère l’auth (RG-PAY-05) / capture partielle des frais RG-CANCEL
 - [ ] **CS-M06-S06** Sync stripe_account charges_enabled
 
 ---

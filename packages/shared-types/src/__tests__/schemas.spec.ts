@@ -19,6 +19,8 @@ import {
   PaymentSchema,
   computePaymentSplit,
   StripeWebhookEventSchema,
+  AdminRefundBookingSchema,
+  AdminRefundResponseSchema,
   BookingActorTypeSchema,
   BookingPhotoTypeSchema,
   BookingPhotoUploaderSchema,
@@ -1507,5 +1509,24 @@ describe('StripeWebhookEventSchema', () => {
         data: { object: {} },
       }).success,
     ).toBe(false);
+  });
+});
+
+describe('AdminRefundBookingSchema / AdminRefundResponseSchema', () => {
+  it('accepte un body vide', () => {
+    expect(AdminRefundBookingSchema.parse(undefined)).toEqual({});
+  });
+
+  it('valide la réponse refund admin', () => {
+    expect(
+      AdminRefundResponseSchema.parse({
+        bookingId: '77777777-7777-4777-8777-777777777777',
+        status: 'cancelled_by_admin',
+        paymentStatus: 'refunded',
+        refundCents: 9000,
+        currency: 'EUR',
+        action: 'canceled_authorization',
+      }),
+    ).toMatchObject({ action: 'canceled_authorization' });
   });
 });

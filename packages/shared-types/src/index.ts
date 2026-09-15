@@ -943,3 +943,26 @@ export const StripeWebhookEventSchema = z.object({
   }),
 });
 export type StripeWebhookEvent = z.infer<typeof StripeWebhookEventSchema>;
+
+export const AdminRefundBookingSchema = z.preprocess(
+  (value) => value ?? {},
+  z.object({
+    reason: z.string().trim().min(3).max(300).optional(),
+  }),
+);
+export type AdminRefundBookingDto = z.infer<typeof AdminRefundBookingSchema>;
+
+export const AdminRefundResponseSchema = z.object({
+  bookingId: z.string().uuid(),
+  status: BookingStatusSchema,
+  paymentStatus: PaymentStatusSchema,
+  refundCents: z.number().int().nonnegative(),
+  currency: z.literal('EUR'),
+  action: z.enum([
+    'canceled_authorization',
+    'refunded',
+    'partial_capture',
+    'noop',
+  ]),
+});
+export type AdminRefundResponse = z.infer<typeof AdminRefundResponseSchema>;

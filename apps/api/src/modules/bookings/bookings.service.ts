@@ -543,6 +543,8 @@ export class BookingsService {
       actor === 'provider' ? providerCancelPenalty(window) : 0;
     const rematchUrgent = actor === 'provider' && window === 'late';
 
+    await this.payments.releaseOrRefund(bookingId, refundCents, now);
+
     const history = this.stateMachine.buildHistoryEntry(
       fromStatus,
       toStatus,

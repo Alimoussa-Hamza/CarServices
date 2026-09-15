@@ -805,6 +805,39 @@
           }
         }
       ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Refund Booking",
+          "request": {
+            "method": "POST",
+            "description": "JWT admin. Cancel PI si authorized, refund si captured (RG-PAY-05). Booking → cancelled_by_admin si transition OK.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Geste commercial\"\n}"
+            },
+            "url": "{{baseUrl}}/admin/bookings/{{bookingId}}/refund"
+          }
+        }
+      ]
     }
   ]
 }

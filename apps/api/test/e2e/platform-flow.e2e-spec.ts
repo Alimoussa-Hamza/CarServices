@@ -19,6 +19,7 @@ import {
   futureSlotIso,
   loadCatalogSeed,
   login,
+  loginAdmin,
 } from './e2e-helpers';
 
 describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
@@ -620,6 +621,10 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
       window: 'free',
       feeCents: 0,
     });
+    const freePayment = await prisma.payment.findUniqueOrThrow({
+      where: { bookingId: freeId },
+    });
+    expect(freePayment.status).toBe('refunded');
 
     const assigned = await http()
       .post('/api/v1/bookings')
@@ -909,5 +914,54 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
       where: { id: createdPayload.booking.id },
     });
     expect(booking.status).toBe('expired');
+  });
+
+  it('CS-M06-S05 refund admin libère l’auth (RG-PAY-05)', async () => {
+    const adminPhone = `+33699${suffix}`;
+    await prisma.user.create({
+      data: { phone: adminPhone, role: 'admin', isActive: true },
+    });
+    const adminToken = await loginAdmin(http, adminPhone, userIds, prisma);
+
+    const created = await http()
+      .post('/api/v1/bookings')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({
+        offerId,
+        vehicleType: 'suv',
+        optionIds: [],
+        addressId: clientAddressId,
+        slotStart: futureSlotIso(9),
+      })
+      .expect(201);
+    const createdPayload = (
+      created.body as Envelope<{ booking: { id: string } }>
+    ).data;
+
+    const refunded = await http()
+      .post(`/api/v1/admin/bookings/${createdPayload.booking.id}/refund`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ reason: 'Geste commercial E2E' })
+      .expect(200);
+    expect(
+      (
+        refunded.body as Envelope<{
+          status: string;
+          paymentStatus: string;
+          action: string;
+        }>
+      ).data,
+    ).toMatchObject({
+      status: 'cancelled_by_admin',
+      paymentStatus: 'refunded',
+      action: 'canceled_authorization',
+    });
+
+    const forbidden = await http()
+      .post(`/api/v1/admin/bookings/${createdPayload.booking.id}/refund`)
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({})
+      .expect(403);
+    expect((forbidden.body as ErrorEnvelope).error.code).toBe('FORBIDDEN');
   });
 });

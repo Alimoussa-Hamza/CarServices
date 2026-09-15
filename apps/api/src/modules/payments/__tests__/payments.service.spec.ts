@@ -38,6 +38,13 @@ function buildService() {
       amountCents: 9000,
       applicationFeeCents: 1800,
     }),
+    cancelPaymentIntent: jest.fn().mockResolvedValue({
+      id: 'pi_mock_abc123',
+      status: 'canceled',
+    }),
+    refundPaymentIntent: jest.fn().mockResolvedValue({
+      id: 're_mock_pi_mock_abc123',
+    }),
   };
   const prisma = {
     payment: {
@@ -278,6 +285,93 @@ describe('PaymentsService.processStripeEvent', () => {
     expect(prisma.payment.update).toHaveBeenCalledWith({
       where: { id: paymentId },
       data: { status: 'captured', capturedAt: now },
+    });
+  });
+});
+
+describe('PaymentsService.releaseOrRefund / adminRefund', () => {
+  const adminId = '99999999-9999-4999-8999-999999999999';
+
+  it('annule l’auth Stripe si authorized (RG-PAY-05)', async () => {
+    const { service, stripe, prisma } = buildService();
+    prisma.payment.findUnique.mockResolvedValue(authorizedPayment);
+
+    await expect(
+      service.releaseOrRefund(bookingId, 9000, now),
+    ).resolves.toEqual({
+      action: 'canceled_authorization',
+      paymentStatus: 'refunded',
+      refundCents: 9000,
+    });
+    expect(stripe.cancelPaymentIntent).toHaveBeenCalledWith('pi_mock_abc123');
+    expect(prisma.payment.update).toHaveBeenCalledWith({
+      where: { id: paymentId },
+      data: { status: 'refunded', refundedAt: now },
+    });
+  });
+
+  it('capture uniquement les frais si remboursement partiel sur auth', async () => {
+    const { service, stripe, prisma } = buildService();
+    prisma.payment.findUnique.mockResolvedValue(authorizedPayment);
+
+    await expect(
+      service.releaseOrRefund(bookingId, 7200, now),
+    ).resolves.toEqual({
+      action: 'partial_capture',
+      paymentStatus: 'captured',
+      refundCents: 7200,
+    });
+    expect(stripe.capturePaymentIntent).toHaveBeenCalledWith({
+      paymentIntentId: 'pi_mock_abc123',
+      amountCents: 1800,
+      applicationFeeCents: 0,
+    });
+  });
+
+  it('rembourse un paiement déjà capturé', async () => {
+    const { service, stripe, prisma } = buildService();
+    prisma.payment.findUnique.mockResolvedValue({
+      ...authorizedPayment,
+      status: 'captured',
+      capturedAt: now,
+    });
+
+    await expect(
+      service.releaseOrRefund(bookingId, 9000, now),
+    ).resolves.toEqual({
+      action: 'refunded',
+      paymentStatus: 'refunded',
+      refundCents: 9000,
+    });
+    expect(stripe.refundPaymentIntent).toHaveBeenCalledWith({
+      paymentIntentId: 'pi_mock_abc123',
+      amountCents: 9000,
+    });
+  });
+
+  it('refund admin annule le booking unpaid (RG-PAY-05)', async () => {
+    const { service, prisma } = buildService();
+    prisma.booking.findUnique.mockResolvedValue({
+      id: bookingId,
+      status: 'pending_provider',
+    });
+    prisma.payment.findUnique.mockResolvedValue(authorizedPayment);
+
+    await expect(
+      service.adminRefund(bookingId, 'Litige qualité', adminId, now),
+    ).resolves.toEqual({
+      data: {
+        bookingId,
+        status: 'cancelled_by_admin',
+        paymentStatus: 'refunded',
+        refundCents: 9000,
+        currency: 'EUR',
+        action: 'canceled_authorization',
+      },
+    });
+    expect(prisma.booking.update).toHaveBeenCalledWith({
+      where: { id: bookingId },
+      data: { status: 'cancelled_by_admin' },
     });
   });
 });

@@ -271,3 +271,64 @@ describe('StripeService.parseWebhookEvent', () => {
     ).toThrow(BadRequestException);
   });
 });
+
+describe('StripeService.cancelPaymentIntent / refundPaymentIntent', () => {
+  it('mocke cancel et refund sans clé Stripe (RG-PAY-05)', async () => {
+    const { service } = serviceWithKey(undefined);
+
+    await expect(service.cancelPaymentIntent('pi_mock_abc123')).resolves.toEqual({
+      id: 'pi_mock_abc123',
+      status: 'canceled',
+    });
+    await expect(
+      service.refundPaymentIntent({
+        paymentIntentId: 'pi_mock_abc123',
+        amountCents: 9000,
+      }),
+    ).resolves.toEqual({ id: 're_mock_pi_mock_abc123' });
+  });
+
+  it('appelle Stripe cancel et refund', async () => {
+    const { service } = serviceWithKey('sk_test_mocklocalkey16chars');
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ id: 'pi_3liveIntentId0001', status: 'canceled' }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ id: 're_3liveRefund0001' }),
+      });
+
+    await withMockedFetch(fetchMock, async () => {
+      await expect(
+        service.cancelPaymentIntent('pi_3liveIntentId0001'),
+      ).resolves.toEqual({
+        id: 'pi_3liveIntentId0001',
+        status: 'canceled',
+      });
+      await expect(
+        service.refundPaymentIntent({
+          paymentIntentId: 'pi_3liveIntentId0001',
+          amountCents: 5000,
+        }),
+      ).resolves.toEqual({ id: 're_3liveRefund0001' });
+    });
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      'https://api.stripe.com/v1/payment_intents/pi_3liveIntentId0001/cancel',
+      expect.objectContaining({ method: 'POST' }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      'https://api.stripe.com/v1/refunds',
+      expect.objectContaining({ method: 'POST' }),
+    );
+    expect(String(fetchMock.mock.calls[1]?.[1]?.body)).toContain(
+      'payment_intent=pi_3liveIntentId0001',
+    );
+    expect(String(fetchMock.mock.calls[1]?.[1]?.body)).toContain('amount=5000');
+  });
+});

@@ -182,6 +182,65 @@ export class StripeService {
     };
   }
 
+  async cancelPaymentIntent(paymentIntentId: string): Promise<{
+    id: string;
+    status: 'canceled';
+  }> {
+    const canceled = {
+      id: paymentIntentId,
+      status: 'canceled' as const,
+    };
+    const secretKey = this.secretKey();
+    if (!secretKey || isLocalMockPaymentIntent(paymentIntentId)) {
+      return canceled;
+    }
+
+    const intent = await this.request<{ id?: string; status?: string }>(
+      `/v1/payment_intents/${encodeURIComponent(paymentIntentId)}/cancel`,
+      new URLSearchParams(),
+      secretKey,
+    );
+
+    if (!intent.id || intent.status !== 'canceled') {
+      throw new ServiceUnavailableException({
+        code: 'STRIPE_CANCEL_FAILED',
+        message: 'Annulation du PaymentIntent impossible.',
+        details: { status: intent.status ?? null },
+      });
+    }
+
+    return { id: intent.id, status: 'canceled' };
+  }
+
+  async refundPaymentIntent(input: {
+    paymentIntentId: string;
+    amountCents: number;
+  }): Promise<{ id: string }> {
+    const secretKey = this.secretKey();
+    if (!secretKey || isLocalMockPaymentIntent(input.paymentIntentId)) {
+      return { id: `re_mock_${input.paymentIntentId}` };
+    }
+
+    const refund = await this.request<{ id?: string }>(
+      '/v1/refunds',
+      new URLSearchParams({
+        payment_intent: input.paymentIntentId,
+        amount: String(input.amountCents),
+      }),
+      secretKey,
+    );
+
+    if (!refund.id) {
+      throw new ServiceUnavailableException({
+        code: 'STRIPE_REFUND_FAILED',
+        message: 'Remboursement Stripe impossible.',
+        details: [],
+      });
+    }
+
+    return { id: refund.id };
+  }
+
   async request<T>(
     path: string,
     body: URLSearchParams,

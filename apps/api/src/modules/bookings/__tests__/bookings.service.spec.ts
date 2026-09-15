@@ -135,6 +135,11 @@ function buildService() {
       status: 'captured',
       capturedAt: '2026-09-13T15:45:00.000Z',
     }),
+    releaseOrRefund: jest.fn().mockResolvedValue({
+      action: 'canceled_authorization',
+      paymentStatus: 'refunded',
+      refundCents: 11200,
+    }),
   };
 
   prisma.clientProfile.upsert.mockResolvedValue({ id: clientId, userId });
@@ -616,7 +621,7 @@ describe('BookingsService.cancel', () => {
   };
 
   it('annule gratuitement un client > 24 h (RG-CANCEL)', async () => {
-    const { service, prisma, redis } = buildService();
+    const { service, prisma, redis, paymentsService } = buildService();
     prisma.booking.findUnique.mockResolvedValue(pendingBooking);
     prisma.booking.update.mockResolvedValue({
       ...pendingBooking,
@@ -639,6 +644,11 @@ describe('BookingsService.cancel', () => {
       providerPenalty: 0,
       rematchUrgent: false,
     });
+    expect(paymentsService.releaseOrRefund).toHaveBeenCalledWith(
+      bookingId,
+      11200,
+      now,
+    );
     expect(redis.client.lpush).toHaveBeenCalledWith(
       'notifications:push',
       expect.stringContaining('booking.cancelled'),
@@ -670,7 +680,7 @@ describe('BookingsService.cancel', () => {
   });
 
   it('refuse l’annulation client après in_progress (RG-CANCEL-02)', async () => {
-    const { service, prisma } = buildService();
+    const { service, prisma, paymentsService } = buildService();
     prisma.booking.findUnique.mockResolvedValue({
       ...pendingBooking,
       status: 'in_progress',
@@ -681,6 +691,7 @@ describe('BookingsService.cancel', () => {
     await expect(
       service.cancel(userId, UserRole.client, bookingId, {}),
     ).rejects.toBeInstanceOf(ConflictException);
+    expect(paymentsService.releaseOrRefund).not.toHaveBeenCalled();
   });
 
   it('exige un motif côté pro (RG-CANCEL-01)', async () => {

@@ -1,4 +1,6 @@
 import {
+  AdminRefundBookingDto,
+  AdminRefundResponseSchema,
   AuthTokensResponseSchema,
   CatalogQuoteDto,
   CatalogQuoteResponseSchema,
@@ -275,9 +277,17 @@ export const api = {
         body: JSON.stringify(dto),
       }).then((data) => CancelledBookingSchema.parse(data)),
   },
+  admin: {
+    refundBooking: (bookingId: string, dto: AdminRefundBookingDto = {}) =>
+      apiRequest(`/api/v1/admin/bookings/${bookingId}/refund`, {
+        method: 'POST',
+        body: JSON.stringify(dto),
+      }).then((data) => AdminRefundResponseSchema.parse(data)),
+  },
 };
 
 export type {
+  AdminRefundBookingDto,
   CatalogQuoteDto,
   CreateBookingDto,
   DeclineBookingDto,
