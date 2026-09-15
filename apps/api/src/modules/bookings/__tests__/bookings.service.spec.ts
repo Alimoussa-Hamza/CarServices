@@ -126,6 +126,15 @@ function buildService() {
       providerNetCents: 8960,
       currency: 'EUR',
     }),
+    captureForBooking: jest.fn().mockResolvedValue({
+      paymentIntentId: 'pi_mock_abc123',
+      amountCents: 11200,
+      commissionCents: 2240,
+      providerNetCents: 8960,
+      currency: 'EUR',
+      status: 'captured',
+      capturedAt: '2026-09-13T15:45:00.000Z',
+    }),
   };
 
   prisma.clientProfile.upsert.mockResolvedValue({ id: clientId, userId });
@@ -396,7 +405,7 @@ function assignedBooking(status: string, photos: unknown[] = []) {
 
 describe('BookingsService.updateStatus', () => {
   it('passe accepted → en_route (RG-BOOK-02)', async () => {
-    const { service, prisma } = buildService();
+    const { service, prisma, paymentsService } = buildService();
     prisma.providerProfile.findUnique.mockResolvedValue({
       id: providerId,
       userId,
@@ -413,6 +422,8 @@ describe('BookingsService.updateStatus', () => {
     });
 
     expect(result.data.status).toBe('en_route');
+    expect(paymentsService.captureForBooking).not.toHaveBeenCalled();
+    expect(paymentsService.captureForBooking).not.toHaveBeenCalled();
     expect(prisma.booking.update).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -513,8 +524,8 @@ describe('BookingsService.updateStatus', () => {
     }
   });
 
-  it('clôture si photos before/after du pro', async () => {
-    const { service, prisma } = buildService();
+  it('clôture si photos before/after du pro et capture le paiement (RG-PAY-02)', async () => {
+    const { service, prisma, paymentsService } = buildService();
     prisma.providerProfile.findUnique.mockResolvedValue({
       id: providerId,
       userId,
@@ -532,6 +543,33 @@ describe('BookingsService.updateStatus', () => {
     });
 
     expect(result.data.status).toBe('completed');
+    expect(paymentsService.captureForBooking).toHaveBeenCalledWith(bookingId);
+  });
+
+  it('n’enregistre pas completed si la capture Stripe échoue (RG-PAY-02)', async () => {
+    const { service, prisma, paymentsService } = buildService();
+    prisma.providerProfile.findUnique.mockResolvedValue({
+      id: providerId,
+      userId,
+    });
+    prisma.booking.findUnique.mockResolvedValue(
+      assignedBooking('in_progress', [
+        { photoType: 'before', uploadedBy: 'provider' },
+        { photoType: 'after', uploadedBy: 'provider' },
+      ]),
+    );
+    paymentsService.captureForBooking.mockRejectedValue(
+      new ServiceUnavailableException({
+        code: 'STRIPE_CAPTURE_FAILED',
+        message: 'Capture du PaymentIntent impossible.',
+        details: [],
+      }),
+    );
+
+    await expect(
+      service.updateStatus(userId, bookingId, { status: 'completed' }),
+    ).rejects.toBeInstanceOf(ServiceUnavailableException);
+    expect(prisma.booking.update).not.toHaveBeenCalled();
   });
 
   it('interdit un pro non assigné', async () => {

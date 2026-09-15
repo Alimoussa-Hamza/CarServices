@@ -127,3 +127,93 @@ describe('StripeService.createManualCapturePaymentIntent', () => {
     });
   });
 });
+
+describe('StripeService.capturePaymentIntent', () => {
+  it('mocke la capture locale sans clé Stripe (RG-PAY-02)', async () => {
+    const { service } = serviceWithKey(undefined);
+
+    await expect(
+      service.capturePaymentIntent({
+        paymentIntentId: 'pi_mock_abc123',
+        amountCents: 9000,
+        applicationFeeCents: 1800,
+      }),
+    ).resolves.toEqual({
+      id: 'pi_mock_abc123',
+      status: 'succeeded',
+      amountCents: 9000,
+      applicationFeeCents: 1800,
+    });
+  });
+
+  it('ne contacte pas Stripe pour un PI mock même avec une clé', async () => {
+    const { service } = serviceWithKey('sk_test_mocklocalkey16chars');
+    const fetchMock = jest.fn();
+
+    await withMockedFetch(fetchMock, () =>
+      service.capturePaymentIntent({
+        paymentIntentId: 'pi_mock_abc123',
+        amountCents: 9000,
+        applicationFeeCents: 1800,
+      }),
+    );
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('capture le montant et annote la commission Stripe', async () => {
+    const { service } = serviceWithKey('sk_test_mocklocalkey16chars');
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        id: 'pi_3liveIntentId0001',
+        status: 'succeeded',
+      }),
+    });
+
+    const captured = await withMockedFetch(fetchMock, () =>
+      service.capturePaymentIntent({
+        paymentIntentId: 'pi_3liveIntentId0001',
+        amountCents: 11200,
+        applicationFeeCents: 2240,
+      }),
+    );
+
+    expect(captured).toEqual({
+      id: 'pi_3liveIntentId0001',
+      status: 'succeeded',
+      amountCents: 11200,
+      applicationFeeCents: 2240,
+    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://api.stripe.com/v1/payment_intents/pi_3liveIntentId0001/capture',
+      expect.objectContaining({ method: 'POST' }),
+    );
+    const body = String(fetchMock.mock.calls[0]?.[1]?.body);
+    expect(body).toContain('amount_to_capture=11200');
+    expect(body).toContain('metadata%5Bcommission_cents%5D=2240');
+  });
+
+  it('lève STRIPE_CAPTURE_FAILED si le statut Stripe n’est pas succeeded', async () => {
+    const { service } = serviceWithKey('sk_test_mocklocalkey16chars');
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        id: 'pi_3liveIntentId0001',
+        status: 'requires_capture',
+      }),
+    });
+
+    await expect(
+      withMockedFetch(fetchMock, () =>
+        service.capturePaymentIntent({
+          paymentIntentId: 'pi_3liveIntentId0001',
+          amountCents: 9000,
+          applicationFeeCents: 1800,
+        }),
+      ),
+    ).rejects.toMatchObject({
+      response: { code: 'STRIPE_CAPTURE_FAILED' },
+    });
+  });
+});

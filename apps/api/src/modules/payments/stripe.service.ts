@@ -9,6 +9,17 @@ export type StripePaymentIntent = {
   clientSecret: string;
 };
 
+export type StripeCapturedPaymentIntent = {
+  id: string;
+  status: 'succeeded';
+  amountCents: number;
+  applicationFeeCents: number;
+};
+
+export function isLocalMockPaymentIntent(paymentIntentId: string): boolean {
+  return paymentIntentId.startsWith('pi_mock_');
+}
+
 @Injectable()
 export class StripeService {
   constructor(private readonly config: ConfigService) {}
@@ -64,6 +75,48 @@ export class StripeService {
     }
 
     return { id: intent.id, clientSecret: intent.client_secret };
+  }
+
+  async capturePaymentIntent(input: {
+    paymentIntentId: string;
+    amountCents: number;
+    applicationFeeCents: number;
+  }): Promise<StripeCapturedPaymentIntent> {
+    const captured: StripeCapturedPaymentIntent = {
+      id: input.paymentIntentId,
+      status: 'succeeded',
+      amountCents: input.amountCents,
+      applicationFeeCents: input.applicationFeeCents,
+    };
+
+    const secretKey = this.secretKey();
+    if (!secretKey || isLocalMockPaymentIntent(input.paymentIntentId)) {
+      return captured;
+    }
+
+    const params = new URLSearchParams({
+      amount_to_capture: String(input.amountCents),
+      'metadata[commission_cents]': String(input.applicationFeeCents),
+    });
+
+    const intent = await this.request<{ id?: string; status?: string }>(
+      `/v1/payment_intents/${encodeURIComponent(input.paymentIntentId)}/capture`,
+      params,
+      secretKey,
+    );
+
+    if (!intent.id || intent.status !== 'succeeded') {
+      throw new ServiceUnavailableException({
+        code: 'STRIPE_CAPTURE_FAILED',
+        message: 'Capture du PaymentIntent impossible.',
+        details: { status: intent.status ?? null },
+      });
+    }
+
+    return {
+      ...captured,
+      id: intent.id,
+    };
   }
 
   async request<T>(

@@ -19,7 +19,7 @@
 | F — Apps clientes | 3/6 | — en attente maquettes |
 | G — Backend Pros & KYC (M04) | 8/8 | — terminé |
 | H — Bookings (M05) | 10/10 | — terminé |
-| I — Paiements Stripe (M06) | 2/6 | CS-M06-S03 Capture completed |
+| I — Paiements Stripe (M06) | 3/6 | CS-M06-S04 Webhook |
 
 ---
 
@@ -253,7 +253,10 @@
   - [x] `POST /bookings` crée un PI `capture_method=manual` (mock `pi_mock_*` sans clé)
   - [x] Ligne `payments` persistée (`authorized` + split RG-PAY-03)
   - [x] Échec Stripe → pas de booking (RG-PAY-06)
-- [ ] **CS-M06-S03** Capture à completed + commission
+- [x] **CS-M06-S03** Capture à completed + commission
+  - [x] `PATCH /bookings/:id/status` `completed` capture le PI avant le statut
+  - [x] Commission = `payments.commission_cents` (split RG-PAY-03, annotée `metadata[commission_cents]`)
+  - [x] Échec capture → booking reste `in_progress` ; capture mock `pi_mock_*`
 - [ ] **CS-M06-S04** Webhook Stripe idempotent
 - [ ] **CS-M06-S05** Refund admin + annulation auth
 - [ ] **CS-M06-S06** Sync stripe_account charges_enabled

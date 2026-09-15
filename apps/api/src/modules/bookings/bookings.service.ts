@@ -418,6 +418,10 @@ export class BookingsService {
       });
     }
 
+    if (dto.status === 'completed') {
+      await this.payments.captureForBooking(bookingId);
+    }
+
     const history = this.stateMachine.buildHistoryEntry(
       fromStatus,
       dto.status,

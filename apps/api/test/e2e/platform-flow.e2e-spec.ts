@@ -518,12 +518,20 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
 
     const persisted = await prisma.booking.findUniqueOrThrow({
       where: { id: bookingId },
-      include: { history: { orderBy: { createdAt: 'asc' } } },
+      include: { history: { orderBy: { createdAt: 'asc' } }, payment: true },
     });
     expect(persisted.status).toBe('completed');
     expect(persisted.history.map((row) => row.toStatus)).toEqual(
       expect.arrayContaining(['en_route', 'in_progress', 'completed']),
     );
+    expect(persisted.payment).toMatchObject({
+      status: 'captured',
+    });
+    expect(persisted.payment?.capturedAt).not.toBeNull();
+    expect(
+      (persisted.payment?.commissionCents ?? 0) +
+        (persisted.payment?.providerNetCents ?? 0),
+    ).toBe(persisted.payment?.amountCents);
   });
 
   it('CS-M05-S07 jobs T1/T2 → expand puis unassigned (RG-MATCH-04/05)', async () => {

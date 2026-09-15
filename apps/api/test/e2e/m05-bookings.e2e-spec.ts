@@ -227,6 +227,15 @@ describe('E2E M05 Bookings — gate module', () => {
       .send({ status: 'completed' })
       .expect(200);
 
+    const capturedPayment = await prisma.payment.findUniqueOrThrow({
+      where: { bookingId },
+    });
+    expect(capturedPayment.status).toBe('captured');
+    expect(capturedPayment.capturedAt).not.toBeNull();
+    expect(
+      capturedPayment.commissionCents + capturedPayment.providerNetCents,
+    ).toBe(capturedPayment.amountCents);
+
     const detail = await http()
       .get(`/api/v1/bookings/${bookingId}`)
       .set('Authorization', `Bearer ${tokens.client}`)

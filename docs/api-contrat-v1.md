@@ -683,9 +683,9 @@ JWT provider + KYC approved. Pro assigné uniquement. Transitions : `accepted` �
 ```
 
 - `in_progress` : `lat`/`lng` optionnels. S’ils sont fournis, distance ≤ `BOOKING_GEOFENCE_METERS` (200 m, RG-BOOK-03) sinon `BOOKING_GEOFENCE_FAILED` (400).
-- `completed` : au moins 1 photo `before` et 1 `after` uploadées par le pro (RG-BOOK-04). Media upload = M07 ; sans photos → `BOOKING_PHOTOS_REQUIRED` (400).
+- `completed` : au moins 1 photo `before` et 1 `after` uploadées par le pro (RG-BOOK-04). Media upload = M07 ; sans photos → `BOOKING_PHOTOS_REQUIRED` (400). Capture Stripe du PaymentIntent **avant** le passage à `completed` (RG-PAY-02) : commission plateforme = `payments.commission_cents` (20 %, RG-PAY-03). Sans clé / `pi_mock_*` : capture locale. Échec Stripe → le booking reste `in_progress`.
 
-Erreurs : `VALIDATION_ERROR` (400), `BOOKING_NOT_FOUND` (404), `BOOKING_NOT_ASSIGNED` (403), `BOOKING_INVALID_TRANSITION` (409), `BOOKING_GEOFENCE_FAILED` (400), `BOOKING_PHOTOS_REQUIRED` (400), `KYC_NOT_APPROVED` (403).
+Erreurs : `VALIDATION_ERROR` (400), `BOOKING_NOT_FOUND` (404), `BOOKING_NOT_ASSIGNED` (403), `BOOKING_INVALID_TRANSITION` (409), `BOOKING_GEOFENCE_FAILED` (400), `BOOKING_PHOTOS_REQUIRED` (400), `KYC_NOT_APPROVED` (403), `PAYMENT_NOT_FOUND` / `PAYMENT_NOT_CAPTURABLE` / `PAYMENT_SPLIT_INVALID` (409), `STRIPE_CAPTURE_FAILED` / `STRIPE_REQUEST_FAILED` (503).
 
 **Transitions autorisées :** voir [RG-BOOK](regles-de-gestion.md). Appliquées uniquement côté API (`BookingStateMachine`) — jamais côté mobile.
 
