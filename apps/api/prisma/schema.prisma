@@ -109,6 +109,7 @@ model ClientProfile {
 
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   bookings Booking[]
+  reviews  Review[]
 
   @@map("client_profiles")
 }
@@ -142,6 +143,7 @@ model ProviderProfile {
   kycDocuments  ProviderKycDocument[]
   bookings      Booking[]
   broadcasts    BookingBroadcast[]
+  reviews       Review[]
 
   @@map("provider_profiles")
 }
@@ -375,6 +377,7 @@ model Booking {
   photos     BookingPhoto[]
   broadcasts BookingBroadcast[]
   payment    Payment?
+  review     Review?
 
   @@index([clientId, status])
   @@index([providerId, status])
@@ -474,4 +477,23 @@ model StripeEvent {
 
   @@index([type])
   @@map("stripe_events")
+}
+
+model Review {
+  id         String   @id @default(uuid()) @db.Uuid
+  bookingId  String   @unique @map("booking_id") @db.Uuid
+  clientId   String   @map("client_id") @db.Uuid
+  providerId String   @map("provider_id") @db.Uuid
+  rating     Int      @db.SmallInt
+  comment    String?
+  tags       String[] @default([])
+  isHidden   Boolean  @default(false) @map("is_hidden")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  booking  Booking         @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  client   ClientProfile   @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  provider ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Restrict)
+
+  @@index([providerId, isHidden])
+  @@map("reviews")
 }

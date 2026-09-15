@@ -21,6 +21,7 @@
 | H — Bookings (M05) | 10/10 | — terminé |
 | I — Paiements Stripe (M06) | 6/6 | — terminé |
 | J — Médias & preuves (M07) | 4/4 | — terminé |
+| K — Avis & litiges (M08) | 1/4 | CS-M08-S02 disputes |
 
 ---
 
@@ -289,6 +290,17 @@
   - [x] `BOOKING_MIN_BEFORE_PHOTOS` / `AFTER` = 2 (RG-BOOK-04)
   - [x] `BOOKING_PHOTOS_REQUIRED` si quota pro non atteint
 - [x] Gate fin M07 — `test/e2e/m07-media.e2e-spec.ts`
+
+---
+
+## Piste K — Avis & litiges · Module M08
+
+- [x] **CS-M08-S01** POST `/reviews` + calcul rating pro
+  - [x] Table `reviews` (1 avis / booking) + `rating_avg` / `rating_count`
+  - [x] RG-QUAL-02/04 — moyenne avis non masqués, booking `completed`
+- [ ] **CS-M08-S02** POST `/disputes` + freeze payout
+- [ ] **CS-M08-S03** GET reviews public pro
+- [ ] **CS-M08-S04** Fenêtre 72h avis / 48h litige
 
 ---
 

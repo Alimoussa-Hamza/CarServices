@@ -825,10 +825,29 @@ Erreurs : `VALIDATION_ERROR` (400), `MEDIA_FILE_KEY_INVALID` (400), `MEDIA_OBJEC
 | POST | `/reviews` | client | Créer avis |
 | GET | `/reviews/provider/:id` | public | Avis d'un pro |
 
+### POST `/reviews`
+
+JWT **client**. 1 avis / booking (`REVIEW_ALREADY_EXISTS`). Booking `completed` uniquement (RG-QUAL-04). Recalcule `provider_profiles.rating_avg` / `rating_count` sur les avis **non masqués** (RG-QUAL-02). Tags : `punctuality`, `quality`, `cleanliness`, `friendliness`. Fenêtre 72 h (RG-QUAL-05) = M08-S04.
+
 ```json
-// POST /reviews
+// Request
 { "bookingId": "uuid", "rating": 5, "comment": "...", "tags": ["quality", "punctuality"] }
+
+// Response 201
+{
+  "data": {
+    "id": "uuid",
+    "bookingId": "uuid",
+    "rating": 5,
+    "comment": "...",
+    "tags": ["quality", "punctuality"],
+    "createdAt": "...",
+    "provider": { "ratingAvg": 5, "ratingCount": 1 }
+  }
+}
 ```
+
+Erreurs : `VALIDATION_ERROR` (400), `REVIEW_BOOKING_NOT_COMPLETED` (400), `FORBIDDEN` (403), `BOOKING_NOT_FOUND` (404), `REVIEW_ALREADY_EXISTS` (409), `BOOKING_NOT_ASSIGNED` (409).
 
 ---
 
@@ -939,6 +958,8 @@ Erreurs : `FORBIDDEN` (403), `BOOKING_NOT_FOUND` (404), `PAYMENT_NOT_FOUND` / `P
 | `STRIPE_CHARGES_DISABLED` | 403 | Compte Connect sans `charges_enabled` |
 | `BOOKING_INVALID_TRANSITION` | 409 | Transition statut interdite |
 | `BOOKING_DISPUTE_WINDOW_EXPIRED` | 409 | Litige hors délai 48 h |
+| `REVIEW_BOOKING_NOT_COMPLETED` | 400 | Avis hors mission `completed` |
+| `REVIEW_ALREADY_EXISTS` | 409 | Un avis existe déjà pour ce booking |
 | `BOOKING_ALREADY_ACCEPTED` | 409 | Mission déjà prise |
 | `BOOKING_NOT_OFFERED` | 403 | Mission hors broadcast du pro |
 | `CAPABILITY_REQUIRED` | 403 | Offre hors capabilities du pro |

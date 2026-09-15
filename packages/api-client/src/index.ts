@@ -16,6 +16,8 @@ import {
   CreateBookingDto,
   CreateBookingResponseSchema,
   CreateMediaUploadUrlDto,
+  CreateReviewDto,
+  CreatedReviewSchema,
   DeclineBookingDto,
   DeclinedBookingSchema,
   ListBookingsQuery,
@@ -300,6 +302,13 @@ export const api = {
         body: JSON.stringify(dto),
       }).then((data) => ConfirmedMediaUploadSchema.parse(data)),
   },
+  reviews: {
+    create: (dto: CreateReviewDto) =>
+      apiRequest('/api/v1/reviews', {
+        method: 'POST',
+        body: JSON.stringify(dto),
+      }).then((data) => CreatedReviewSchema.parse(data)),
+  },
 };
 
 export type {
@@ -308,6 +317,7 @@ export type {
   ConfirmMediaUploadDto,
   CreateBookingDto,
   CreateMediaUploadUrlDto,
+  CreateReviewDto,
   DeclineBookingDto,
   PatchBookingStatusDto,
   CancelBookingDto,

@@ -1053,3 +1053,47 @@ export const ConfirmedMediaUploadSchema = z.object({
   createdAt: z.string().datetime(),
 });
 export type ConfirmedMediaUpload = z.infer<typeof ConfirmedMediaUploadSchema>;
+
+/** Fenêtre pour laisser un avis après `completed` (RG-QUAL-05). */
+export const REVIEW_WINDOW_HOURS = 72;
+
+export const ReviewTagSchema = z.enum([
+  'punctuality',
+  'quality',
+  'cleanliness',
+  'friendliness',
+]);
+export type ReviewTag = z.infer<typeof ReviewTagSchema>;
+
+export const CreateReviewSchema = z.object({
+  bookingId: z.string().uuid(),
+  rating: z.number().int().min(1).max(5),
+  comment: z.string().trim().max(1000).optional(),
+  tags: z
+    .array(ReviewTagSchema)
+    .max(4)
+    .default([])
+    .superRefine((tags, ctx) => {
+      if (new Set(tags).size !== tags.length) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Tags en double.',
+        });
+      }
+    }),
+});
+export type CreateReviewDto = z.infer<typeof CreateReviewSchema>;
+
+export const CreatedReviewSchema = z.object({
+  id: z.string().uuid(),
+  bookingId: z.string().uuid(),
+  rating: z.number().int().min(1).max(5),
+  comment: z.string().nullable(),
+  tags: z.array(ReviewTagSchema),
+  createdAt: z.string().datetime(),
+  provider: z.object({
+    ratingAvg: z.number(),
+    ratingCount: z.number().int().nonnegative(),
+  }),
+});
+export type CreatedReview = z.infer<typeof CreatedReviewSchema>;

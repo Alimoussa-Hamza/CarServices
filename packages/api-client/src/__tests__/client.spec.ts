@@ -1302,4 +1302,45 @@ describe('api-client', () => {
       );
     });
   });
+
+  describe('api.reviews', () => {
+    it('crée un avis client et valide la réponse', async () => {
+      const payload = {
+        id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        bookingId: '77777777-7777-4777-8777-777777777777',
+        rating: 5,
+        comment: 'Impeccable',
+        tags: ['quality', 'punctuality'],
+        createdAt: '2026-09-15T21:00:00.000Z',
+        provider: { ratingAvg: 5, ratingCount: 1 },
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: payload }));
+      initApiClient({
+        baseUrl: 'http://api.test',
+        getAccessToken: jest.fn().mockResolvedValue('client.jwt'),
+      });
+
+      await expect(
+        api.reviews.create({
+          bookingId: '77777777-7777-4777-8777-777777777777',
+          rating: 5,
+          comment: 'Impeccable',
+          tags: ['quality', 'punctuality'],
+        }),
+      ).resolves.toEqual(payload);
+      expect(fetchMock).toHaveBeenCalledWith('http://api.test/api/v1/reviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer client.jwt',
+        },
+        body: JSON.stringify({
+          bookingId: '77777777-7777-4777-8777-777777777777',
+          rating: 5,
+          comment: 'Impeccable',
+          tags: ['quality', 'punctuality'],
+        }),
+      });
+    });
+  });
 });

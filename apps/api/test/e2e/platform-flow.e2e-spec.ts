@@ -1227,4 +1227,79 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
       .expect(403);
     expect((forbiddenKyc.body as ErrorEnvelope).error.code).toBe('FORBIDDEN');
   });
+
+  it('CS-M08-S01 POST /reviews calcule rating_avg', async () => {
+    const created = await http()
+      .post('/api/v1/reviews')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({
+        bookingId,
+        rating: 5,
+        comment: 'Impeccable',
+        tags: ['quality', 'punctuality'],
+      })
+      .expect(201);
+    expect(
+      (
+        created.body as Envelope<{
+          bookingId: string;
+          rating: number;
+          provider: { ratingAvg: number; ratingCount: number };
+        }>
+      ).data,
+    ).toMatchObject({
+      bookingId,
+      rating: 5,
+      provider: { ratingAvg: 5, ratingCount: 1 },
+    });
+
+    const duplicate = await http()
+      .post('/api/v1/reviews')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({ bookingId, rating: 4 })
+      .expect(409);
+    expect((duplicate.body as ErrorEnvelope).error.code).toBe(
+      'REVIEW_ALREADY_EXISTS',
+    );
+
+    const forbiddenRole = await http()
+      .post('/api/v1/reviews')
+      .set('Authorization', `Bearer ${tokens.providerA}`)
+      .send({ bookingId, rating: 5 })
+      .expect(403);
+    expect((forbiddenRole.body as ErrorEnvelope).error.code).toBe('FORBIDDEN');
+
+    const pending = await http()
+      .post('/api/v1/bookings')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({
+        offerId,
+        vehicleType: 'suv',
+        optionIds: [],
+        addressId: clientAddressId,
+        slotStart: futureSlotIso(13),
+      })
+      .expect(201);
+    const pendingId = (
+      pending.body as Envelope<{ booking: { id: string } }>
+    ).data.booking.id;
+    const notCompleted = await http()
+      .post('/api/v1/reviews')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({ bookingId: pendingId, rating: 5 })
+      .expect(400);
+    expect((notCompleted.body as ErrorEnvelope).error.code).toBe(
+      'REVIEW_BOOKING_NOT_COMPLETED',
+    );
+
+    const me = await http()
+      .get('/api/v1/providers/me')
+      .set('Authorization', `Bearer ${tokens.providerA}`)
+      .expect(200);
+    expect(
+      (
+        me.body as Envelope<{ ratingAvg: number; ratingCount: number }>
+      ).data,
+    ).toMatchObject({ ratingAvg: 5, ratingCount: 1 });
+  });
 });

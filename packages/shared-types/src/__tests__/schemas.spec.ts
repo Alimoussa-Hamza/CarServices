@@ -15,6 +15,7 @@ import {
   CANCEL_FREE_HOURS,
   CANCEL_LATE_HOURS,
   PLATFORM_COMMISSION_RATE,
+  REVIEW_WINDOW_HOURS,
   PaymentStatusSchema,
   PaymentSchema,
   computePaymentSplit,
@@ -24,6 +25,8 @@ import {
   ConfirmMediaUploadSchema,
   ConfirmedMediaUploadSchema,
   CreateMediaUploadUrlSchema,
+  CreateReviewSchema,
+  CreatedReviewSchema,
   MEDIA_UPLOAD_TTL_SECONDS,
   MEDIA_MAX_PHOTO_BYTES,
   MediaUploadUrlResponseSchema,
@@ -263,6 +266,12 @@ describe('BookingActorTypeSchema', () => {
 describe('BOOKING_DISPUTE_WINDOW_HOURS', () => {
   it('fixe la fenêtre litige à 48 h (RG-BOOK)', () => {
     expect(BOOKING_DISPUTE_WINDOW_HOURS).toBe(48);
+  });
+});
+
+describe('REVIEW_WINDOW_HOURS', () => {
+  it('fixe la fenêtre avis à 72 h (RG-QUAL-05)', () => {
+    expect(REVIEW_WINDOW_HOURS).toBe(72);
   });
 });
 
@@ -1650,5 +1659,51 @@ describe('ConfirmMediaUploadSchema / ConfirmedMediaUploadSchema', () => {
         createdAt: '2026-09-15T10:00:00.000Z',
       }),
     ).toMatchObject({ id: null, bookingId: null });
+  });
+});
+
+describe('CreateReviewSchema / CreatedReviewSchema', () => {
+  it('valide un avis 1–5 avec tags C11', () => {
+    expect(
+      CreateReviewSchema.parse({
+        bookingId: '77777777-7777-4777-8777-777777777777',
+        rating: 5,
+        comment: 'Impeccable',
+        tags: ['quality', 'punctuality'],
+      }),
+    ).toMatchObject({ rating: 5, tags: ['quality', 'punctuality'] });
+  });
+
+  it('refuse une note hors 1–5', () => {
+    expect(
+      CreateReviewSchema.safeParse({
+        bookingId: '77777777-7777-4777-8777-777777777777',
+        rating: 6,
+      }).success,
+    ).toBe(false);
+  });
+
+  it('refuse un tag inconnu', () => {
+    expect(
+      CreateReviewSchema.safeParse({
+        bookingId: '77777777-7777-4777-8777-777777777777',
+        rating: 4,
+        tags: ['unknown'],
+      }).success,
+    ).toBe(false);
+  });
+
+  it('valide la réponse de création', () => {
+    expect(
+      CreatedReviewSchema.parse({
+        id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        bookingId: '77777777-7777-4777-8777-777777777777',
+        rating: 5,
+        comment: 'Impeccable',
+        tags: ['quality'],
+        createdAt: '2026-09-15T21:00:00.000Z',
+        provider: { ratingAvg: 5, ratingCount: 1 },
+      }),
+    ).toMatchObject({ provider: { ratingCount: 1 } });
   });
 });

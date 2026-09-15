@@ -840,6 +840,39 @@
       ]
     },
     {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "description": "JWT client. Booking completed, 1 avis / mission. Recalcule rating_avg (avis non masqués, RG-QUAL-02/04). Fenêtre 72 h = M08-S04.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingId\": \"{{bookingId}}\",\n  \"rating\": 5,\n  \"comment\": \"Impeccable\",\n  \"tags\": [\"quality\", \"punctuality\"]\n}"
+            },
+            "url": "{{baseUrl}}/reviews"
+          }
+        }
+      ]
+    },
+    {
       "name": "Webhooks",
       "item": [
         {
