@@ -3,10 +3,12 @@ import {
   ConflictException,
   ForbiddenException,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma, UserRole } from '@prisma/client';
 import { CatalogService } from '../../catalog/catalog.service';
+import { PaymentsService } from '../../payments/payments.service';
 import { RedisService } from '../../redis/redis.service';
 import { ZonesService } from '../../zones/zones.service';
 import { BookingMatchingService } from '../booking-matching.service';
@@ -115,6 +117,16 @@ function buildService() {
   const redis = {
     client: { lpush: jest.fn().mockResolvedValue(1) },
   };
+  const paymentsService = {
+    authorizeBooking: jest.fn().mockResolvedValue({
+      paymentIntentId: 'pi_mock_abc123',
+      clientSecret: 'pi_mock_abc123_secret_def',
+      amountCents: 11200,
+      commissionCents: 2240,
+      providerNetCents: 8960,
+      currency: 'EUR',
+    }),
+  };
 
   prisma.clientProfile.upsert.mockResolvedValue({ id: clientId, userId });
   prisma.address.findFirst.mockResolvedValue(address);
@@ -136,6 +148,7 @@ function buildService() {
       matchingQueue as unknown as MatchingQueueService,
       redis as unknown as RedisService,
       config as unknown as ConfigService,
+      paymentsService as unknown as PaymentsService,
     ),
     prisma,
     catalogService,
@@ -143,13 +156,21 @@ function buildService() {
     matchingService,
     matchingQueue,
     redis,
+    paymentsService,
   };
 }
 
 describe('BookingsService.create', () => {
-  it('crée un booking avec snapshots figés et paiement mock (RG-CAT-03)', async () => {
-    const { service, prisma, catalogService, zonesService, matchingService, matchingQueue } =
-      buildService();
+  it('crée un booking avec snapshots figés et PaymentIntent (RG-PAY-01)', async () => {
+    const {
+      service,
+      prisma,
+      catalogService,
+      zonesService,
+      matchingService,
+      matchingQueue,
+      paymentsService,
+    } = buildService();
 
     const result = await service.create(userId, dto, now);
 
@@ -168,8 +189,15 @@ describe('BookingsService.create', () => {
       new Date(dto.slotStart),
       now,
     );
-    expect(result.data.payment.paymentIntentId).toMatch(/^pi_mock_/);
-    expect(result.data.payment.clientSecret).toContain('_secret_');
+    expect(paymentsService.authorizeBooking).toHaveBeenCalledWith({
+      amountCents: 11200,
+      commissionRate: 0.2,
+      metadata: { clientId, zoneSlug: 'lyon' },
+    });
+    expect(result.data.payment).toEqual({
+      paymentIntentId: 'pi_mock_abc123',
+      clientSecret: 'pi_mock_abc123_secret_def',
+    });
     expect(zonesService.findCoveringZone).toHaveBeenCalledWith(45.764, 4.835);
     expect(catalogService.computeQuote).toHaveBeenCalledWith({
       offerId,
@@ -201,6 +229,14 @@ describe('BookingsService.create', () => {
       unitPriceCents: 11000,
       totalPriceCents: 11200,
     });
+    expect(createData.payment.create).toEqual({
+      stripePaymentIntentId: 'pi_mock_abc123',
+      amountCents: 11200,
+      commissionCents: 2240,
+      providerNetCents: 8960,
+      currency: 'EUR',
+      status: 'authorized',
+    });
     expect(createData.history.create).toEqual([
       { fromStatus: null, toStatus: 'draft', actorType: 'system' },
       {
@@ -209,6 +245,23 @@ describe('BookingsService.create', () => {
         actorType: 'system',
       },
     ]);
+  });
+
+  it('n’enregistre pas le booking si la pré-auth Stripe échoue (RG-PAY-06)', async () => {
+    const { service, prisma, matchingService, paymentsService } = buildService();
+    paymentsService.authorizeBooking.mockRejectedValue(
+      new ServiceUnavailableException({
+        code: 'STRIPE_REQUEST_FAILED',
+        message: 'Stripe indisponible.',
+        details: [],
+      }),
+    );
+
+    await expect(service.create(userId, dto, now)).rejects.toBeInstanceOf(
+      ServiceUnavailableException,
+    );
+    expect(prisma.booking.create).not.toHaveBeenCalled();
+    expect(matchingService.broadcast).not.toHaveBeenCalled();
   });
 
   it('rejette une adresse inconnue ou d’un autre user', async () => {

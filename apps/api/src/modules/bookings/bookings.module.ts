@@ -3,6 +3,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { AuthModule } from '../auth/auth.module';
 import { CatalogModule } from '../catalog/catalog.module';
+import { PaymentsModule } from '../payments/payments.module';
 import { ProvidersModule } from '../providers/providers.module';
 import { ZonesModule } from '../zones/zones.module';
 import { BookingMatchingService } from './booking-matching.service';
@@ -13,7 +14,13 @@ import { MatchingQueueService } from './matching-queue.service';
 import { SlotPickerService } from './slot-picker.service';
 
 @Module({
-  imports: [AuthModule, CatalogModule, ZonesModule, ProvidersModule],
+  imports: [
+    AuthModule,
+    CatalogModule,
+    ZonesModule,
+    ProvidersModule,
+    PaymentsModule,
+  ],
   controllers: [BookingsController],
   providers: [
     BookingStateMachine,

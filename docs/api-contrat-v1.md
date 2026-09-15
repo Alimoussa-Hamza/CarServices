@@ -488,6 +488,12 @@ Erreurs : `VALIDATION_ERROR` (URLs invalides), `STRIPE_REQUEST_FAILED` / `STRIPE
 
 `status` = `pending_provider` si au moins un pro a été notifié, sinon `payment_authorized`.
 
+À la création, l'API ouvre un **PaymentIntent Stripe en capture manuelle** (RG-PAY-01) du montant `pricingSnapshot.totalCents`, persiste la ligne `payments` (`authorized`, split commission RG-PAY-03) et renvoie `clientSecret` pour PaymentSheet. Sans `STRIPE_SECRET_KEY` valide, le PI est mocké (`pi_mock_*`) — même contrat.
+
+Échec Stripe (`STRIPE_REQUEST_FAILED` / `STRIPE_PAYMENT_INTENT_FAILED`, 503) : **aucun booking** n'est créé (RG-PAY-06).
+
+Erreurs : `VALIDATION_ERROR` (400), `ADDRESS_NOT_FOUND` (404), `OFFER_NOT_FOUND` (404), `INVALID_OPTIONS` (400), `ZONE_NOT_COVERED` (400), `SLOT_UNAVAILABLE` (409, délai min zone ou créneau passé), `PAYMENT_AMOUNT_INVALID` (400), `STRIPE_REQUEST_FAILED` / `STRIPE_PAYMENT_INTENT_FAILED` (503).
+
 ### POST `/bookings/slots`
 
 JWT client. Calendrier **J → J+14** (C07), créneaux 1 h UTC (08:00–20:00). `available: false` = aucun pro éligible (RG-MATCH-01 : KYC, RC Pro, capability, zone/rayon, dispo hebdo, pas de conflit). Créneaux `< now + minBookingLeadHours` (zone, défaut 2 h) **omis**.
@@ -681,10 +687,6 @@ JWT provider + KYC approved. Pro assigné uniquement. Transitions : `accepted` �
 
 Erreurs : `VALIDATION_ERROR` (400), `BOOKING_NOT_FOUND` (404), `BOOKING_NOT_ASSIGNED` (403), `BOOKING_INVALID_TRANSITION` (409), `BOOKING_GEOFENCE_FAILED` (400), `BOOKING_PHOTOS_REQUIRED` (400), `KYC_NOT_APPROVED` (403).
 
-Erreurs : `VALIDATION_ERROR` (400), `ADDRESS_NOT_FOUND` (404), `OFFER_NOT_FOUND` (404), `INVALID_OPTIONS` (400), `ZONE_NOT_COVERED` (400), `SLOT_UNAVAILABLE` (409, délai min zone ou créneau passé).
-
-Le `pricingSnapshot` est figé à la création (RG-CAT-03). Le `payment` est une **pre-auth mock** tant que M06 (Stripe PaymentIntent) n’est pas branché.
-
 **Transitions autorisées :** voir [RG-BOOK](regles-de-gestion.md). Appliquées uniquement côté API (`BookingStateMachine`) — jamais côté mobile.
 
 Fenêtre litige : `completed` → `disputed` par le client pendant **48 h** (`BOOKING_DISPUTE_WINDOW_HOURS`).
@@ -714,7 +716,7 @@ JWT client ou provider. Motif obligatoire côté pro (RG-CANCEL-01). Impossible 
 }
 ```
 
-Grille client (sur `pricingSnapshot.totalCents`, paiement mock jusqu’à M06) :
+Grille client (sur `pricingSnapshot.totalCents`) :
 
 | Fenêtre | Délai | Frais |
 |---------|-------|-------|

@@ -309,13 +309,21 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
 
     const persisted = await prisma.booking.findUniqueOrThrow({
       where: { id: bookingId },
-      include: { items: true, history: true, broadcasts: true },
+      include: { items: true, history: true, broadcasts: true, payment: true },
     });
     expect(persisted.items).toHaveLength(1);
     expect(persisted.history.map((row) => row.toStatus)).toEqual(
       expect.arrayContaining(['draft', 'payment_authorized', 'pending_provider']),
     );
     expect(persisted.broadcasts.length).toBeGreaterThanOrEqual(2);
+    expect(persisted.payment).toMatchObject({
+      stripePaymentIntentId: payload.payment.paymentIntentId,
+      status: 'authorized',
+    });
+    expect(
+      (persisted.payment?.commissionCents ?? 0) +
+        (persisted.payment?.providerNetCents ?? 0),
+    ).toBe(persisted.payment?.amountCents);
   });
 
   it('CS-M05-S03 refuse adresse inconnue et créneau trop tôt', async () => {

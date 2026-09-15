@@ -144,6 +144,16 @@ describe('E2E M05 Bookings — gate module', () => {
     expect(booking.matching.broadcastCount).toBeGreaterThanOrEqual(2);
     expect(booking.payment.paymentIntentId).toMatch(/^pi_mock_/);
     const bookingId = booking.booking.id;
+    const storedPayment = await prisma.payment.findUniqueOrThrow({
+      where: { bookingId },
+    });
+    expect(storedPayment.status).toBe('authorized');
+    expect(storedPayment.stripePaymentIntentId).toBe(
+      booking.payment.paymentIntentId,
+    );
+    expect(storedPayment.commissionCents + storedPayment.providerNetCents).toBe(
+      storedPayment.amountCents,
+    );
 
     const pendingDetail = await http()
       .get(`/api/v1/bookings/${bookingId}`)

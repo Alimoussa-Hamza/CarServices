@@ -19,7 +19,7 @@
 | F — Apps clientes | 3/6 | — en attente maquettes |
 | G — Backend Pros & KYC (M04) | 8/8 | — terminé |
 | H — Bookings (M05) | 10/10 | — terminé |
-| I — Paiements Stripe (M06) | 1/6 | CS-M06-S02 PaymentIntent |
+| I — Paiements Stripe (M06) | 2/6 | CS-M06-S03 Capture completed |
 
 ---
 
@@ -199,7 +199,7 @@
   - [x] JWT client · adresse owner · zone PostGIS (RG-ZONE-01)
   - [x] Quote API figée en `pricing_snapshot` (RG-CAT-03) + `address_snapshot`
   - [x] Référence `CS-YYYYMMDD-XXXX` + item + history draft→payment_authorized
-  - [x] Pre-auth paiement mock (`pi_mock_*`) — Stripe réel = M06
+  - [x] Pre-auth PaymentIntent capture manuelle (`pi_mock_*` sans clé Stripe)
   - [x] Postman **Create Booking** + `api.bookings.create`
 - [x] **CS-M05-S04** MatchingService broadcast pros
   - [x] Filtre RG-MATCH-01 : KYC, RC Pro, capability, zone, rayon, dispo, conflits
@@ -249,7 +249,10 @@
   - [x] Table `payments` 1:1 booking, unique `stripe_payment_intent_id`
   - [x] Split `commission_cents` / `provider_net_cents` (RG-PAY-03)
   - [x] `computePaymentSplit` + alignement Prisma ↔ Zod
-- [ ] **CS-M06-S02** PaymentIntent manual capture à booking
+- [x] **CS-M06-S02** PaymentIntent manual capture à booking
+  - [x] `POST /bookings` crée un PI `capture_method=manual` (mock `pi_mock_*` sans clé)
+  - [x] Ligne `payments` persistée (`authorized` + split RG-PAY-03)
+  - [x] Échec Stripe → pas de booking (RG-PAY-06)
 - [ ] **CS-M06-S03** Capture à completed + commission
 - [ ] **CS-M06-S04** Webhook Stripe idempotent
 - [ ] **CS-M06-S05** Refund admin + annulation auth

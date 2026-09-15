@@ -25,9 +25,9 @@ import {
   type WashMethod,
 } from '@carservice/shared-types';
 import { Prisma, UserRole } from '@prisma/client';
-import { randomBytes } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CatalogService } from '../catalog/catalog.service';
+import { PaymentsService } from '../payments/payments.service';
 import { RedisService } from '../redis/redis.service';
 import { ZonesService } from '../zones/zones.service';
 import {
@@ -58,6 +58,7 @@ export class BookingsService {
     private readonly matchingQueue: MatchingQueueService,
     private readonly redis: RedisService,
     private readonly config: ConfigService,
+    private readonly payments: PaymentsService,
   ) {}
 
   async create(userId: string, dto: CreateBookingDto, now = new Date()) {
@@ -118,7 +119,14 @@ export class BookingsService {
     const addressSnapshot = this.toAddressSnapshot(address, lat, lng);
     const pricingSnapshot = quote.breakdown;
     const commissionRate = this.commissionRate();
-    const payment = this.createMockPaymentAuthorization();
+    const payment = await this.payments.authorizeBooking({
+      amountCents: pricingSnapshot.totalCents,
+      commissionRate: Number(commissionRate),
+      metadata: {
+        clientId: client.id,
+        zoneSlug: zone.slug,
+      },
+    });
     const optionsTotal = pricingSnapshot.options.reduce(
       (total, option) => total + option.amount,
       0,
@@ -160,6 +168,7 @@ export class BookingsService {
       totalPriceCents: pricingSnapshot.totalCents,
       draftHistory,
       authorizedHistory,
+      payment,
     });
 
     const matching = await this.matchingService.broadcast(booking.id, now);
@@ -184,7 +193,10 @@ export class BookingsService {
           slotStart: booking.slotStart.toISOString(),
           slotEnd: booking.slotEnd.toISOString(),
         },
-        payment,
+        payment: {
+          paymentIntentId: payment.paymentIntentId,
+          clientSecret: payment.clientSecret,
+        },
         matching: { broadcastCount: matching.broadcastCount },
       },
     };
@@ -619,14 +631,6 @@ export class BookingsService {
     return new Prisma.Decimal(rate.toFixed(2));
   }
 
-  private createMockPaymentAuthorization() {
-    const paymentIntentId = `pi_mock_${randomBytes(8).toString('hex')}`;
-    return {
-      paymentIntentId,
-      clientSecret: `${paymentIntentId}_secret_${randomBytes(8).toString('hex')}`,
-    };
-  }
-
   private toListItem(
     booking: {
       id: string;
@@ -797,6 +801,12 @@ export class BookingsService {
     totalPriceCents: number;
     draftHistory: ReturnType<BookingStateMachine['buildHistoryEntry']>;
     authorizedHistory: ReturnType<BookingStateMachine['buildHistoryEntry']>;
+    payment: {
+      paymentIntentId: string;
+      amountCents: number;
+      commissionCents: number;
+      providerNetCents: number;
+    };
   }) {
     for (let attempt = 0; attempt < REFERENCE_RETRY_MAX; attempt += 1) {
       const reference = generateBookingReference(input.slotStart);
@@ -840,6 +850,16 @@ export class BookingsService {
                     actorType: input.authorizedHistory.actorType,
                   },
                 ],
+              },
+              payment: {
+                create: {
+                  stripePaymentIntentId: input.payment.paymentIntentId,
+                  amountCents: input.payment.amountCents,
+                  commissionCents: input.payment.commissionCents,
+                  providerNetCents: input.payment.providerNetCents,
+                  currency: 'EUR',
+                  status: 'authorized',
+                },
               },
             },
           });

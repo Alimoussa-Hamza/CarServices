@@ -575,6 +575,7 @@
           "name": "Create Booking",
           "request": {
             "method": "POST",
+            "description": "Pré-auth PaymentIntent capture manuelle (RG-PAY-01). Sans STRIPE_SECRET_KEY: pi_mock_*. Échec Stripe = pas de booking (RG-PAY-06).",
             "auth": {
               "type": "bearer",
               "bearer": [

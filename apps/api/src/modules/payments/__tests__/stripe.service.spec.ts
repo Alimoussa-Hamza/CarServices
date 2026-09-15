@@ -1,0 +1,129 @@
+import { ServiceUnavailableException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { StripeService } from '../stripe.service';
+
+async function withMockedFetch<T>(
+  fetchMock: jest.Mock,
+  action: () => Promise<T>,
+): Promise<T> {
+  const originalFetch = global.fetch;
+  global.fetch = fetchMock as unknown as typeof fetch;
+  try {
+    return await action();
+  } finally {
+    global.fetch = originalFetch;
+  }
+}
+
+function serviceWithKey(key: string | undefined) {
+  const config = {
+    get: jest.fn().mockReturnValue(key),
+  };
+  return {
+    service: new StripeService(config as unknown as ConfigService),
+    config,
+  };
+}
+
+describe('StripeService.createManualCapturePaymentIntent', () => {
+  it('mocke un PI local sans clé Stripe (RG-PAY-01)', async () => {
+    const { service } = serviceWithKey(undefined);
+
+    const intent = await service.createManualCapturePaymentIntent({
+      amountCents: 9000,
+      currency: 'EUR',
+    });
+
+    expect(intent.id).toMatch(/^pi_mock_/);
+    expect(intent.clientSecret).toContain(`${intent.id}_secret_`);
+  });
+
+  it('ignore une clé trop courte (placeholder)', async () => {
+    const { service } = serviceWithKey('sk_test_placeholder');
+
+    const intent = await service.createManualCapturePaymentIntent({
+      amountCents: 9000,
+      currency: 'EUR',
+    });
+
+    expect(intent.id).toMatch(/^pi_mock_/);
+  });
+
+  it('crée un PaymentIntent Stripe en capture manuelle', async () => {
+    const { service } = serviceWithKey('sk_test_mocklocalkey16chars');
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        id: 'pi_3liveIntentId0001',
+        client_secret: 'pi_3liveIntentId0001_secret_abc',
+      }),
+    });
+
+    const intent = await withMockedFetch(fetchMock, () =>
+      service.createManualCapturePaymentIntent({
+        amountCents: 11200,
+        currency: 'EUR',
+        metadata: { clientId: 'client-1', zoneSlug: 'lyon' },
+      }),
+    );
+
+    expect(intent).toEqual({
+      id: 'pi_3liveIntentId0001',
+      clientSecret: 'pi_3liveIntentId0001_secret_abc',
+    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://api.stripe.com/v1/payment_intents',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          Authorization: 'Bearer sk_test_mocklocalkey16chars',
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Stripe-Version': '2024-11-20.acacia',
+        }),
+      }),
+    );
+    const body = String(fetchMock.mock.calls[0]?.[1]?.body);
+    expect(body).toContain('amount=11200');
+    expect(body).toContain('currency=eur');
+    expect(body).toContain('capture_method=manual');
+    expect(body).toContain('automatic_payment_methods%5Benabled%5D=true');
+    expect(body).toContain('metadata%5BclientId%5D=client-1');
+    expect(body).toContain('metadata%5BzoneSlug%5D=lyon');
+  });
+
+  it('lève STRIPE_REQUEST_FAILED si Stripe HTTP échoue', async () => {
+    const { service } = serviceWithKey('sk_test_mocklocalkey16chars');
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+    });
+
+    await expect(
+      withMockedFetch(fetchMock, () =>
+        service.createManualCapturePaymentIntent({
+          amountCents: 9000,
+          currency: 'EUR',
+        }),
+      ),
+    ).rejects.toBeInstanceOf(ServiceUnavailableException);
+  });
+
+  it('lève STRIPE_PAYMENT_INTENT_FAILED si id/secret manquants', async () => {
+    const { service } = serviceWithKey('sk_test_mocklocalkey16chars');
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    });
+
+    await expect(
+      withMockedFetch(fetchMock, () =>
+        service.createManualCapturePaymentIntent({
+          amountCents: 9000,
+          currency: 'EUR',
+        }),
+      ),
+    ).rejects.toMatchObject({
+      response: { code: 'STRIPE_PAYMENT_INTENT_FAILED' },
+    });
+  });
+});
