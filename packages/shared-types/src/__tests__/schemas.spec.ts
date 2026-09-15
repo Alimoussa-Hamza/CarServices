@@ -1,23 +1,56 @@
 import {
+  AddressSnapshotSchema,
   AuthTokensResponseSchema,
+  BOOKING_DISPUTE_WINDOW_HOURS,
+  BOOKING_GEOFENCE_METERS,
+  BOOKING_MIN_AFTER_PHOTOS,
+  BOOKING_MIN_BEFORE_PHOTOS,
+  MATCHING_BROADCAST_SIZE,
+  MATCHING_RADIUS_EXPAND_FACTOR,
+  MATCHING_TIMEOUT_T1_MINUTES,
+  MATCHING_TIMEOUT_T2_HOURS,
+  MATCHING_UNASSIGNED_LEAD_HOURS,
+  CANCEL_FEE_LATE_PERCENT,
+  CANCEL_FEE_MID_PERCENT,
+  CANCEL_FREE_HOURS,
+  CANCEL_LATE_HOURS,
+  PLATFORM_COMMISSION_RATE,
+  BookingActorTypeSchema,
+  BookingPhotoTypeSchema,
+  BookingPhotoUploaderSchema,
+  BookingReferenceSchema,
   BookingStatusSchema,
   CatalogQuoteResponseSchema,
+  PricingSnapshotSchema,
   CatalogQuoteSchema,
+  AcceptedBookingSchema,
+  CreateBookingResponseSchema,
+  CreateBookingSchema,
+  DeclineBookingSchema,
+  PatchBookingStatusSchema,
+  BookingStatusUpdateSchema,
+  CancelBookingSchema,
+  CancelledBookingSchema,
+  CreateStripeOnboardingLinkSchema,
   DirtLevelSchema,
   KycDocumentTypeSchema,
   KycStatusResponseSchema,
   KycStatusSchema,
+  ProviderKycAlertsResponseSchema,
+  RcProAlertSchema,
   OtpRoleSchema,
   OutOfZoneLeadSchema,
   ProviderAvailabilityResponseSchema,
   ProviderCapabilitiesResponseSchema,
   ProviderCapabilitySchema,
+  ProviderMissionEligibilitySchema,
   ProviderProfileSchema,
   ProviderZonesResponseSchema,
   SendOtpResponseSchema,
   SendOtpSchema,
   ServiceCategorySchema,
   ServiceOfferSchema,
+  StripeOnboardingLinkResponseSchema,
   SubmitKycSchema,
   UpdateProviderAvailabilitySchema,
   UpdateProviderCapabilitiesSchema,
@@ -182,6 +215,323 @@ describe('BookingStatusSchema', () => {
 
   it('rejette un statut inconnu', () => {
     expect(BookingStatusSchema.safeParse('refunded').success).toBe(false);
+  });
+});
+
+describe('BookingReferenceSchema', () => {
+  it('valide une référence CS-YYYYMMDD-XXXX', () => {
+    expect(BookingReferenceSchema.parse('CS-20260906-A7B2')).toBe(
+      'CS-20260906-A7B2',
+    );
+  });
+
+  it('rejette une référence mal formée', () => {
+    expect(BookingReferenceSchema.safeParse('CS-2026-ABC').success).toBe(false);
+  });
+});
+
+describe('BookingActorTypeSchema', () => {
+  it('couvre les acteurs de timeline RG-BOOK', () => {
+    expect(BookingActorTypeSchema.options).toEqual([
+      'client',
+      'provider',
+      'admin',
+      'system',
+    ]);
+  });
+});
+
+describe('BOOKING_DISPUTE_WINDOW_HOURS', () => {
+  it('fixe la fenêtre litige à 48 h (RG-BOOK)', () => {
+    expect(BOOKING_DISPUTE_WINDOW_HOURS).toBe(48);
+  });
+});
+
+describe('PLATFORM_COMMISSION_RATE', () => {
+  it('fixe la commission plateforme à 20 % (RG-PAY-03)', () => {
+    expect(PLATFORM_COMMISSION_RATE).toBe(0.2);
+  });
+});
+
+describe('MATCHING_BROADCAST_SIZE', () => {
+  it('broadcast top 8 (RG-MATCH-03)', () => {
+    expect(MATCHING_BROADCAST_SIZE).toBe(8);
+  });
+});
+
+describe('MATCHING_TIMEOUTS', () => {
+  it('fixe T1 30 min, T2 2 h, H-2, rayon ×2 (RG-MATCH-04/05)', () => {
+    expect(MATCHING_TIMEOUT_T1_MINUTES).toBe(30);
+    expect(MATCHING_TIMEOUT_T2_HOURS).toBe(2);
+    expect(MATCHING_UNASSIGNED_LEAD_HOURS).toBe(2);
+    expect(MATCHING_RADIUS_EXPAND_FACTOR).toBe(2);
+  });
+});
+
+describe('CANCEL_*', () => {
+  it('fixe la grille RG-CANCEL (24 h / 2 h, 20 % / 50 %)', () => {
+    expect(CANCEL_FREE_HOURS).toBe(24);
+    expect(CANCEL_LATE_HOURS).toBe(2);
+    expect(CANCEL_FEE_MID_PERCENT).toBe(20);
+    expect(CANCEL_FEE_LATE_PERCENT).toBe(50);
+  });
+});
+
+describe('BOOKING_GEOFENCE_METERS / photos min', () => {
+  it('fixe la géofence d’arrivée à 200 m (RG-BOOK-03)', () => {
+    expect(BOOKING_GEOFENCE_METERS).toBe(200);
+  });
+
+  it('exige au moins 1 photo avant et 1 après (RG-BOOK-04)', () => {
+    expect(BOOKING_MIN_BEFORE_PHOTOS).toBe(1);
+    expect(BOOKING_MIN_AFTER_PHOTOS).toBe(1);
+  });
+});
+
+describe('CreateBookingSchema', () => {
+  const valid = {
+    offerId: '22222222-2222-4222-8222-222222222222',
+    vehicleType: 'suv',
+    addressId: '33333333-3333-4333-8333-333333333333',
+    slotStart: '2026-09-06T08:00:00.000Z',
+  };
+
+  it('valide une création booking et applique les defaults', () => {
+    expect(CreateBookingSchema.parse(valid)).toEqual({
+      ...valid,
+      optionIds: [],
+      clientPhotoIds: [],
+    });
+  });
+
+  it('rejette un slotStart sans timezone', () => {
+    expect(
+      CreateBookingSchema.safeParse({
+        ...valid,
+        slotStart: '2026-09-06T08:00:00',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejette un commentaire trop long', () => {
+    expect(
+      CreateBookingSchema.safeParse({
+        ...valid,
+        clientComment: 'x'.repeat(301),
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe('DeclineBookingSchema', () => {
+  it('accepte un body vide', () => {
+    expect(DeclineBookingSchema.parse(undefined)).toEqual({});
+    expect(DeclineBookingSchema.parse({})).toEqual({});
+  });
+
+  it('accepte un motif optionnel', () => {
+    expect(DeclineBookingSchema.parse({ reason: 'Créneau trop tôt' })).toEqual({
+      reason: 'Créneau trop tôt',
+    });
+  });
+});
+
+describe('PatchBookingStatusSchema', () => {
+  it('accepte en_route sans coordonnées', () => {
+    expect(PatchBookingStatusSchema.parse({ status: 'en_route' })).toEqual({
+      status: 'en_route',
+    });
+  });
+
+  it('accepte in_progress avec lat/lng', () => {
+    expect(
+      PatchBookingStatusSchema.parse({
+        status: 'in_progress',
+        lat: 45.764,
+        lng: 4.8357,
+        providerNotes: 'Arrivé, place trouvée',
+      }),
+    ).toMatchObject({ status: 'in_progress', lat: 45.764, lng: 4.8357 });
+  });
+
+  it('rejette lat sans lng', () => {
+    expect(
+      PatchBookingStatusSchema.safeParse({
+        status: 'in_progress',
+        lat: 45.764,
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejette un statut hors graphe pro (cancelled, disputed)', () => {
+    expect(
+      PatchBookingStatusSchema.safeParse({ status: 'cancelled_by_provider' })
+        .success,
+    ).toBe(false);
+  });
+});
+
+describe('BookingStatusUpdateSchema', () => {
+  it('valide la réponse de transition', () => {
+    expect(
+      BookingStatusUpdateSchema.parse({
+        id: '77777777-7777-4777-8777-777777777777',
+        reference: 'CS-20260906-A7B2',
+        status: 'en_route',
+        providerNotes: null,
+        slotStart: '2026-09-06T08:00:00.000Z',
+        slotEnd: '2026-09-06T09:30:00.000Z',
+      }),
+    ).toMatchObject({ status: 'en_route', providerNotes: null });
+  });
+});
+
+describe('CancelBookingSchema', () => {
+  it('accepte un body vide (client)', () => {
+    expect(CancelBookingSchema.parse(undefined)).toEqual({});
+    expect(CancelBookingSchema.parse({})).toEqual({});
+  });
+
+  it('accepte un motif', () => {
+    expect(CancelBookingSchema.parse({ reason: 'Empêchement' })).toEqual({
+      reason: 'Empêchement',
+    });
+  });
+
+  it('rejette un motif trop court', () => {
+    expect(CancelBookingSchema.safeParse({ reason: 'no' }).success).toBe(false);
+  });
+});
+
+describe('CancelledBookingSchema', () => {
+  it('valide une annulation client gratuite', () => {
+    expect(
+      CancelledBookingSchema.parse({
+        id: '77777777-7777-4777-8777-777777777777',
+        reference: 'CS-20260906-A7B2',
+        status: 'cancelled_by_client',
+        reason: null,
+        window: 'free',
+        feeCents: 0,
+        refundCents: 9700,
+        currency: 'EUR',
+        providerPenalty: 0,
+        rematchUrgent: false,
+      }),
+    ).toMatchObject({ window: 'free', feeCents: 0 });
+  });
+});
+
+describe('AcceptedBookingSchema', () => {
+  it('exige une adresse snapshot (RG-SEC-02)', () => {
+    expect(
+      AcceptedBookingSchema.parse({
+        id: '77777777-7777-4777-8777-777777777777',
+        reference: 'CS-20260906-A7B2',
+        status: 'accepted',
+        slotStart: '2026-09-06T08:00:00.000Z',
+        slotEnd: '2026-09-06T09:30:00.000Z',
+        offerName: 'Lavage complet',
+        totalCents: 9700,
+        currency: 'EUR',
+        addressSnapshot: {
+          street: '12 rue de la République',
+          complement: null,
+          city: 'Lyon',
+          postalCode: '69002',
+          country: 'FR',
+          lat: 45.764,
+          lng: 4.835,
+          instructions: null,
+        },
+      }).status,
+    ).toBe('accepted');
+  });
+});
+
+describe('CreateBookingResponseSchema', () => {
+  it('valide la réponse 201 du contrat', () => {
+    expect(
+      CreateBookingResponseSchema.parse({
+        booking: {
+          id: '77777777-7777-4777-8777-777777777777',
+          reference: 'CS-20260906-A7B2',
+          status: 'payment_authorized',
+          pricingSnapshot: {
+            base: 8500,
+            vehicleSurcharge: 1000,
+            options: [],
+            serviceFee: 200,
+            totalCents: 9700,
+            currency: 'EUR',
+          },
+          slotStart: '2026-09-06T08:00:00.000Z',
+          slotEnd: '2026-09-06T09:30:00.000Z',
+        },
+        payment: {
+          clientSecret: 'pi_mock_abc_secret_def',
+          paymentIntentId: 'pi_mock_abc',
+        },
+        matching: { broadcastCount: 3 },
+      }),
+    ).toMatchObject({
+      booking: { status: 'payment_authorized' },
+      matching: { broadcastCount: 3 },
+    });
+  });
+});
+
+describe('BookingPhotoTypeSchema', () => {
+  it('couvre before/after/issue', () => {
+    expect(BookingPhotoTypeSchema.options).toEqual(['before', 'after', 'issue']);
+  });
+});
+
+describe('AddressSnapshotSchema', () => {
+  it('valide un snapshot adresse de booking', () => {
+    expect(
+      AddressSnapshotSchema.parse({
+        street: '10 rue de la République',
+        complement: null,
+        city: 'Lyon',
+        postalCode: '69001',
+        country: 'FR',
+        lat: 45.764,
+        lng: 4.8357,
+        instructions: 'Digicode 12',
+        label: 'Domicile',
+      }),
+    ).toMatchObject({ city: 'Lyon', country: 'FR' });
+  });
+
+  it('rejette une latitude impossible', () => {
+    expect(
+      AddressSnapshotSchema.safeParse({
+        street: '10 rue de la République',
+        complement: null,
+        city: 'Lyon',
+        postalCode: '69001',
+        country: 'FR',
+        lat: 120,
+        lng: 4.8357,
+        instructions: null,
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe('PricingSnapshotSchema', () => {
+  it('valide le snapshot prix figé (RG-CAT-03)', () => {
+    expect(
+      PricingSnapshotSchema.parse({
+        base: 7900,
+        vehicleSurcharge: 1500,
+        options: [],
+        serviceFee: 300,
+        totalCents: 9700,
+        currency: 'EUR',
+      }).totalCents,
+    ).toBe(9700);
   });
 });
 
@@ -467,8 +817,62 @@ describe('KycStatusResponseSchema', () => {
             verifiedAt: null,
           },
         ],
+        rcProAlert: null,
       }),
-    ).toMatchObject({ status: 'submitted' });
+    ).toMatchObject({ status: 'submitted', rcProAlert: null });
+  });
+
+  it('valide une alerte RC Pro J-30', () => {
+    expect(
+      KycStatusResponseSchema.parse({
+        status: 'approved',
+        rejectionReason: null,
+        documents: [],
+        rcProAlert: {
+          kind: 'expiring_soon',
+          expiresAt: '2026-10-03',
+          daysRemaining: 30,
+        },
+      }).rcProAlert,
+    ).toEqual({
+      kind: 'expiring_soon',
+      expiresAt: '2026-10-03',
+      daysRemaining: 30,
+    });
+  });
+});
+
+describe('RcProAlertSchema', () => {
+  it('valide une alerte expirée avec jours négatifs', () => {
+    expect(
+      RcProAlertSchema.parse({
+        kind: 'expired',
+        expiresAt: '2026-09-02',
+        daysRemaining: -1,
+      }),
+    ).toEqual({
+      kind: 'expired',
+      expiresAt: '2026-09-02',
+      daysRemaining: -1,
+    });
+  });
+
+  it('rejette un kind inconnu', () => {
+    expect(
+      RcProAlertSchema.safeParse({
+        kind: 'soon',
+        expiresAt: '2026-10-03',
+        daysRemaining: 10,
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe('ProviderKycAlertsResponseSchema', () => {
+  it('accepte une absence d’alerte', () => {
+    expect(ProviderKycAlertsResponseSchema.parse({ alert: null })).toEqual({
+      alert: null,
+    });
   });
 });
 
@@ -674,6 +1078,127 @@ describe('ProviderZonesResponseSchema', () => {
         ],
       }).zones,
     ).toHaveLength(1);
+  });
+});
+
+describe('CreateStripeOnboardingLinkSchema', () => {
+  it('valide les URLs return/refresh Stripe Connect', () => {
+    expect(
+      CreateStripeOnboardingLinkSchema.parse({
+        returnUrl: 'https://pro.carservice.test/stripe/return',
+        refreshUrl: 'https://pro.carservice.test/stripe/refresh',
+      }),
+    ).toEqual({
+      returnUrl: 'https://pro.carservice.test/stripe/return',
+      refreshUrl: 'https://pro.carservice.test/stripe/refresh',
+    });
+  });
+
+  it('rejette une URL invalide', () => {
+    expect(
+      CreateStripeOnboardingLinkSchema.safeParse({
+        returnUrl: 'not-url',
+        refreshUrl: 'https://pro.carservice.test/stripe/refresh',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejette un refreshUrl manquant', () => {
+    expect(
+      CreateStripeOnboardingLinkSchema.safeParse({
+        returnUrl: 'https://pro.carservice.test/stripe/return',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejette un returnUrl manquant', () => {
+    expect(
+      CreateStripeOnboardingLinkSchema.safeParse({
+        refreshUrl: 'https://pro.carservice.test/stripe/refresh',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejette un refreshUrl invalide', () => {
+    expect(
+      CreateStripeOnboardingLinkSchema.safeParse({
+        returnUrl: 'https://pro.carservice.test/stripe/return',
+        refreshUrl: 'refresh-me',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejette un payload vide', () => {
+    expect(CreateStripeOnboardingLinkSchema.safeParse({}).success).toBe(false);
+  });
+});
+
+describe('StripeOnboardingLinkResponseSchema', () => {
+  it('valide la réponse de lien onboarding Stripe', () => {
+    expect(
+      StripeOnboardingLinkResponseSchema.parse({
+        url: 'https://connect.stripe.com/setup/s/acct_123',
+        stripeAccountId: 'acct_123',
+      }),
+    ).toEqual({
+      url: 'https://connect.stripe.com/setup/s/acct_123',
+      stripeAccountId: 'acct_123',
+    });
+  });
+
+  it('rejette un stripeAccountId vide', () => {
+    expect(
+      StripeOnboardingLinkResponseSchema.safeParse({
+        url: 'https://connect.stripe.com/setup/s/acct_123',
+        stripeAccountId: '',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejette une url invalide', () => {
+    expect(
+      StripeOnboardingLinkResponseSchema.safeParse({
+        url: 'not-a-url',
+        stripeAccountId: 'acct_123',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejette une réponse sans url', () => {
+    expect(
+      StripeOnboardingLinkResponseSchema.safeParse({
+        stripeAccountId: 'acct_123',
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe('ProviderMissionEligibilitySchema', () => {
+  it('valide un pro éligible aux missions', () => {
+    expect(
+      ProviderMissionEligibilitySchema.parse({
+        eligible: true,
+        kycStatus: 'approved',
+      }),
+    ).toEqual({ eligible: true, kycStatus: 'approved' });
+  });
+
+  it('rejette eligible false — l’ineligibilité passe par 403', () => {
+    expect(
+      ProviderMissionEligibilitySchema.safeParse({
+        eligible: false,
+        kycStatus: 'draft',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejette un kycStatus autre que approved', () => {
+    expect(
+      ProviderMissionEligibilitySchema.safeParse({
+        eligible: true,
+        kycStatus: 'submitted',
+      }).success,
+    ).toBe(false);
   });
 });
 

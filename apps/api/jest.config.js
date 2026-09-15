@@ -7,6 +7,10 @@ module.exports = {
   transform: {
     '^.+\\.ts$': ['ts-jest', { tsconfig: '<rootDir>/../tsconfig.json' }],
   },
+  moduleNameMapper: {
+    '^@carservice/shared-types$':
+      '<rootDir>/../../../packages/shared-types/src/index.ts',
+  },
   collectCoverageFrom: ['**/*.(t|j)s', '!**/*.module.ts', '!main.ts'],
   coverageDirectory: '../coverage',
   testEnvironment: 'node',

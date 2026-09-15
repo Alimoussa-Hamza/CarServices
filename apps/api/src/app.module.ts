@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AuthModule } from './modules/auth/auth.module';
+import { BookingsModule } from './modules/bookings/bookings.module';
 import { CatalogModule } from './modules/catalog/catalog.module';
 import { HealthModule } from './modules/health/health.module';
 import { ProvidersModule } from './modules/providers/providers.module';
@@ -19,6 +20,7 @@ import { PrismaModule } from './prisma/prisma.module';
     CatalogModule,
     ZonesModule,
     ProvidersModule,
+    BookingsModule,
   ],
   controllers: [AppController],
 })

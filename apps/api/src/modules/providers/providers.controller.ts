@@ -9,6 +9,8 @@ import {
 } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 import {
+  CreateStripeOnboardingLinkDto,
+  CreateStripeOnboardingLinkSchema,
   SubmitKycDto,
   SubmitKycSchema,
   UpdateProviderAvailabilityDto,
@@ -26,6 +28,7 @@ import {
 } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { KycApprovedGuard } from '../../common/guards/kyc-approved.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { ProvidersService } from './providers.service';
@@ -61,6 +64,17 @@ export class ProvidersController {
   @Get('kyc/status')
   getKycStatus(@CurrentUser() user: AuthPayload) {
     return this.providersService.getKycStatus(user.sub);
+  }
+
+  @Get('kyc/alerts')
+  getKycAlerts(@CurrentUser() user: AuthPayload) {
+    return this.providersService.getKycAlerts(user.sub);
+  }
+
+  @Get('missions/eligibility')
+  @UseGuards(KycApprovedGuard)
+  getMissionEligibility(@CurrentUser() user: AuthPayload) {
+    return this.providersService.getMissionEligibility(user.sub);
   }
 
   @Get('capabilities')
@@ -103,5 +117,14 @@ export class ProvidersController {
     dto: UpdateProviderZonesDto,
   ) {
     return this.providersService.updateZones(user.sub, dto);
+  }
+
+  @Post('stripe/onboard')
+  createStripeOnboardingLink(
+    @CurrentUser() user: AuthPayload,
+    @Body(new ZodValidationPipe(CreateStripeOnboardingLinkSchema))
+    dto: CreateStripeOnboardingLinkDto,
+  ) {
+    return this.providersService.createStripeOnboardingLink(user.sub, dto);
   }
 }

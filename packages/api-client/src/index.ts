@@ -2,11 +2,24 @@ import {
   AuthTokensResponseSchema,
   CatalogQuoteDto,
   CatalogQuoteResponseSchema,
+  AcceptedBookingSchema,
+  AvailableBookingSchema,
+  BookingStatusUpdateSchema,
+  CancelBookingDto,
+  CancelledBookingSchema,
+  CreateBookingDto,
+  CreateBookingResponseSchema,
+  DeclineBookingDto,
+  DeclinedBookingSchema,
+  PatchBookingStatusDto,
+  CreateStripeOnboardingLinkDto,
   HealthResponseSchema,
   KycStatusResponseSchema,
   OutOfZoneLeadDto,
   ProviderAvailabilityResponseSchema,
   ProviderCapabilitiesResponseSchema,
+  ProviderKycAlertsResponseSchema,
+  ProviderMissionEligibilitySchema,
   ProviderProfileSchema,
   ProviderZonesResponseSchema,
   RefreshTokenDto,
@@ -14,6 +27,7 @@ import {
   SendOtpResponseSchema,
   ServiceCategorySchema,
   ServiceOfferSchema,
+  StripeOnboardingLinkResponseSchema,
   SubmitKycDto,
   UpdateProviderAvailabilityDto,
   UpdateProviderCapabilitiesDto,
@@ -163,6 +177,14 @@ export const api = {
       apiRequest('/api/v1/providers/kyc/status').then((data) =>
         KycStatusResponseSchema.parse(data),
       ),
+    kycAlerts: () =>
+      apiRequest('/api/v1/providers/kyc/alerts').then((data) =>
+        ProviderKycAlertsResponseSchema.parse(data),
+      ),
+    missionEligibility: () =>
+      apiRequest('/api/v1/providers/missions/eligibility').then((data) =>
+        ProviderMissionEligibilitySchema.parse(data),
+      ),
     capabilities: () =>
       apiRequest('/api/v1/providers/capabilities').then((data) =>
         ProviderCapabilitiesResponseSchema.parse(data),
@@ -190,11 +212,51 @@ export const api = {
         method: 'PUT',
         body: JSON.stringify(dto),
       }).then((data) => ProviderZonesResponseSchema.parse(data)),
+    createStripeOnboardingLink: (dto: CreateStripeOnboardingLinkDto) =>
+      apiRequest('/api/v1/providers/stripe/onboard', {
+        method: 'POST',
+        body: JSON.stringify(dto),
+      }).then((data) => StripeOnboardingLinkResponseSchema.parse(data)),
+  },
+  bookings: {
+    create: (dto: CreateBookingDto) =>
+      apiRequest('/api/v1/bookings', {
+        method: 'POST',
+        body: JSON.stringify(dto),
+      }).then((data) => CreateBookingResponseSchema.parse(data)),
+    available: () =>
+      apiRequest('/api/v1/bookings/available').then((data) =>
+        AvailableBookingSchema.array().parse(data),
+      ),
+    accept: (bookingId: string) =>
+      apiRequest(`/api/v1/bookings/${bookingId}/accept`, {
+        method: 'POST',
+      }).then((data) => AcceptedBookingSchema.parse(data)),
+    decline: (bookingId: string, dto: DeclineBookingDto = {}) =>
+      apiRequest(`/api/v1/bookings/${bookingId}/decline`, {
+        method: 'POST',
+        body: JSON.stringify(dto),
+      }).then((data) => DeclinedBookingSchema.parse(data)),
+    updateStatus: (bookingId: string, dto: PatchBookingStatusDto) =>
+      apiRequest(`/api/v1/bookings/${bookingId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify(dto),
+      }).then((data) => BookingStatusUpdateSchema.parse(data)),
+    cancel: (bookingId: string, dto: CancelBookingDto = {}) =>
+      apiRequest(`/api/v1/bookings/${bookingId}/cancel`, {
+        method: 'PATCH',
+        body: JSON.stringify(dto),
+      }).then((data) => CancelledBookingSchema.parse(data)),
   },
 };
 
 export type {
   CatalogQuoteDto,
+  CreateBookingDto,
+  DeclineBookingDto,
+  PatchBookingStatusDto,
+  CancelBookingDto,
+  CreateStripeOnboardingLinkDto,
   OutOfZoneLeadDto,
   SubmitKycDto,
   UpdateProviderAvailabilityDto,

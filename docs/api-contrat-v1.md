@@ -157,6 +157,8 @@ X-Request-Id: <uuid>             # optionnel client, sinon généré serveur
 | PATCH | `/providers/me` | provider | Mettre à jour identité publique, bio, méthodes et adresse de base |
 | POST | `/providers/kyc/submit` | provider | Soumettre dossier |
 | GET | `/providers/kyc/status` | provider | Statut KYC |
+| GET | `/providers/kyc/alerts` | provider | Alerte RC Pro J-30 / expirée |
+| GET | `/providers/missions/eligibility` | provider | Accès missions (KYC approved + RC Pro valide) |
 | POST | `/providers/stripe/onboard` | provider | Lien onboarding Connect |
 | GET | `/providers/availability` | provider | Dispo hebdo |
 | PUT | `/providers/availability` | provider | Maj dispo |
@@ -234,7 +236,68 @@ Règles appliquées : SIRET 14 chiffres, RC Pro obligatoire non expirée, au moi
         "expiresAt": "2099-12-31",
         "verifiedAt": null
       }
-    ]
+    ],
+    "rcProAlert": null
+  }
+}
+```
+
+`rcProAlert` : `null` si aucune RC Pro ou expiration > 30 jours. Sinon `{ kind: "expiring_soon" | "expired", expiresAt, daysRemaining }` (RG-KYC-02).
+
+### GET `/providers/kyc/alerts`
+
+```json
+// Response 200 — J-30
+{
+  "data": {
+    "alert": {
+      "kind": "expiring_soon",
+      "expiresAt": "2026-10-03",
+      "daysRemaining": 30
+    }
+  }
+}
+```
+
+```json
+// Response 200 — pas d'alerte
+{ "data": { "alert": null } }
+```
+
+### GET `/providers/missions/eligibility`
+
+Protégé par `KycApprovedGuard`. Réutilisable sur les futures routes missions (`GET /bookings/available`, accept/decline).
+
+Règles : `kycStatus === approved` et RC Pro présente non expirée (fin de journée UTC). Sinon 403.
+
+```json
+// Response 200
+{
+  "data": {
+    "eligible": true,
+    "kycStatus": "approved"
+  }
+}
+```
+
+```json
+// Response 403 — KYC non approved
+{
+  "error": {
+    "code": "KYC_NOT_APPROVED",
+    "message": "Le dossier KYC n'est pas encore approuvé.",
+    "details": { "kycStatus": "draft" }
+  }
+}
+```
+
+```json
+// Response 403 — RC Pro expirée (RG-KYC-02)
+{
+  "error": {
+    "code": "RC_PRO_EXPIRED",
+    "message": "La RC Pro est expirée. Les missions sont bloquées.",
+    "details": { "expiresAt": "2026-01-01" }
   }
 }
 ```
@@ -349,6 +412,30 @@ Règle : seules les zones plateforme actives sont conservées pour l'éligibilit
 }
 ```
 
+### POST `/providers/stripe/onboard`
+
+Crée un compte **Stripe Connect Express** (FR, `card_payments` + `transfers`) s'il n'existe pas encore, persiste `stripeAccountId`, puis retourne un Account Link.
+
+Sans clé Stripe réelle (`STRIPE_SECRET_KEY` vide ou placeholder `sk_test_xxx`), l'API reste utilisable en local : compte `acct_dev_*` et URL mockée vers `returnUrl`.
+
+```json
+// Request
+{
+  "returnUrl": "https://pro.carservice.test/stripe/return",
+  "refreshUrl": "https://pro.carservice.test/stripe/refresh"
+}
+
+// Response 200
+{
+  "data": {
+    "url": "https://connect.stripe.com/setup/s/acct_xxx",
+    "stripeAccountId": "acct_xxx"
+  }
+}
+```
+
+Erreurs : `VALIDATION_ERROR` (URLs invalides), `STRIPE_REQUEST_FAILED` / `STRIPE_ACCOUNT_CREATE_FAILED` / `STRIPE_ACCOUNT_LINK_FAILED` (503).
+
 ---
 
 ## Bookings
@@ -392,21 +479,156 @@ Règle : seules les zones plateforme actives sont conservées pour l'éligibilit
     "payment": {
       "clientSecret": "pi_xxx_secret_xxx",
       "paymentIntentId": "pi_xxx"
-    }
+    },
+    "matching": { "broadcastCount": 3 }
   }
 }
 ```
 
+`status` = `pending_provider` si au moins un pro a été notifié, sinon `payment_authorized`.
+
+### GET `/bookings/available`
+
+JWT provider + KYC approved. Missions `pending_provider` du broadcast (top 8, RG-MATCH-03).
+
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "reference": "CS-20260906-A7B2",
+      "slotStart": "...",
+      "slotEnd": "...",
+      "offerName": "Lavage complet",
+      "totalCents": 9700,
+      "currency": "EUR",
+      "score": 72.5,
+      "zone": { "slug": "lyon", "name": "Lyon" }
+    }
+  ]
+}
+```
+
+### POST `/bookings/:id/accept`
+
+JWT provider + KYC approved. Premier accept gagne (verrou `FOR UPDATE`, RG-MATCH-03). Réponse : adresse exacte (RG-SEC-02).
+
+```json
+{
+  "data": {
+    "id": "uuid",
+    "reference": "CS-20260906-A7B2",
+    "status": "accepted",
+    "slotStart": "...",
+    "slotEnd": "...",
+    "offerName": "Lavage complet",
+    "totalCents": 9700,
+    "currency": "EUR",
+    "addressSnapshot": { "street": "...", "city": "Lyon", "lat": 45.76, "lng": 4.83 }
+  }
+}
+```
+
+Erreurs : `BOOKING_NOT_FOUND` (404), `BOOKING_NOT_OFFERED` (403), `BOOKING_ALREADY_ACCEPTED` (409), `CAPABILITY_REQUIRED` (403).
+
+### POST `/bookings/:id/decline`
+
+Retire le pro du broadcast. Le booking reste `pending_provider` pour les autres. Pénalité `acceptanceRate` −1.
+
+```json
+// Request (optionnel)
+{ "reason": "Créneau trop tôt" }
+
+// Response
+{ "data": { "declined": true, "bookingId": "uuid", "remainingBroadcasts": 2 } }
+```
+
 ### PATCH `/bookings/:id/status`
+
+JWT provider + KYC approved. Pro assigné uniquement. Transitions : `accepted` → `en_route` → `in_progress` → `completed` (RG-BOOK-01/02). Pas de saut.
 
 ```json
 // Request
-{ "status": "en_route" | "in_progress" | "completed", "providerNotes": "..." }
+{
+  "status": "en_route" | "in_progress" | "completed",
+  "providerNotes": "Je pars",
+  "lat": 45.764,
+  "lng": 4.8357
+}
 
-// completed requires photos uploaded separately
+// Response 200
+{
+  "data": {
+    "id": "uuid",
+    "reference": "CS-20260906-A7B2",
+    "status": "en_route",
+    "providerNotes": "Je pars",
+    "slotStart": "...",
+    "slotEnd": "..."
+  }
+}
 ```
 
-**Transitions autorisées :** voir [RG-BOOK](regles-de-gestion.md)
+- `in_progress` : `lat`/`lng` optionnels. S’ils sont fournis, distance ≤ `BOOKING_GEOFENCE_METERS` (200 m, RG-BOOK-03) sinon `BOOKING_GEOFENCE_FAILED` (400).
+- `completed` : au moins 1 photo `before` et 1 `after` uploadées par le pro (RG-BOOK-04). Media upload = M07 ; sans photos → `BOOKING_PHOTOS_REQUIRED` (400).
+
+Erreurs : `VALIDATION_ERROR` (400), `BOOKING_NOT_FOUND` (404), `BOOKING_NOT_ASSIGNED` (403), `BOOKING_INVALID_TRANSITION` (409), `BOOKING_GEOFENCE_FAILED` (400), `BOOKING_PHOTOS_REQUIRED` (400), `KYC_NOT_APPROVED` (403).
+
+Erreurs : `VALIDATION_ERROR` (400), `ADDRESS_NOT_FOUND` (404), `OFFER_NOT_FOUND` (404), `INVALID_OPTIONS` (400), `ZONE_NOT_COVERED` (400), `SLOT_UNAVAILABLE` (409, délai min zone ou créneau passé).
+
+Le `pricingSnapshot` est figé à la création (RG-CAT-03). Le `payment` est une **pre-auth mock** tant que M06 (Stripe PaymentIntent) n’est pas branché.
+
+**Transitions autorisées :** voir [RG-BOOK](regles-de-gestion.md). Appliquées uniquement côté API (`BookingStateMachine`) — jamais côté mobile.
+
+Fenêtre litige : `completed` → `disputed` par le client pendant **48 h** (`BOOKING_DISPUTE_WINDOW_HOURS`).
+
+### PATCH `/bookings/:id/cancel`
+
+JWT client ou provider. Motif obligatoire côté pro (RG-CANCEL-01). Impossible dès `in_progress` — litige uniquement (RG-CANCEL-02).
+
+```json
+// Request
+{ "reason": "Empêchement" }
+
+// Response 200
+{
+  "data": {
+    "id": "uuid",
+    "reference": "CS-20260906-A7B2",
+    "status": "cancelled_by_client",
+    "reason": "Empêchement",
+    "window": "free" | "mid" | "late",
+    "feeCents": 0,
+    "refundCents": 9700,
+    "currency": "EUR",
+    "providerPenalty": 0,
+    "rematchUrgent": false
+  }
+}
+```
+
+Grille client (sur `pricingSnapshot.totalCents`, paiement mock jusqu’à M06) :
+
+| Fenêtre | Délai | Frais |
+|---------|-------|-------|
+| `free` | > 24 h | 0 % |
+| `mid` | 2–24 h | 20 % |
+| `late` | < 2 h | 50 % |
+
+Pro : `cancelled_by_provider`, remboursement client 100 %, pénalité `acceptanceRate` 0 / −2 / −5. Si `late`, push `booking.rematch_urgent`.
+
+Erreurs : `BOOKING_CANCEL_REASON_REQUIRED` (400), `BOOKING_FORBIDDEN` (403), `BOOKING_NOT_ASSIGNED` (403), `BOOKING_CANCEL_VIA_DISPUTE` (409), `BOOKING_INVALID_TRANSITION` (409), `BOOKING_NOT_FOUND` (404).
+
+### Jobs matching (BullMQ, pas d’endpoint HTTP)
+
+Queue Redis `matching` (prefix `carservice`), planifiée à la création du booking :
+
+| Job | Délai | Action |
+|-----|-------|--------|
+| `expand-radius` | T1 = 30 min (`MATCHING_TIMEOUT_T1_MINUTES`) | Élargit le rayon ×2 et notifie plus de pros (RG-MATCH-04). No-op si déjà accepté. |
+| `timeout-unassigned` | min(T2 = 2 h, H-2 du créneau) | `pending_provider` / `payment_authorized` → `unassigned` (RG-MATCH-05). No-op sinon. |
+
+Handlers idempotents, retry 3×. Worker désactivé si `NODE_ENV=test` (sauf `MATCHING_WORKER_ENABLED=true`).
 
 ---
 
@@ -492,9 +714,17 @@ Règle : seules les zones plateforme actives sont conservées pour l'éligibilit
 |------|------|-------------|
 | `VALIDATION_ERROR` | 400 | Body invalide |
 | `ZONE_NOT_COVERED` | 400 | Hors zone |
-| `KYC_NOT_APPROVED` | 403 | Pro non validé |
+| `ADDRESS_NOT_FOUND` | 404 | Adresse cliente introuvable |
+| `OFFER_NOT_FOUND` | 404 | Offre inactive ou inconnue |
+| `INVALID_OPTIONS` | 400 | Option inactive ou hors offre |
+| `KYC_NOT_APPROVED` | 403 | Pro non validé (`draft` / `submitted` / `rejected`) |
+| `RC_PRO_EXPIRED` | 403 | RC Pro manquante ou expirée |
 | `BOOKING_INVALID_TRANSITION` | 409 | Transition statut interdite |
+| `BOOKING_DISPUTE_WINDOW_EXPIRED` | 409 | Litige hors délai 48 h |
 | `BOOKING_ALREADY_ACCEPTED` | 409 | Mission déjà prise |
+| `BOOKING_NOT_OFFERED` | 403 | Mission hors broadcast du pro |
+| `CAPABILITY_REQUIRED` | 403 | Offre hors capabilities du pro |
+| `BOOKING_NOT_FOUND` | 404 | Réservation introuvable |
 | `SLOT_UNAVAILABLE` | 409 | Créneau complet |
 | `PAYMENT_FAILED` | 402 | Paiement refusé |
 | `OTP_RATE_LIMITED` | 429 | Trop de tentatives OTP |

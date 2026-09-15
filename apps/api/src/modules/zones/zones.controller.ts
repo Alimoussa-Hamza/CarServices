@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import {
   OutOfZoneLeadDto,
   OutOfZoneLeadSchema,
@@ -13,6 +13,7 @@ export class ZonesController {
   constructor(private readonly zonesService: ZonesService) {}
 
   @Post('check')
+  @HttpCode(200)
   check(@Body(new ZodValidationPipe(ZoneCheckSchema)) dto: ZoneCheckDto) {
     return this.zonesService.check(dto);
   }

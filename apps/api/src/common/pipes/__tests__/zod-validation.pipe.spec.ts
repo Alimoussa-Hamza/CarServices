@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import { CreateStripeOnboardingLinkSchema } from '@carservice/shared-types';
 import { z } from 'zod';
 import { ZodValidationPipe } from '../zod-validation.pipe';
 
@@ -46,5 +47,38 @@ describe('ZodValidationPipe', () => {
         { type: 'body' },
       ),
     ).toEqual({ phone: '+33612345678', code: '123456' });
+  });
+
+  it('valide le body Stripe Connect onboarding', () => {
+    const pipe = new ZodValidationPipe(CreateStripeOnboardingLinkSchema);
+    const payload = {
+      returnUrl: 'https://pro.carservice.test/stripe/return',
+      refreshUrl: 'https://pro.carservice.test/stripe/refresh',
+    };
+
+    expect(pipe.transform(payload, { type: 'body' })).toEqual(payload);
+  });
+
+  it('rejette un body Stripe Connect avec URL invalide', () => {
+    const pipe = new ZodValidationPipe(CreateStripeOnboardingLinkSchema);
+
+    try {
+      pipe.transform(
+        {
+          returnUrl: 'not-url',
+          refreshUrl: 'https://pro.carservice.test/stripe/refresh',
+        },
+        { type: 'body' },
+      );
+      throw new Error('expected VALIDATION_ERROR');
+    } catch (error) {
+      expect(error).toBeInstanceOf(BadRequestException);
+      expect((error as BadRequestException).getResponse()).toMatchObject({
+        code: 'VALIDATION_ERROR',
+        details: {
+          returnUrl: expect.any(Array),
+        },
+      });
+    }
   });
 });

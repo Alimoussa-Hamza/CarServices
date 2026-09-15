@@ -2,30 +2,35 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { OutOfZoneLeadDto, ZoneCheckDto } from '@carservice/shared-types';
 import { PrismaService } from '../../prisma/prisma.service';
 
-type ZoneRow = {
+export type CoveringZone = {
   id: string;
   name: string;
   slug: string;
+  minBookingLeadHours: number;
 };
 
 @Injectable()
 export class ZonesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async check(dto: ZoneCheckDto) {
-    const zones = await this.prisma.$queryRaw<ZoneRow[]>`
-      SELECT id::text, name, slug
+  async findCoveringZone(lat: number, lng: number): Promise<CoveringZone | null> {
+    const zones = await this.prisma.$queryRaw<CoveringZone[]>`
+      SELECT id::text, name, slug, min_booking_lead_hours AS "minBookingLeadHours"
       FROM service_zones
       WHERE is_active = true
         AND ST_Intersects(
           polygon,
-          ST_SetSRID(ST_MakePoint(${dto.lng}, ${dto.lat}), 4326)::geography
+          ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography
         )
       ORDER BY name ASC
       LIMIT 1
     `;
 
-    const zone = zones[0];
+    return zones[0] ?? null;
+  }
+
+  async check(dto: ZoneCheckDto) {
+    const zone = await this.findCoveringZone(dto.lat, dto.lng);
 
     if (!zone) {
       return {
@@ -39,7 +44,11 @@ export class ZonesService {
     return {
       data: {
         covered: true as const,
-        zone,
+        zone: {
+          id: zone.id,
+          name: zone.name,
+          slug: zone.slug,
+        },
       },
     };
   }

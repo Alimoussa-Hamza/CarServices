@@ -55,6 +55,27 @@ describe('ZonesService', () => {
     });
   });
 
+  describe('findCoveringZone', () => {
+    it('retourne la zone active et le délai min de réservation', async () => {
+      const { service, prisma } = buildService();
+      prisma.$queryRaw.mockResolvedValue([
+        {
+          id: '44444444-4444-4444-8444-444444444444',
+          name: 'Lyon',
+          slug: 'lyon',
+          minBookingLeadHours: 2,
+        },
+      ]);
+
+      await expect(service.findCoveringZone(45.764, 4.835)).resolves.toEqual({
+        id: '44444444-4444-4444-8444-444444444444',
+        name: 'Lyon',
+        slug: 'lyon',
+        minBookingLeadHours: 2,
+      });
+    });
+  });
+
   describe('createLead', () => {
     it('crée un lead hors zone avec email', async () => {
       const { service, prisma } = buildService();

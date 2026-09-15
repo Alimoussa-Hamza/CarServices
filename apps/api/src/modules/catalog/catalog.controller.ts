@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, Query } from '@nestjs/common';
 import { CatalogQuoteDto, CatalogQuoteSchema } from '@carservice/shared-types';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { CatalogService } from './catalog.service';
@@ -23,6 +23,7 @@ export class CatalogController {
   }
 
   @Post('quote')
+  @HttpCode(200)
   quote(@Body(new ZodValidationPipe(CatalogQuoteSchema)) dto: CatalogQuoteDto) {
     return this.catalogService.quote(dto);
   }

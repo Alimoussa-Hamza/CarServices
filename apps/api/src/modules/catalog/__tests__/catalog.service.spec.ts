@@ -194,6 +194,30 @@ describe('CatalogService', () => {
       expect(result.data.breakdown.totalCents).toBe(10200);
     });
 
+    it('expose l’offre pour figer le snapshot booking', async () => {
+      const { service, prisma } = buildService();
+      prisma.serviceOffer.findFirst.mockResolvedValue({
+        ...offer,
+        zonePricing: [{ priceOverrideCents: null, vehicleSurcharges: {} }],
+      });
+
+      await expect(
+        service.computeQuote({
+          offerId: offer.id,
+          vehicleType: 'suv',
+          optionIds: [],
+          zoneSlug: 'lyon',
+          dirtLevel: 'normal',
+        }),
+      ).resolves.toMatchObject({
+        offer: {
+          id: offer.id,
+          name: 'Lavage complet',
+          categorySlug: 'wash',
+        },
+      });
+    });
+
     it('rejette une offre inexistante', async () => {
       const { service, prisma } = buildService();
       prisma.serviceOffer.findFirst.mockResolvedValue(null);

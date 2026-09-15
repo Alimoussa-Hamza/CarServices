@@ -78,7 +78,7 @@ export class CatalogService {
     return { data: this.toOfferDto(offer) };
   }
 
-  async quote(dto: CatalogQuoteDto) {
+  async computeQuote(dto: CatalogQuoteDto) {
     const offer = await this.prisma.serviceOffer.findFirst({
       where: { id: dto.offerId, isActive: true, category: { isEnabled: true } },
       include: {
@@ -139,18 +139,26 @@ export class CatalogService {
       );
 
     return {
-      data: {
-        breakdown: {
-          base,
-          vehicleSurcharge,
-          options,
-          serviceFee: SERVICE_FEE_CENTS,
-          totalCents: base + vehicleSurcharge + optionsTotal + SERVICE_FEE_CENTS,
-          currency: 'EUR' as const,
-        },
-        durationMinutes,
+      breakdown: {
+        base,
+        vehicleSurcharge,
+        options,
+        serviceFee: SERVICE_FEE_CENTS,
+        totalCents: base + vehicleSurcharge + optionsTotal + SERVICE_FEE_CENTS,
+        currency: 'EUR' as const,
+      },
+      durationMinutes,
+      offer: {
+        id: offer.id,
+        name: offer.name,
+        categorySlug: offer.category.slug,
       },
     };
+  }
+
+  async quote(dto: CatalogQuoteDto) {
+    const { breakdown, durationMinutes } = await this.computeQuote(dto);
+    return { data: { breakdown, durationMinutes } };
   }
 
   private getVehicleSurcharge(

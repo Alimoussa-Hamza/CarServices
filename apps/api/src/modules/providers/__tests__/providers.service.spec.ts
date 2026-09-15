@@ -1,5 +1,6 @@
 import { ProvidersService } from '../providers.service';
 import { PrismaService } from '../../../prisma/prisma.service';
+import { ConfigService } from '@nestjs/config';
 
 const profile = {
   id: '11111111-1111-4111-8111-111111111111',
@@ -97,6 +98,19 @@ const providerZone = {
   zone: serviceZone,
 };
 
+async function withMockedFetch<T>(
+  fetchMock: jest.Mock,
+  action: () => Promise<T>,
+): Promise<T> {
+  const originalFetch = global.fetch;
+  global.fetch = fetchMock as unknown as typeof fetch;
+  try {
+    return await action();
+  } finally {
+    global.fetch = originalFetch;
+  }
+}
+
 function buildService() {
   const prisma = {
     providerProfile: {
@@ -143,12 +157,17 @@ function buildService() {
       ) => (Array.isArray(action) ? Promise.all(action) : action(prisma)),
     ),
   };
+  const config = {
+    get: jest.fn(),
+  };
 
   return {
     service: new ProvidersService(
       prismaWithTransaction as unknown as PrismaService,
+      config as unknown as ConfigService,
     ),
     prisma: prismaWithTransaction,
+    config,
   };
 }
 
@@ -298,6 +317,7 @@ describe('ProvidersService', () => {
               verifiedAt: null,
             },
           ],
+          rcProAlert: null,
         },
       });
 
@@ -406,6 +426,246 @@ describe('ProvidersService', () => {
               verifiedAt: null,
             },
           ],
+          rcProAlert: null,
+        },
+      });
+    });
+
+    it('inclut rcProAlert expiring_soon dans le statut KYC', async () => {
+      const { service, prisma } = buildService();
+      const now = new Date('2026-09-03T12:00:00.000Z');
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        kycStatus: 'approved',
+        kycDocuments: [
+          { ...kycDocument, expiresAt: new Date('2026-09-20T00:00:00.000Z') },
+        ],
+      });
+
+      await expect(service.getKycStatus(profile.userId, now)).resolves.toEqual({
+        data: {
+          status: 'approved',
+          rejectionReason: null,
+          documents: [
+            {
+              id: kycDocument.id,
+              docType: 'rc_pro',
+              fileUrl: 'https://example.com/rc-pro.pdf',
+              expiresAt: '2026-09-20',
+              verifiedAt: null,
+            },
+          ],
+          rcProAlert: {
+            kind: 'expiring_soon',
+            expiresAt: '2026-09-20',
+            daysRemaining: 17,
+          },
+        },
+      });
+    });
+  });
+
+  describe('getKycAlerts', () => {
+    const now = new Date('2026-09-03T12:00:00.000Z');
+
+    it('ne renvoie pas d’alerte si la RC Pro expire dans plus de 30 jours', async () => {
+      const { service, prisma } = buildService();
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        kycDocuments: [kycDocument],
+      });
+
+      await expect(service.getKycAlerts(profile.userId, now)).resolves.toEqual({
+        data: { alert: null },
+      });
+    });
+
+    it('alerte expiring_soon à J-30', async () => {
+      const { service, prisma } = buildService();
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        kycDocuments: [
+          { ...kycDocument, expiresAt: new Date('2026-10-03T00:00:00.000Z') },
+        ],
+      });
+
+      await expect(service.getKycAlerts(profile.userId, now)).resolves.toEqual({
+        data: {
+          alert: {
+            kind: 'expiring_soon',
+            expiresAt: '2026-10-03',
+            daysRemaining: 30,
+          },
+        },
+      });
+    });
+
+    it('alerte expiring_soon le jour d’expiration', async () => {
+      const { service, prisma } = buildService();
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        kycDocuments: [
+          { ...kycDocument, expiresAt: new Date('2026-09-03T00:00:00.000Z') },
+        ],
+      });
+
+      await expect(service.getKycAlerts(profile.userId, now)).resolves.toEqual({
+        data: {
+          alert: {
+            kind: 'expiring_soon',
+            expiresAt: '2026-09-03',
+            daysRemaining: 0,
+          },
+        },
+      });
+    });
+
+    it('n’alerte pas à J-31', async () => {
+      const { service, prisma } = buildService();
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        kycDocuments: [
+          { ...kycDocument, expiresAt: new Date('2026-10-04T00:00:00.000Z') },
+        ],
+      });
+
+      await expect(service.getKycAlerts(profile.userId, now)).resolves.toEqual({
+        data: { alert: null },
+      });
+    });
+
+    it('alerte expired après la date d’expiration', async () => {
+      const { service, prisma } = buildService();
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        kycDocuments: [
+          { ...kycDocument, expiresAt: new Date('2026-09-02T00:00:00.000Z') },
+        ],
+      });
+
+      await expect(service.getKycAlerts(profile.userId, now)).resolves.toEqual({
+        data: {
+          alert: {
+            kind: 'expired',
+            expiresAt: '2026-09-02',
+            daysRemaining: -1,
+          },
+        },
+      });
+    });
+
+    it('ne renvoie pas d’alerte sans document RC Pro', async () => {
+      const { service, prisma } = buildService();
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        kycDocuments: [],
+      });
+
+      await expect(service.getKycAlerts(profile.userId, now)).resolves.toEqual({
+        data: { alert: null },
+      });
+    });
+  });
+
+  describe('assertCanReceiveMissions / getMissionEligibility', () => {
+    const now = new Date('2026-09-03T12:00:00.000Z');
+
+    it.each(['draft', 'submitted', 'rejected'] as const)(
+      'bloque un provider KYC %s',
+      async (kycStatus) => {
+        const { service, prisma } = buildService();
+        prisma.providerProfile.upsert.mockResolvedValue({
+          ...profile,
+          kycStatus,
+          kycDocuments: [kycDocument],
+        });
+
+        await expect(
+          service.assertCanReceiveMissions(profile.userId, now),
+        ).rejects.toMatchObject({
+          response: {
+            code: 'KYC_NOT_APPROVED',
+            details: { kycStatus },
+          },
+        });
+      },
+    );
+
+    it('autorise un provider approved avec RC Pro valide', async () => {
+      const { service, prisma } = buildService();
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        kycStatus: 'approved',
+        kycDocuments: [kycDocument],
+      });
+
+      await expect(
+        service.getMissionEligibility(profile.userId, now),
+      ).resolves.toEqual({
+        data: { eligible: true, kycStatus: 'approved' },
+      });
+      expect(prisma.providerProfile.upsert).toHaveBeenCalledWith({
+        where: { userId: profile.userId },
+        update: {},
+        create: { userId: profile.userId },
+        include: {
+          kycDocuments: {
+            where: { docType: 'rc_pro' },
+            orderBy: { expiresAt: 'desc' },
+          },
+        },
+      });
+    });
+
+    it('autorise si la RC Pro expire aujourd’hui', async () => {
+      const { service, prisma } = buildService();
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        kycStatus: 'approved',
+        kycDocuments: [
+          { ...kycDocument, expiresAt: new Date('2026-09-03T00:00:00.000Z') },
+        ],
+      });
+
+      await expect(
+        service.assertCanReceiveMissions(profile.userId, now),
+      ).resolves.toBeUndefined();
+    });
+
+    it('bloque un provider approved sans RC Pro', async () => {
+      const { service, prisma } = buildService();
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        kycStatus: 'approved',
+        kycDocuments: [],
+      });
+
+      await expect(
+        service.getMissionEligibility(profile.userId, now),
+      ).rejects.toMatchObject({
+        response: {
+          code: 'RC_PRO_EXPIRED',
+          details: { expiresAt: null },
+        },
+      });
+    });
+
+    it('bloque un provider approved avec RC Pro expirée', async () => {
+      const { service, prisma } = buildService();
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        kycStatus: 'approved',
+        kycDocuments: [
+          { ...kycDocument, expiresAt: new Date('2026-09-02T00:00:00.000Z') },
+        ],
+      });
+
+      await expect(
+        service.assertCanReceiveMissions(profile.userId, now),
+      ).rejects.toMatchObject({
+        response: {
+          code: 'RC_PRO_EXPIRED',
+          details: { expiresAt: '2026-09-02' },
         },
       });
     });
@@ -722,6 +982,353 @@ describe('ProvidersService', () => {
         }),
       ).rejects.toMatchObject({
         response: { code: 'NO_VALID_PROVIDER_ZONES' },
+      });
+    });
+  });
+
+  describe('createStripeOnboardingLink', () => {
+    it('crée un compte Connect dev et stocke son id si absent', async () => {
+      const { service, prisma, config } = buildService();
+      config.get.mockReturnValue(undefined);
+      prisma.providerProfile.upsert.mockResolvedValue(profile);
+      prisma.providerProfile.update.mockResolvedValue({
+        ...profile,
+        stripeAccountId: 'acct_dev_1111111111114111',
+      });
+
+      await expect(
+        service.createStripeOnboardingLink(profile.userId, {
+          returnUrl: 'https://pro.carservice.test/stripe/return',
+          refreshUrl: 'https://pro.carservice.test/stripe/refresh',
+        }),
+      ).resolves.toEqual({
+        data: {
+          stripeAccountId: 'acct_dev_1111111111114111',
+          url: 'https://pro.carservice.test/stripe/return?stripe_mock=onboarding&account=acct_dev_1111111111114111',
+        },
+      });
+
+      expect(prisma.providerProfile.update).toHaveBeenCalledWith({
+        where: { id: profile.id },
+        data: { stripeAccountId: 'acct_dev_1111111111114111' },
+      });
+    });
+
+    it('ignore le placeholder sk_test_xxx et reste en mock local', async () => {
+      const { service, prisma, config } = buildService();
+      config.get.mockReturnValue('sk_test_xxx');
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        stripeAccountId: 'acct_existing',
+      });
+
+      await expect(
+        service.createStripeOnboardingLink(profile.userId, {
+          returnUrl: 'https://pro.carservice.test/stripe/return',
+          refreshUrl: 'https://pro.carservice.test/stripe/refresh',
+        }),
+      ).resolves.toEqual({
+        data: {
+          stripeAccountId: 'acct_existing',
+          url: 'https://pro.carservice.test/stripe/return?stripe_mock=onboarding&account=acct_existing',
+        },
+      });
+    });
+
+    it('réutilise le compte Stripe existant sans le recréer', async () => {
+      const { service, prisma, config } = buildService();
+      config.get.mockReturnValue(undefined);
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        stripeAccountId: 'acct_existing',
+      });
+
+      await expect(
+        service.createStripeOnboardingLink(profile.userId, {
+          returnUrl: 'https://pro.carservice.test/stripe/return',
+          refreshUrl: 'https://pro.carservice.test/stripe/refresh',
+        }),
+      ).resolves.toEqual({
+        data: {
+          stripeAccountId: 'acct_existing',
+          url: 'https://pro.carservice.test/stripe/return?stripe_mock=onboarding&account=acct_existing',
+        },
+      });
+
+      expect(prisma.providerProfile.update).not.toHaveBeenCalled();
+    });
+
+    it('crée un compte Express et un Account Link via Stripe', async () => {
+      const { service, prisma, config } = buildService();
+      config.get.mockReturnValue('sk_test_mocklocalkey16chars');
+      prisma.providerProfile.upsert.mockResolvedValue(profile);
+      prisma.providerProfile.update.mockResolvedValue({
+        ...profile,
+        stripeAccountId: 'acct_123',
+      });
+
+      const fetchMock = jest
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ id: 'acct_123' }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            url: 'https://connect.stripe.com/setup/s/acct_123',
+          }),
+        });
+      const originalFetch = global.fetch;
+      global.fetch = fetchMock as unknown as typeof fetch;
+
+      try {
+        await expect(
+          service.createStripeOnboardingLink(profile.userId, {
+            returnUrl: 'https://pro.carservice.test/stripe/return',
+            refreshUrl: 'https://pro.carservice.test/stripe/refresh',
+          }),
+        ).resolves.toEqual({
+          data: {
+            stripeAccountId: 'acct_123',
+            url: 'https://connect.stripe.com/setup/s/acct_123',
+          },
+        });
+      } finally {
+        global.fetch = originalFetch;
+      }
+
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(fetchMock).toHaveBeenNthCalledWith(
+        1,
+        'https://api.stripe.com/v1/accounts',
+        expect.objectContaining({
+          method: 'POST',
+          headers: {
+            Authorization: 'Bearer sk_test_mocklocalkey16chars',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Stripe-Version': '2024-11-20.acacia',
+          },
+        }),
+      );
+      const accountBody = String(fetchMock.mock.calls[0]?.[1]?.body);
+      expect(accountBody).toContain('type=express');
+      expect(accountBody).toContain('country=FR');
+      expect(fetchMock).toHaveBeenNthCalledWith(
+        2,
+        'https://api.stripe.com/v1/account_links',
+        expect.objectContaining({
+          method: 'POST',
+        }),
+      );
+      const linkBody = String(fetchMock.mock.calls[1]?.[1]?.body);
+      expect(linkBody).toContain('account=acct_123');
+      expect(linkBody).toContain('type=account_onboarding');
+    });
+
+    it('remonte une indisponibilité Stripe Connect', async () => {
+      const { service, prisma, config } = buildService();
+      config.get.mockReturnValue('sk_test_mocklocalkey16chars');
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        stripeAccountId: 'acct_existing',
+      });
+
+      const fetchMock = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+      });
+
+      await withMockedFetch(fetchMock, async () => {
+        await expect(
+          service.createStripeOnboardingLink(profile.userId, {
+            returnUrl: 'https://pro.carservice.test/stripe/return',
+            refreshUrl: 'https://pro.carservice.test/stripe/refresh',
+          }),
+        ).rejects.toMatchObject({
+          response: { code: 'STRIPE_REQUEST_FAILED' },
+        });
+      });
+    });
+
+    it('traite une clé vide ou uniquement des espaces comme mock local', async () => {
+      const { service, prisma, config } = buildService();
+      config.get.mockReturnValue('   ');
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        stripeAccountId: 'acct_existing',
+      });
+      const fetchMock = jest.fn();
+
+      await withMockedFetch(fetchMock, async () => {
+        await expect(
+          service.createStripeOnboardingLink(profile.userId, {
+            returnUrl: 'https://pro.carservice.test/stripe/return',
+            refreshUrl: 'https://pro.carservice.test/stripe/refresh',
+          }),
+        ).resolves.toMatchObject({
+          data: { stripeAccountId: 'acct_existing' },
+        });
+      });
+
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it('accepte une restricted key rk_test_ comme clé Stripe réelle', async () => {
+      const { service, prisma, config } = buildService();
+      config.get.mockReturnValue('rk_test_mocklocalkey16chars');
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        stripeAccountId: 'acct_existing',
+      });
+      const fetchMock = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          url: 'https://connect.stripe.com/setup/s/acct_existing',
+        }),
+      });
+
+      await withMockedFetch(fetchMock, async () => {
+        await expect(
+          service.createStripeOnboardingLink(profile.userId, {
+            returnUrl: 'https://pro.carservice.test/stripe/return',
+            refreshUrl: 'https://pro.carservice.test/stripe/refresh',
+          }),
+        ).resolves.toEqual({
+          data: {
+            stripeAccountId: 'acct_existing',
+            url: 'https://connect.stripe.com/setup/s/acct_existing',
+          },
+        });
+      });
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://api.stripe.com/v1/account_links',
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: 'Bearer rk_test_mocklocalkey16chars',
+          }),
+        }),
+      );
+    });
+
+    it('ne recrée pas le compte Stripe si stripeAccountId existe déjà', async () => {
+      const { service, prisma, config } = buildService();
+      config.get.mockReturnValue('sk_test_mocklocalkey16chars');
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        stripeAccountId: 'acct_existing',
+      });
+      const fetchMock = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          url: 'https://connect.stripe.com/setup/s/acct_existing',
+        }),
+      });
+
+      await withMockedFetch(fetchMock, async () => {
+        await service.createStripeOnboardingLink(profile.userId, {
+          returnUrl: 'https://pro.carservice.test/stripe/return',
+          refreshUrl: 'https://pro.carservice.test/stripe/refresh',
+        });
+      });
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
+        'https://api.stripe.com/v1/account_links',
+      );
+      expect(prisma.providerProfile.update).not.toHaveBeenCalled();
+    });
+
+    it('demande card_payments et transfers sur le compte Express', async () => {
+      const { service, prisma, config } = buildService();
+      config.get.mockReturnValue('sk_test_mocklocalkey16chars');
+      prisma.providerProfile.upsert.mockResolvedValue(profile);
+      prisma.providerProfile.update.mockResolvedValue({
+        ...profile,
+        stripeAccountId: 'acct_123',
+      });
+      const fetchMock = jest
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ id: 'acct_123' }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            url: 'https://connect.stripe.com/setup/s/acct_123',
+          }),
+        });
+
+      await withMockedFetch(fetchMock, async () => {
+        await service.createStripeOnboardingLink(profile.userId, {
+          returnUrl: 'https://pro.carservice.test/stripe/return',
+          refreshUrl: 'https://pro.carservice.test/stripe/refresh',
+        });
+      });
+
+      const accountBody = String(fetchMock.mock.calls[0]?.[1]?.body);
+      expect(accountBody).toContain(
+        'capabilities%5Bcard_payments%5D%5Brequested%5D=true',
+      );
+      expect(accountBody).toContain(
+        'capabilities%5Btransfers%5D%5Brequested%5D=true',
+      );
+      const linkBody = String(fetchMock.mock.calls[1]?.[1]?.body);
+      expect(linkBody).toContain(
+        'return_url=https%3A%2F%2Fpro.carservice.test%2Fstripe%2Freturn',
+      );
+      expect(linkBody).toContain(
+        'refresh_url=https%3A%2F%2Fpro.carservice.test%2Fstripe%2Frefresh',
+      );
+    });
+
+    it('remonte STRIPE_ACCOUNT_CREATE_FAILED si Stripe omet l’id', async () => {
+      const { service, prisma, config } = buildService();
+      config.get.mockReturnValue('sk_test_mocklocalkey16chars');
+      prisma.providerProfile.upsert.mockResolvedValue(profile);
+      const fetchMock = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({}),
+      });
+
+      await withMockedFetch(fetchMock, async () => {
+        await expect(
+          service.createStripeOnboardingLink(profile.userId, {
+            returnUrl: 'https://pro.carservice.test/stripe/return',
+            refreshUrl: 'https://pro.carservice.test/stripe/refresh',
+          }),
+        ).rejects.toMatchObject({
+          response: { code: 'STRIPE_ACCOUNT_CREATE_FAILED' },
+        });
+      });
+
+      expect(prisma.providerProfile.update).not.toHaveBeenCalled();
+    });
+
+    it('remonte STRIPE_ACCOUNT_LINK_FAILED si Stripe omet l’url', async () => {
+      const { service, prisma, config } = buildService();
+      config.get.mockReturnValue('sk_test_mocklocalkey16chars');
+      prisma.providerProfile.upsert.mockResolvedValue({
+        ...profile,
+        stripeAccountId: 'acct_existing',
+      });
+      const fetchMock = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({}),
+      });
+
+      await withMockedFetch(fetchMock, async () => {
+        await expect(
+          service.createStripeOnboardingLink(profile.userId, {
+            returnUrl: 'https://pro.carservice.test/stripe/return',
+            refreshUrl: 'https://pro.carservice.test/stripe/refresh',
+          }),
+        ).rejects.toMatchObject({
+          response: { code: 'STRIPE_ACCOUNT_LINK_FAILED' },
+        });
       });
     });
   });

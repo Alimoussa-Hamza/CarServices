@@ -37,6 +37,98 @@ export const BookingStatusSchema = z.enum([
 ]);
 export type BookingStatus = z.infer<typeof BookingStatusSchema>;
 
+export const BookingActorTypeSchema = z.enum([
+  'client',
+  'provider',
+  'admin',
+  'system',
+]);
+export type BookingActorType = z.infer<typeof BookingActorTypeSchema>;
+
+/** Délai max pour ouvrir un litige après `completed` (RG-BOOK). */
+export const BOOKING_DISPUTE_WINDOW_HOURS = 48;
+
+/** Commission plateforme figée au booking (RG-PAY-03). */
+export const PLATFORM_COMMISSION_RATE = 0.2;
+
+/** Taille du broadcast matching (RG-MATCH-03, top 5–10). */
+export const MATCHING_BROADCAST_SIZE = 8;
+
+/** Timeout matching T1 — élargir le rayon (RG-MATCH-04). */
+export const MATCHING_TIMEOUT_T1_MINUTES = 30;
+
+/** Timeout matching T2 — unassigned (RG-MATCH-05). */
+export const MATCHING_TIMEOUT_T2_HOURS = 2;
+
+/** Unassigned aussi à H-2 du créneau (RG-MATCH-05). */
+export const MATCHING_UNASSIGNED_LEAD_HOURS = 2;
+
+/** Facteur d’élargissement du rayon à T1 (RG-MATCH-04). */
+export const MATCHING_RADIUS_EXPAND_FACTOR = 2;
+
+/** Annulation gratuite au-delà de ce délai (RG-CANCEL). */
+export const CANCEL_FREE_HOURS = 24;
+
+/** Seuil «late » d’annulation (RG-CANCEL). */
+export const CANCEL_LATE_HOURS = 2;
+
+/** Frais client 2–24 h, en % du snapshot (RG-CANCEL). */
+export const CANCEL_FEE_MID_PERCENT = 20;
+
+/** Frais client < 2 h, en % du snapshot (RG-CANCEL). */
+export const CANCEL_FEE_LATE_PERCENT = 50;
+
+/** Pénalité acceptanceRate pro (mid / late). */
+export const CANCEL_PROVIDER_PENALTY_MID = 2;
+export const CANCEL_PROVIDER_PENALTY_LATE = 5;
+
+/** Géofence optionnelle à l’arrivée (RG-BOOK-03, wireframe P04). */
+export const BOOKING_GEOFENCE_METERS = 200;
+
+/** Photos min avant/après pour clôturer (RG-BOOK-04). M07-S04 pourra relever. */
+export const BOOKING_MIN_BEFORE_PHOTOS = 1;
+export const BOOKING_MIN_AFTER_PHOTOS = 1;
+
+export const BookingPhotoTypeSchema = z.enum(['before', 'after', 'issue']);
+export type BookingPhotoType = z.infer<typeof BookingPhotoTypeSchema>;
+
+export const BookingPhotoUploaderSchema = z.enum(['client', 'provider']);
+export type BookingPhotoUploader = z.infer<typeof BookingPhotoUploaderSchema>;
+
+export const BookingReferenceSchema = z
+  .string()
+  .regex(/^CS-\d{8}-[A-Z0-9]{4}$/, 'Référence booking invalide.');
+export type BookingReference = z.infer<typeof BookingReferenceSchema>;
+
+export const AddressSnapshotSchema = z.object({
+  street: z.string().min(1).max(255),
+  complement: z.string().max(255).nullable(),
+  city: z.string().min(1).max(100),
+  postalCode: z.string().min(4).max(10),
+  country: z.string().length(2),
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
+  instructions: z.string().nullable(),
+  label: z.string().max(100).nullable().optional(),
+});
+export type AddressSnapshot = z.infer<typeof AddressSnapshotSchema>;
+
+export const PricingSnapshotSchema = z.object({
+  base: z.number().int().nonnegative(),
+  vehicleSurcharge: z.number().int().nonnegative(),
+  options: z.array(
+    z.object({
+      id: z.string().uuid(),
+      name: z.string(),
+      amount: z.number().int(),
+    }),
+  ),
+  serviceFee: z.number().int().nonnegative(),
+  totalCents: z.number().int().nonnegative(),
+  currency: z.literal('EUR'),
+});
+export type PricingSnapshot = z.infer<typeof PricingSnapshotSchema>;
+
 export const VehicleTypeSchema = z.enum([
   'citadine',
   'berline',
@@ -267,12 +359,30 @@ export const KycDocumentSchema = z.object({
 });
 export type KycDocumentDto = z.infer<typeof KycDocumentSchema>;
 
+export const RcProAlertKindSchema = z.enum(['expiring_soon', 'expired']);
+export type RcProAlertKind = z.infer<typeof RcProAlertKindSchema>;
+
+export const RcProAlertSchema = z.object({
+  kind: RcProAlertKindSchema,
+  expiresAt: z.string().date(),
+  daysRemaining: z.number().int(),
+});
+export type RcProAlert = z.infer<typeof RcProAlertSchema>;
+
 export const KycStatusResponseSchema = z.object({
   status: KycStatusSchema,
   rejectionReason: z.string().nullable(),
   documents: z.array(KycDocumentSchema),
+  rcProAlert: RcProAlertSchema.nullable(),
 });
 export type KycStatusResponse = z.infer<typeof KycStatusResponseSchema>;
+
+export const ProviderKycAlertsResponseSchema = z.object({
+  alert: RcProAlertSchema.nullable(),
+});
+export type ProviderKycAlertsResponse = z.infer<
+  typeof ProviderKycAlertsResponseSchema
+>;
 
 export const ProviderCapabilitySchema = z.object({
   offerId: z.string().uuid(),
@@ -463,3 +573,164 @@ export const UpdateProviderZonesSchema = z
 export type UpdateProviderZonesDto = z.infer<
   typeof UpdateProviderZonesSchema
 >;
+
+export const CreateStripeOnboardingLinkSchema = z.object({
+  returnUrl: z.string().url(),
+  refreshUrl: z.string().url(),
+});
+export type CreateStripeOnboardingLinkDto = z.infer<
+  typeof CreateStripeOnboardingLinkSchema
+>;
+
+export const StripeOnboardingLinkResponseSchema = z.object({
+  url: z.string().url(),
+  stripeAccountId: z.string().min(1),
+});
+export type StripeOnboardingLinkResponse = z.infer<
+  typeof StripeOnboardingLinkResponseSchema
+>;
+
+export const ProviderMissionEligibilitySchema = z.object({
+  eligible: z.literal(true),
+  kycStatus: z.literal('approved'),
+});
+export type ProviderMissionEligibility = z.infer<
+  typeof ProviderMissionEligibilitySchema
+>;
+
+export const CreateBookingSchema = z.object({
+  offerId: z.string().uuid(),
+  vehicleType: VehicleTypeSchema,
+  optionIds: z.array(z.string().uuid()).default([]),
+  addressId: z.string().uuid(),
+  slotStart: z.string().datetime(),
+  clientComment: z.string().max(300).optional(),
+  clientPhotoIds: z.array(z.string().uuid()).default([]),
+});
+export type CreateBookingDto = z.infer<typeof CreateBookingSchema>;
+
+export const BookingPaymentSchema = z.object({
+  clientSecret: z.string().min(1),
+  paymentIntentId: z.string().min(1),
+});
+export type BookingPayment = z.infer<typeof BookingPaymentSchema>;
+
+export const CreateBookingResponseSchema = z.object({
+  booking: z.object({
+    id: z.string().uuid(),
+    reference: BookingReferenceSchema,
+    status: z.enum(['payment_authorized', 'pending_provider']),
+    pricingSnapshot: PricingSnapshotSchema,
+    slotStart: z.string().datetime(),
+    slotEnd: z.string().datetime(),
+  }),
+  payment: BookingPaymentSchema,
+  matching: z.object({
+    broadcastCount: z.number().int().nonnegative(),
+  }),
+});
+export type CreateBookingResponse = z.infer<typeof CreateBookingResponseSchema>;
+
+export const AvailableBookingSchema = z.object({
+  id: z.string().uuid(),
+  reference: BookingReferenceSchema,
+  slotStart: z.string().datetime(),
+  slotEnd: z.string().datetime(),
+  offerName: z.string(),
+  totalCents: z.number().int().nonnegative(),
+  currency: z.literal('EUR'),
+  score: z.number(),
+  zone: z.object({
+    slug: z.string(),
+    name: z.string(),
+  }),
+});
+export type AvailableBooking = z.infer<typeof AvailableBookingSchema>;
+
+export const DeclineBookingSchema = z.preprocess(
+  (value) => value ?? {},
+  z.object({
+    reason: z.string().max(300).optional(),
+  }),
+);
+export type DeclineBookingDto = z.infer<typeof DeclineBookingSchema>;
+
+export const AcceptedBookingSchema = z.object({
+  id: z.string().uuid(),
+  reference: BookingReferenceSchema,
+  status: z.literal('accepted'),
+  slotStart: z.string().datetime(),
+  slotEnd: z.string().datetime(),
+  offerName: z.string(),
+  totalCents: z.number().int().nonnegative(),
+  currency: z.literal('EUR'),
+  addressSnapshot: AddressSnapshotSchema,
+});
+export type AcceptedBooking = z.infer<typeof AcceptedBookingSchema>;
+
+export const DeclinedBookingSchema = z.object({
+  declined: z.literal(true),
+  bookingId: z.string().uuid(),
+  remainingBroadcasts: z.number().int().nonnegative(),
+});
+export type DeclinedBooking = z.infer<typeof DeclinedBookingSchema>;
+
+export const ProviderMissionStatusSchema = z.enum([
+  'en_route',
+  'in_progress',
+  'completed',
+]);
+export type ProviderMissionStatus = z.infer<typeof ProviderMissionStatusSchema>;
+
+export const PatchBookingStatusSchema = z
+  .object({
+    status: ProviderMissionStatusSchema,
+    providerNotes: z.string().max(500).optional(),
+    lat: z.number().min(-90).max(90).optional(),
+    lng: z.number().min(-180).max(180).optional(),
+  })
+  .superRefine((dto, ctx) => {
+    if ((dto.lat === undefined) !== (dto.lng === undefined)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['lat'],
+        message: 'lat et lng doivent être fournis ensemble.',
+      });
+    }
+  });
+export type PatchBookingStatusDto = z.infer<typeof PatchBookingStatusSchema>;
+
+export const BookingStatusUpdateSchema = z.object({
+  id: z.string().uuid(),
+  reference: BookingReferenceSchema,
+  status: ProviderMissionStatusSchema,
+  providerNotes: z.string().nullable(),
+  slotStart: z.string().datetime(),
+  slotEnd: z.string().datetime(),
+});
+export type BookingStatusUpdate = z.infer<typeof BookingStatusUpdateSchema>;
+
+export const CancelWindowSchema = z.enum(['free', 'mid', 'late']);
+export type CancelWindow = z.infer<typeof CancelWindowSchema>;
+
+export const CancelBookingSchema = z.preprocess(
+  (value) => value ?? {},
+  z.object({
+    reason: z.string().trim().min(3).max(300).optional(),
+  }),
+);
+export type CancelBookingDto = z.infer<typeof CancelBookingSchema>;
+
+export const CancelledBookingSchema = z.object({
+  id: z.string().uuid(),
+  reference: BookingReferenceSchema,
+  status: z.enum(['cancelled_by_client', 'cancelled_by_provider']),
+  reason: z.string().nullable(),
+  window: CancelWindowSchema,
+  feeCents: z.number().int().nonnegative(),
+  refundCents: z.number().int().nonnegative(),
+  currency: z.literal('EUR'),
+  providerPenalty: z.number().int().nonnegative(),
+  rematchUrgent: z.boolean(),
+});
+export type CancelledBooking = z.infer<typeof CancelledBookingSchema>;

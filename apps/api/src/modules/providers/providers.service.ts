@@ -1,10 +1,14 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
+  ServiceUnavailableException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { KycStatus } from '@prisma/client';
 import {
+  CreateStripeOnboardingLinkDto,
   SubmitKycDto,
   UpdateProviderAvailabilityDto,
   UpdateProviderCapabilitiesDto,
@@ -71,7 +75,10 @@ type ProviderZoneRecord = {
 
 @Injectable()
 export class ProvidersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly config: ConfigService,
+  ) {}
 
   async getMe(userId: string) {
     const profile = await this.prisma.providerProfile.upsert({
@@ -154,7 +161,7 @@ export class ProvidersService {
     return { data: this.toKycStatusDto(profile) };
   }
 
-  async getKycStatus(userId: string) {
+  async getKycStatus(userId: string, now = new Date()) {
     const profile = await this.prisma.providerProfile.upsert({
       where: { userId },
       update: {},
@@ -164,7 +171,65 @@ export class ProvidersService {
       },
     });
 
-    return { data: this.toKycStatusDto(profile) };
+    return { data: this.toKycStatusDto(profile, now) };
+  }
+
+  async getKycAlerts(userId: string, now = new Date()) {
+    const profile = await this.prisma.providerProfile.upsert({
+      where: { userId },
+      update: {},
+      create: { userId },
+      include: {
+        kycDocuments: {
+          where: { docType: 'rc_pro' },
+          orderBy: { expiresAt: 'desc' },
+        },
+      },
+    });
+
+    return { data: { alert: this.toRcProAlert(profile.kycDocuments, now) } };
+  }
+
+  async getMissionEligibility(userId: string, now = new Date()) {
+    await this.assertCanReceiveMissions(userId, now);
+
+    return {
+      data: {
+        eligible: true as const,
+        kycStatus: 'approved' as const,
+      },
+    };
+  }
+
+  async assertCanReceiveMissions(userId: string, now = new Date()) {
+    const profile = await this.prisma.providerProfile.upsert({
+      where: { userId },
+      update: {},
+      create: { userId },
+      include: {
+        kycDocuments: {
+          where: { docType: 'rc_pro' },
+          orderBy: { expiresAt: 'desc' },
+        },
+      },
+    });
+
+    if (profile.kycStatus !== KycStatus.approved) {
+      throw new ForbiddenException({
+        code: 'KYC_NOT_APPROVED',
+        message: "Le dossier KYC n'est pas encore approuvé.",
+        details: { kycStatus: profile.kycStatus },
+      });
+    }
+
+    const rcPro = profile.kycDocuments[0];
+    if (!this.isRcProValid(rcPro, now)) {
+      throw new ForbiddenException({
+        code: 'RC_PRO_EXPIRED',
+        message: 'La RC Pro est expirée. Les missions sont bloquées.',
+        details: { expiresAt: this.dateToIsoDate(rcPro?.expiresAt ?? null) },
+      });
+    }
   }
 
   async listCapabilities(userId: string) {
@@ -353,6 +418,30 @@ export class ProvidersService {
     return { data: this.toProviderZonesDto(providerZones) };
   }
 
+  async createStripeOnboardingLink(
+    userId: string,
+    dto: CreateStripeOnboardingLinkDto,
+  ) {
+    const profile = await this.prisma.providerProfile.upsert({
+      where: { userId },
+      update: {},
+      create: { userId },
+    });
+    const stripeAccountId =
+      profile.stripeAccountId ?? (await this.createStripeAccount(profile.id));
+
+    if (!profile.stripeAccountId) {
+      await this.prisma.providerProfile.update({
+        where: { id: profile.id },
+        data: { stripeAccountId },
+      });
+    }
+
+    const url = await this.createStripeAccountLink(stripeAccountId, dto);
+
+    return { data: { url, stripeAccountId } };
+  }
+
   private assertKycCanBeSubmitted(
     status: 'draft' | 'submitted' | 'approved' | 'rejected',
   ): void {
@@ -424,7 +513,10 @@ export class ProvidersService {
     return Number(value);
   }
 
-  private toKycStatusDto(profile: ProviderKycStatusRecord) {
+  private toKycStatusDto(
+    profile: ProviderKycStatusRecord,
+    now = new Date(),
+  ) {
     return {
       status: profile.kycStatus,
       rejectionReason: profile.kycRejectionReason,
@@ -435,11 +527,78 @@ export class ProvidersService {
         expiresAt: this.dateToIsoDate(document.expiresAt),
         verifiedAt: document.verifiedAt?.toISOString() ?? null,
       })),
+      rcProAlert: this.toRcProAlert(profile.kycDocuments, now),
     };
+  }
+
+  private toRcProAlert(
+    documents: KycDocumentRecord[],
+    now: Date,
+  ): {
+    kind: 'expiring_soon' | 'expired';
+    expiresAt: string;
+    daysRemaining: number;
+  } | null {
+    const rcPro = [...documents]
+      .filter((document) => document.docType === 'rc_pro' && document.expiresAt)
+      .sort((left, right) => {
+        const leftTime = left.expiresAt?.getTime() ?? 0;
+        const rightTime = right.expiresAt?.getTime() ?? 0;
+        return rightTime - leftTime;
+      })[0];
+
+    if (!rcPro?.expiresAt) {
+      return null;
+    }
+
+    const daysRemaining = this.calendarDaysUntil(rcPro.expiresAt, now);
+    const expiresAt = this.dateToIsoDate(rcPro.expiresAt);
+
+    if (!expiresAt) {
+      return null;
+    }
+
+    if (daysRemaining < 0) {
+      return { kind: 'expired', expiresAt, daysRemaining };
+    }
+
+    if (daysRemaining <= 30) {
+      return { kind: 'expiring_soon', expiresAt, daysRemaining };
+    }
+
+    return null;
+  }
+
+  private calendarDaysUntil(expiresAt: Date, now: Date): number {
+    const end = Date.UTC(
+      expiresAt.getUTCFullYear(),
+      expiresAt.getUTCMonth(),
+      expiresAt.getUTCDate(),
+    );
+    const start = Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate(),
+    );
+
+    return Math.round((end - start) / 86_400_000);
   }
 
   private dateToIsoDate(date: Date | null): string | null {
     return date?.toISOString().slice(0, 10) ?? null;
+  }
+
+  private isRcProValid(
+    document: { expiresAt: Date | null } | undefined,
+    now: Date,
+  ): boolean {
+    if (!document?.expiresAt) {
+      return false;
+    }
+
+    const expiresAtEndOfDay = new Date(document.expiresAt);
+    expiresAtEndOfDay.setUTCHours(23, 59, 59, 999);
+    return expiresAtEndOfDay.getTime() >= now.getTime();
   }
 
   private toCapabilitiesDto(capabilities: ProviderCapabilityRecord[]) {
@@ -488,6 +647,100 @@ export class ProvidersService {
         }))
         .sort((left, right) => left.zoneName.localeCompare(right.zoneName)),
     };
+  }
+
+  private stripeSecretKey(): string | null {
+    const secretKey = this.config.get<string>('STRIPE_SECRET_KEY')?.trim();
+    if (!secretKey || !/^(sk|rk)_(test|live)_[A-Za-z0-9]{16,}$/.test(secretKey)) {
+      return null;
+    }
+
+    return secretKey;
+  }
+
+  private async createStripeAccount(providerId: string): Promise<string> {
+    const secretKey = this.stripeSecretKey();
+    if (!secretKey) {
+      return `acct_dev_${providerId.replaceAll('-', '').slice(0, 16)}`;
+    }
+
+    const account = await this.stripeRequest<{ id?: string }>(
+      '/v1/accounts',
+      new URLSearchParams({
+        type: 'express',
+        country: 'FR',
+        'capabilities[card_payments][requested]': 'true',
+        'capabilities[transfers][requested]': 'true',
+      }),
+      secretKey,
+    );
+
+    if (!account.id) {
+      throw new ServiceUnavailableException({
+        code: 'STRIPE_ACCOUNT_CREATE_FAILED',
+        message: 'Création du compte Stripe impossible.',
+        details: [],
+      });
+    }
+
+    return account.id;
+  }
+
+  private async createStripeAccountLink(
+    stripeAccountId: string,
+    dto: CreateStripeOnboardingLinkDto,
+  ): Promise<string> {
+    const secretKey = this.stripeSecretKey();
+    if (!secretKey) {
+      return `${dto.returnUrl}?stripe_mock=onboarding&account=${stripeAccountId}`;
+    }
+
+    const link = await this.stripeRequest<{ url?: string }>(
+      '/v1/account_links',
+      new URLSearchParams({
+        account: stripeAccountId,
+        refresh_url: dto.refreshUrl,
+        return_url: dto.returnUrl,
+        type: 'account_onboarding',
+      }),
+      secretKey,
+    );
+
+    if (!link.url) {
+      throw new ServiceUnavailableException({
+        code: 'STRIPE_ACCOUNT_LINK_FAILED',
+        message: 'Création du lien onboarding Stripe impossible.',
+        details: [],
+      });
+    }
+
+    return link.url;
+  }
+
+  private async stripeRequest<T>(
+    path: string,
+    body: URLSearchParams,
+    secretKey: string,
+  ): Promise<T> {
+    const response = await fetch(`https://api.stripe.com${path}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${secretKey}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Stripe-Version': '2024-11-20.acacia',
+      },
+      body,
+    });
+
+    if (!response.ok) {
+      throw new ServiceUnavailableException({
+        code: 'STRIPE_REQUEST_FAILED',
+        message: 'Stripe Connect indisponible.',
+        details: { status: response.status },
+      });
+    }
+
+    return (await response.json()) as T;
   }
 
   private availabilityInclude() {

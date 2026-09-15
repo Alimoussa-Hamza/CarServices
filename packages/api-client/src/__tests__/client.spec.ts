@@ -467,6 +467,7 @@ describe('api-client', () => {
             verifiedAt: null,
           },
         ],
+        rcProAlert: null,
       };
       const dto = {
         siret: '12345678901234',
@@ -497,6 +498,7 @@ describe('api-client', () => {
         status: 'draft',
         rejectionReason: null,
         documents: [],
+        rcProAlert: null,
       };
       fetchMock.mockResolvedValue(mockFetchResponse({ data: status }));
 
@@ -505,6 +507,65 @@ describe('api-client', () => {
         'http://api.test/api/v1/providers/kyc/status',
         { headers: { 'Content-Type': 'application/json' } },
       );
+    });
+
+    it('récupère les alertes RC Pro provider', async () => {
+      const response = {
+        alert: {
+          kind: 'expiring_soon',
+          expiresAt: '2026-10-03',
+          daysRemaining: 30,
+        },
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: response }));
+
+      await expect(api.providers.kycAlerts()).resolves.toEqual(response);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/providers/kyc/alerts',
+        { headers: { 'Content-Type': 'application/json' } },
+      );
+    });
+
+    it('récupère l’éligibilité missions provider avec Authorization', async () => {
+      const response = { eligible: true, kycStatus: 'approved' };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: response }));
+      initApiClient({
+        baseUrl: 'http://api.test',
+        getAccessToken: jest.fn().mockResolvedValue('provider.jwt'),
+      });
+
+      await expect(api.providers.missionEligibility()).resolves.toEqual(
+        response,
+      );
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/providers/missions/eligibility',
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer provider.jwt',
+          },
+        },
+      );
+    });
+
+    it('remonte KYC_NOT_APPROVED depuis l’éligibilité missions', async () => {
+      fetchMock.mockResolvedValue(
+        mockFetchResponse(
+          {
+            error: {
+              code: 'KYC_NOT_APPROVED',
+              message: "Le dossier KYC n'est pas encore approuvé.",
+            },
+          },
+          { ok: false, status: 403, statusText: 'Forbidden' },
+        ),
+      );
+
+      await expect(api.providers.missionEligibility()).rejects.toMatchObject({
+        name: 'ApiError',
+        code: 'KYC_NOT_APPROVED',
+        status: 403,
+      });
     });
 
     it('récupère les capabilities provider', async () => {
@@ -682,6 +743,323 @@ describe('api-client', () => {
           headers: { 'Content-Type': 'application/json' },
         },
       );
+    });
+
+    it('crée un lien onboarding Stripe Connect', async () => {
+      const dto = {
+        returnUrl: 'https://pro.carservice.test/stripe/return',
+        refreshUrl: 'https://pro.carservice.test/stripe/refresh',
+      };
+      const response = {
+        url: 'https://connect.stripe.com/setup/s/acct_123',
+        stripeAccountId: 'acct_123',
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: response }));
+
+      await expect(
+        api.providers.createStripeOnboardingLink(dto),
+      ).resolves.toEqual(response);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/providers/stripe/onboard',
+        {
+          method: 'POST',
+          body: JSON.stringify(dto),
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    });
+
+    it('envoie le Bearer token pour l’onboarding Stripe', async () => {
+      const dto = {
+        returnUrl: 'https://pro.carservice.test/stripe/return',
+        refreshUrl: 'https://pro.carservice.test/stripe/refresh',
+      };
+      fetchMock.mockResolvedValue(
+        mockFetchResponse({
+          data: {
+            url: 'https://connect.stripe.com/setup/s/acct_123',
+            stripeAccountId: 'acct_123',
+          },
+        }),
+      );
+      initApiClient({
+        baseUrl: 'http://api.test',
+        getAccessToken: jest.fn().mockResolvedValue('provider.jwt'),
+      });
+
+      await api.providers.createStripeOnboardingLink(dto);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/providers/stripe/onboard',
+        expect.objectContaining({
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer provider.jwt',
+          },
+        }),
+      );
+    });
+
+    it('remonte STRIPE_REQUEST_FAILED depuis l’onboarding Stripe', async () => {
+      fetchMock.mockResolvedValue(
+        mockFetchResponse(
+          {
+            error: {
+              code: 'STRIPE_REQUEST_FAILED',
+              message: 'Stripe Connect indisponible.',
+            },
+          },
+          { ok: false, status: 503, statusText: 'Service Unavailable' },
+        ),
+      );
+
+      await expect(
+        api.providers.createStripeOnboardingLink({
+          returnUrl: 'https://pro.carservice.test/stripe/return',
+          refreshUrl: 'https://pro.carservice.test/stripe/refresh',
+        }),
+      ).rejects.toMatchObject({
+        name: 'ApiError',
+        code: 'STRIPE_REQUEST_FAILED',
+        status: 503,
+      });
+    });
+
+    it('rejette une réponse onboarding Stripe invalide', async () => {
+      fetchMock.mockResolvedValue(
+        mockFetchResponse({
+          data: {
+            url: 'https://connect.stripe.com/setup/s/acct_123',
+            stripeAccountId: '',
+          },
+        }),
+      );
+
+      await expect(
+        api.providers.createStripeOnboardingLink({
+          returnUrl: 'https://pro.carservice.test/stripe/return',
+          refreshUrl: 'https://pro.carservice.test/stripe/refresh',
+        }),
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('api.bookings', () => {
+    const createDto = {
+      offerId: '22222222-2222-4222-8222-222222222222',
+      vehicleType: 'suv' as const,
+      optionIds: [],
+      addressId: '33333333-3333-4333-8333-333333333333',
+      slotStart: '2026-09-06T08:00:00.000Z',
+      clientPhotoIds: [],
+    };
+
+    const createResponse = {
+      booking: {
+        id: '77777777-7777-4777-8777-777777777777',
+        reference: 'CS-20260906-A7B2',
+        status: 'payment_authorized' as const,
+        pricingSnapshot: {
+          base: 8500,
+          vehicleSurcharge: 1000,
+          options: [],
+          serviceFee: 200,
+          totalCents: 9700,
+          currency: 'EUR' as const,
+        },
+        slotStart: '2026-09-06T08:00:00.000Z',
+        slotEnd: '2026-09-06T09:30:00.000Z',
+      },
+      payment: {
+        clientSecret: 'pi_mock_abc_secret_def',
+        paymentIntentId: 'pi_mock_abc',
+      },
+      matching: { broadcastCount: 2 },
+    };
+
+    it('crée un booking et valide la réponse 201', async () => {
+      fetchMock.mockResolvedValue(
+        mockFetchResponse({ data: createResponse }, { status: 201 }),
+      );
+
+      await expect(api.bookings.create(createDto)).resolves.toEqual(
+        createResponse,
+      );
+      expect(fetchMock).toHaveBeenCalledWith('http://api.test/api/v1/bookings', {
+        method: 'POST',
+        body: JSON.stringify(createDto),
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+
+    it('envoie le Bearer token pour créer un booking', async () => {
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: createResponse }));
+      initApiClient({
+        baseUrl: 'http://api.test',
+        getAccessToken: jest.fn().mockResolvedValue('client.jwt'),
+      });
+
+      await api.bookings.create(createDto);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/bookings',
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: 'Bearer client.jwt',
+          }),
+        }),
+      );
+    });
+
+    it('accepte une mission et valide l’adresse retournée', async () => {
+      const accepted = {
+        id: '77777777-7777-4777-8777-777777777777',
+        reference: 'CS-20260906-A7B2',
+        status: 'accepted' as const,
+        slotStart: '2026-09-06T08:00:00.000Z',
+        slotEnd: '2026-09-06T09:30:00.000Z',
+        offerName: 'Lavage complet',
+        totalCents: 9700,
+        currency: 'EUR' as const,
+        addressSnapshot: {
+          street: '12 rue de la République',
+          complement: null,
+          city: 'Lyon',
+          postalCode: '69002',
+          country: 'FR',
+          lat: 45.764,
+          lng: 4.835,
+          instructions: null,
+        },
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: accepted }));
+
+      await expect(
+        api.bookings.accept('77777777-7777-4777-8777-777777777777'),
+      ).resolves.toEqual(accepted);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/bookings/77777777-7777-4777-8777-777777777777/accept',
+        { method: 'POST', headers: { 'Content-Type': 'application/json' } },
+      );
+    });
+
+    it('refuse une mission et remonte BOOKING_ALREADY_ACCEPTED', async () => {
+      fetchMock.mockResolvedValue(
+        mockFetchResponse(
+          {
+            error: {
+              code: 'BOOKING_ALREADY_ACCEPTED',
+              message: 'Cette mission n’est plus disponible.',
+            },
+          },
+          { ok: false, status: 409, statusText: 'Conflict' },
+        ),
+      );
+
+      await expect(
+        api.bookings.decline('77777777-7777-4777-8777-777777777777'),
+      ).rejects.toMatchObject({
+        name: 'ApiError',
+        code: 'BOOKING_ALREADY_ACCEPTED',
+        status: 409,
+      });
+    });
+
+    it('met à jour le statut de mission (en_route)', async () => {
+      const updated = {
+        id: '77777777-7777-4777-8777-777777777777',
+        reference: 'CS-20260906-A7B2',
+        status: 'en_route' as const,
+        providerNotes: null,
+        slotStart: '2026-09-06T08:00:00.000Z',
+        slotEnd: '2026-09-06T09:30:00.000Z',
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: updated }));
+
+      await expect(
+        api.bookings.updateStatus('77777777-7777-4777-8777-777777777777', {
+          status: 'en_route',
+        }),
+      ).resolves.toEqual(updated);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/bookings/77777777-7777-4777-8777-777777777777/status',
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'en_route' }),
+        },
+      );
+    });
+
+    it('annule une réservation (client, fenêtre free)', async () => {
+      const cancelled = {
+        id: '77777777-7777-4777-8777-777777777777',
+        reference: 'CS-20260906-A7B2',
+        status: 'cancelled_by_client' as const,
+        reason: null,
+        window: 'free' as const,
+        feeCents: 0,
+        refundCents: 9700,
+        currency: 'EUR' as const,
+        providerPenalty: 0,
+        rematchUrgent: false,
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: cancelled }));
+
+      await expect(
+        api.bookings.cancel('77777777-7777-4777-8777-777777777777'),
+      ).resolves.toEqual(cancelled);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/bookings/77777777-7777-4777-8777-777777777777/cancel',
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        },
+      );
+    });
+
+    it('récupère les missions disponibles pour un pro', async () => {
+      const available = [
+        {
+          id: '77777777-7777-4777-8777-777777777777',
+          reference: 'CS-20260906-A7B2',
+          slotStart: '2026-09-06T08:00:00.000Z',
+          slotEnd: '2026-09-06T09:30:00.000Z',
+          offerName: 'Lavage complet',
+          totalCents: 9700,
+          currency: 'EUR' as const,
+          score: 72.5,
+          zone: { slug: 'lyon', name: 'Lyon' },
+        },
+      ];
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: available }));
+
+      await expect(api.bookings.available()).resolves.toEqual(available);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/bookings/available',
+        { headers: { 'Content-Type': 'application/json' } },
+      );
+    });
+
+    it('remonte ZONE_NOT_COVERED depuis la création booking', async () => {
+      fetchMock.mockResolvedValue(
+        mockFetchResponse(
+          {
+            error: {
+              code: 'ZONE_NOT_COVERED',
+              message: "Cette adresse n'est pas encore couverte.",
+            },
+          },
+          { ok: false, status: 400, statusText: 'Bad Request' },
+        ),
+      );
+
+      await expect(api.bookings.create(createDto)).rejects.toMatchObject({
+        name: 'ApiError',
+        code: 'ZONE_NOT_COVERED',
+        status: 400,
+      });
     });
   });
 });

@@ -17,7 +17,8 @@
 | D — Tests & qualité | 9/9 | — terminé |
 | E — Catalogue & zones (M03) | 7/7 | — terminé |
 | F — Apps clientes | 3/6 | — en attente maquettes |
-| G — Backend Pros & KYC (M04) | 5/8 | CS-M04-S06 Stripe Connect onboarding link |
+| G — Backend Pros & KYC (M04) | 8/8 | — terminé |
+| H — Bookings (M05) | 8/10 | CS-M05-S09 Liste + détail |
 
 ---
 
@@ -70,17 +71,18 @@
 - [x] Config Jest `packages/shared-types` (ts-jest, Watchman désactivé)
 - [x] TU `OtpService` — génération 6 chiffres, hash stable, clés Redis, logs dev uniquement
 - [x] TU `AuthService` — OTP invalide/expiré, rate limit, rotation refresh, `ROLE_MISMATCH`
-- [x] TU `ZodValidationPipe` — payload valide / invalide → `VALIDATION_ERROR`
+- [x] TU `ZodValidationPipe` — payload valide / invalide → `VALIDATION_ERROR` + body Stripe Connect
 - [x] TU `JwtAuthGuard` + `RolesGuard` — token absent/invalide, rôle refusé
 - [x] TU `shared-types` — parse valide/invalide de chaque schéma
 - [x] TU `api-client` — fetch wrapper, erreurs, auth endpoints, validation health
 - [x] TU `ui-tokens` — couleurs, spacing, radius, typographie
 - [x] `pnpm test` branché dans la CI
+- [x] E2E API (`pnpm --filter @carservice/api test:e2e`) — Postgres réelle, OTP/SMS/Stripe mock, parcours M02→M05
 
 **Vérifié automatiquement :**
-- `@carservice/shared-types` : 49 tests passés
-- `@carservice/api` : 50 tests passés
-- `@carservice/api-client` : 18 tests passés
+- `@carservice/shared-types` : 109 tests passés
+- `@carservice/api` : 111 tests passés
+- `@carservice/api-client` : 35 tests passés
 - `@carservice/ui-tokens` : 8 tests passés
 
 ---
@@ -149,11 +151,84 @@
   - [x] Rayon optionnel par zone
   - [x] Tests shared-types + API + api-client
   - [x] Collection Postman mise à jour
-- [~] **CS-M04-S06** Stripe Connect onboarding link
-- [ ] **CS-M04-S07** Blocage missions si KYC non approved
-- [ ] **CS-M04-S08** Alerte expiration RC Pro
+- [x] **CS-M04-S06** Stripe Connect onboarding link
+  - [x] Schémas Zod `CreateStripeOnboardingLink` / `StripeOnboardingLinkResponse`
+  - [x] `POST /providers/stripe/onboard` protégé `provider`
+  - [x] Création compte Connect Express FR + Account Link
+  - [x] Réutilisation de `stripeAccountId` existant
+  - [x] Fallback mock local sans clé Stripe réelle
+  - [x] Client API `api.providers.createStripeOnboardingLink`
+  - [x] Tests shared-types + API service/controller + api-client + Zod pipe
+  - [x] Collection Postman + contrat API
+- [x] **CS-M04-S07** Blocage missions si KYC non approved
+  - [x] `KycApprovedGuard` réutilisable (exporté pour M05 bookings)
+  - [x] `GET /providers/missions/eligibility`
+  - [x] `KYC_NOT_APPROVED` si `draft` / `submitted` / `rejected`
+  - [x] `RC_PRO_EXPIRED` si RC Pro manquante ou expirée (RG-KYC-02)
+  - [x] Tests shared-types + service + guard + controller + api-client
+  - [x] Collection Postman + contrat API
+- [x] **CS-M04-S08** Alerte expiration RC Pro
+  - [x] `GET /providers/kyc/alerts`
+  - [x] `rcProAlert` sur `GET /providers/kyc/status` et submit
+  - [x] J-30 `expiring_soon`, J-31 silencieux, après date `expired`
+  - [x] Tests shared-types + API + api-client
+  - [x] Collection Postman + contrat API
 
-**Vérifié manuellement :** OTP provider → `GET /providers/me` → `PATCH /providers/me` avec `companyName`, `siret`, `bio`, `washMethods`.
+**Vérifié manuellement :** `GET /providers/kyc/alerts` provider draft sans RC Pro → `{ alert: null }` ; `GET /providers/kyc/status` inclut `rcProAlert: null`.
+
+---
+
+## Piste H — Bookings · Module M05
+
+- [x] **CS-M05-S01** Schéma Prisma bookings + items + history
+  - [x] Models `bookings`, `booking_items`, `booking_status_history`, `booking_photos`
+  - [x] Enums alignés shared-types (13 statuts RG-BOOK + unassigned)
+  - [x] Snapshots JSON `address_snapshot` / `pricing_snapshot` (RG-CAT-03)
+  - [x] Index client/status, provider/status, slot/zone
+  - [x] Migration `bookings_core`
+  - [x] Tests enums Prisma ↔ Zod + schémas snapshot
+- [x] **CS-M05-S02** BookingStateMachine (transitions RG-BOOK)
+  - [x] Map `canTransition(from, to, actor)` + admin sur chaque arête
+  - [x] Happy path + cancelled_* avant `in_progress` + expired / unassigned
+  - [x] `completed` → `disputed` client ≤ 48 h
+  - [x] `buildHistoryEntry` pour `booking_status_history` (persist S03)
+  - [x] Tests matrice 13×13×4 + erreurs 409
+- [x] **CS-M05-S03** POST /bookings création + snapshot
+  - [x] JWT client · adresse owner · zone PostGIS (RG-ZONE-01)
+  - [x] Quote API figée en `pricing_snapshot` (RG-CAT-03) + `address_snapshot`
+  - [x] Référence `CS-YYYYMMDD-XXXX` + item + history draft→payment_authorized
+  - [x] Pre-auth paiement mock (`pi_mock_*`) — Stripe réel = M06
+  - [x] Postman **Create Booking** + `api.bookings.create`
+- [x] **CS-M05-S04** MatchingService broadcast pros
+  - [x] Filtre RG-MATCH-01 : KYC, RC Pro, capability, zone, rayon, dispo, conflits
+  - [x] Score RG-MATCH-02 + top 8 persisté dans `booking_broadcasts`
+  - [x] Transition `payment_authorized` → `pending_provider` + push Redis mock
+  - [x] `GET /bookings/available` + `tryClaim` (verrou FOR UPDATE, HTTP accept = S05)
+  - [x] Timeouts T1/T2 = S07 (BullMQ)
+- [x] **CS-M05-S05** Accept / decline mission pro
+  - [x] `POST /bookings/:id/accept` + verrou `tryClaim` (RG-MATCH-03)
+  - [x] Adresse exacte renvoyée à l’accept (RG-SEC-02)
+  - [x] `POST /bookings/:id/decline` retire le broadcast + pénalité taux
+  - [x] Postman Accept/Decline + `api.bookings.accept/decline`
+- [x] **CS-M05-S06** Transitions en_route, in_progress, completed
+  - [x] `PATCH /bookings/:id/status` (pro assigné + KYC)
+  - [x] Graphe `accepted` → `en_route` → `in_progress` → `completed` (RG-BOOK-01/02)
+  - [x] Géofence optionnelle 200 m à `in_progress` (RG-BOOK-03)
+  - [x] Photos min before/after du pro à `completed` (RG-BOOK-04)
+  - [x] Postman Patch Status + `api.bookings.updateStatus`
+- [x] **CS-M05-S07** Jobs BullMQ timeout T1/T2
+  - [x] Queue `matching` : `expand-radius` (T1 30 min) + `timeout-unassigned` (T2 / H-2)
+  - [x] T1 élargit le rayon ×2 et notifie plus de pros (RG-MATCH-04)
+  - [x] T2 → `unassigned` si toujours en matching (RG-MATCH-05)
+  - [x] Jobs idempotents, retry 3×, worker off en `NODE_ENV=test`
+- [x] **CS-M05-S08** Annulation client/pro (RG-CANCEL)
+  - [x] `PATCH /bookings/:id/cancel` client + pro
+  - [x] Grille frais >24 h / 2–24 h / <2 h (0 / 20 / 50 %)
+  - [x] Motif obligatoire pro (RG-CANCEL-01) ; client `in_progress` → litige (RG-CANCEL-02)
+  - [x] Pénalité `acceptanceRate` pro + rematch urgent si < 2 h
+  - [x] Postman Cancel + `api.bookings.cancel`
+- [ ] **CS-M05-S09** GET bookings list + detail + timeline
+- [ ] **CS-M05-S10** Créneaux disponibles (slot picker API)
 
 ---
 
