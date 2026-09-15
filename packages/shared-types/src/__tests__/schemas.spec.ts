@@ -67,6 +67,9 @@ import {
   KycStatusResponseSchema,
   KycStatusSchema,
   ProviderKycAlertsResponseSchema,
+  AdminPendingProvidersResponseSchema,
+  AdminRejectKycSchema,
+  AdminKycDecisionResponseSchema,
   RcProAlertSchema,
   OtpRoleSchema,
   OutOfZoneLeadSchema,
@@ -1166,6 +1169,57 @@ describe('ProviderKycAlertsResponseSchema', () => {
     expect(ProviderKycAlertsResponseSchema.parse({ alert: null })).toEqual({
       alert: null,
     });
+  });
+});
+
+describe('Admin KYC schemas (CS-M10-S03)', () => {
+  it('valide la file pending', () => {
+    expect(
+      AdminPendingProvidersResponseSchema.parse({
+        total: 1,
+        items: [
+          {
+            id: '11111111-1111-4111-8111-111111111111',
+            userId: '22222222-2222-4222-8222-222222222222',
+            companyName: null,
+            siret: '12345678901234',
+            washMethods: ['waterless'],
+            kycStatus: 'submitted',
+            submittedAt: '2026-09-16T10:00:00.000Z',
+            phone: '+33600000002',
+            email: null,
+            documents: [
+              {
+                id: '33333333-3333-4333-8333-333333333333',
+                docType: 'rc_pro',
+                fileUrl: 'https://cdn.example/rc.pdf',
+                expiresAt: '2027-12-31',
+                verifiedAt: null,
+              },
+            ],
+          },
+        ],
+      }),
+    ).toMatchObject({ total: 1 });
+  });
+
+  it('exige un motif de rejet ≥ 5 caractères', () => {
+    expect(
+      AdminRejectKycSchema.safeParse({ reason: 'non' }).success,
+    ).toBe(false);
+    expect(
+      AdminRejectKycSchema.parse({ reason: 'Documents illisibles' }),
+    ).toEqual({ reason: 'Documents illisibles' });
+  });
+
+  it('valide la réponse approve/reject', () => {
+    expect(
+      AdminKycDecisionResponseSchema.parse({
+        providerId: '11111111-1111-4111-8111-111111111111',
+        kycStatus: 'approved',
+        rejectionReason: null,
+      }),
+    ).toMatchObject({ kycStatus: 'approved' });
   });
 });
 

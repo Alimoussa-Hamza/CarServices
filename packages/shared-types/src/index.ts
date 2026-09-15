@@ -428,6 +428,43 @@ export type ProviderKycAlertsResponse = z.infer<
   typeof ProviderKycAlertsResponseSchema
 >;
 
+/** File KYC admin — GET /admin/providers/pending (CS-M10-S03). */
+export const AdminPendingProviderSchema = z.object({
+  id: z.string().uuid(),
+  userId: z.string().uuid(),
+  companyName: z.string().nullable(),
+  siret: z.string().nullable(),
+  washMethods: z.array(WashMethodSchema),
+  kycStatus: z.literal('submitted'),
+  submittedAt: z.string().datetime(),
+  phone: z.string(),
+  email: z.string().email().nullable(),
+  documents: z.array(KycDocumentSchema),
+});
+export type AdminPendingProvider = z.infer<typeof AdminPendingProviderSchema>;
+
+export const AdminPendingProvidersResponseSchema = z.object({
+  items: z.array(AdminPendingProviderSchema),
+  total: z.number().int().nonnegative(),
+});
+export type AdminPendingProvidersResponse = z.infer<
+  typeof AdminPendingProvidersResponseSchema
+>;
+
+export const AdminRejectKycSchema = z.object({
+  reason: z.string().trim().min(5).max(500),
+});
+export type AdminRejectKycDto = z.infer<typeof AdminRejectKycSchema>;
+
+export const AdminKycDecisionResponseSchema = z.object({
+  providerId: z.string().uuid(),
+  kycStatus: z.enum(['approved', 'rejected']),
+  rejectionReason: z.string().nullable(),
+});
+export type AdminKycDecisionResponse = z.infer<
+  typeof AdminKycDecisionResponseSchema
+>;
+
 export const ProviderCapabilitySchema = z.object({
   offerId: z.string().uuid(),
   offerSlug: z.string(),

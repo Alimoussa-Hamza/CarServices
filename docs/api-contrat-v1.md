@@ -1069,6 +1069,76 @@ JWT **admin**. KPIs A02 (CS-M10-S02), fenêtres UTC :
 
 Erreurs : `UNAUTHORIZED` (401), `FORBIDDEN` (403).
 
+### GET `/admin/providers/pending`
+
+JWT **admin**. File des dossiers KYC `submitted` (CS-M10-S03), tri `updatedAt` ASC.
+
+```json
+// Response 200
+{
+  "data": {
+    "total": 1,
+    "items": [
+      {
+        "id": "uuid-provider",
+        "userId": "uuid-user",
+        "companyName": null,
+        "siret": "12345678901234",
+        "washMethods": ["waterless"],
+        "kycStatus": "submitted",
+        "submittedAt": "2026-09-16T10:00:00.000Z",
+        "phone": "+33600000002",
+        "email": null,
+        "documents": [
+          {
+            "id": "uuid-doc",
+            "docType": "rc_pro",
+            "fileUrl": "https://cdn.example/rc.pdf",
+            "expiresAt": "2027-12-31",
+            "verifiedAt": null
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### POST `/admin/providers/:id/approve`
+
+JWT **admin**. `submitted` → `approved`, documents `verifiedAt`/`verifiedBy`, notif push (+ email si présent). Ne touche pas `chargesEnabled` (Stripe Connect).
+
+```json
+// Response 200
+{
+  "data": {
+    "providerId": "uuid-provider",
+    "kycStatus": "approved",
+    "rejectionReason": null
+  }
+}
+```
+
+### POST `/admin/providers/:id/reject`
+
+JWT **admin**. Body `{ "reason": "..." }` (min 5). `submitted` → `rejected` + motif, notif push (+ email).
+
+```json
+// Request
+{ "reason": "RC Pro illisible" }
+
+// Response 200
+{
+  "data": {
+    "providerId": "uuid-provider",
+    "kycStatus": "rejected",
+    "rejectionReason": "RC Pro illisible"
+  }
+}
+```
+
+Erreurs KYC : `PROVIDER_NOT_FOUND` (404), `KYC_NOT_SUBMITTED` (400), `KYC_ALREADY_APPROVED` / `KYC_ALREADY_REJECTED` (409), `VALIDATION_ERROR` (400).
+
 ### POST `/admin/bookings/:id/refund`
 
 JWT **admin**. Remboursement total (RG-PAY-05) : si le paiement est `authorized`, **cancel** du PaymentIntent (libération d’auth) ; s’il est `captured`, **refund** Stripe. Le booking passe à `cancelled_by_admin` si la transition est autorisée (pas `in_progress` / `completed` / `disputed`). Sans `STRIPE_SECRET_KEY` : mock local.

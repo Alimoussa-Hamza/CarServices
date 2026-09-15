@@ -1,6 +1,9 @@
 import {
   AdminLoginDto,
   AdminDashboardSchema,
+  AdminPendingProvidersResponseSchema,
+  AdminKycDecisionResponseSchema,
+  AdminRejectKycDto,
   AdminRefundBookingDto,
   AdminRefundResponseSchema,
   AuthTokensResponseSchema,
@@ -301,6 +304,19 @@ export const api = {
       apiRequest('/api/v1/admin/dashboard').then((data) =>
         AdminDashboardSchema.parse(data),
       ),
+    listPendingProviders: () =>
+      apiRequest('/api/v1/admin/providers/pending').then((data) =>
+        AdminPendingProvidersResponseSchema.parse(data),
+      ),
+    approveProvider: (providerId: string) =>
+      apiRequest(`/api/v1/admin/providers/${providerId}/approve`, {
+        method: 'POST',
+      }).then((data) => AdminKycDecisionResponseSchema.parse(data)),
+    rejectProvider: (providerId: string, dto: AdminRejectKycDto) =>
+      apiRequest(`/api/v1/admin/providers/${providerId}/reject`, {
+        method: 'POST',
+        body: JSON.stringify(dto),
+      }).then((data) => AdminKycDecisionResponseSchema.parse(data)),
     refundBooking: (bookingId: string, dto: AdminRefundBookingDto = {}) =>
       apiRequest(`/api/v1/admin/bookings/${bookingId}/refund`, {
         method: 'POST',

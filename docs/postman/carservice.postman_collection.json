@@ -37,6 +37,10 @@
     {
       "key": "bookingId",
       "value": "00000000-0000-4000-8000-000000000000"
+    },
+    {
+      "key": "providerId",
+      "value": "00000000-0000-4000-8000-000000000000"
     }
   ],
   "item": [
@@ -1050,6 +1054,70 @@
               ]
             },
             "url": "{{baseUrl}}/admin/dashboard"
+          }
+        },
+        {
+          "name": "List Pending KYC",
+          "request": {
+            "method": "GET",
+            "description": "JWT admin. Pros kyc_status=submitted.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/admin/providers/pending"
+          }
+        },
+        {
+          "name": "Approve Provider KYC",
+          "request": {
+            "method": "POST",
+            "description": "JWT admin. submitted → approved.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/admin/providers/{{providerId}}/approve"
+          }
+        },
+        {
+          "name": "Reject Provider KYC",
+          "request": {
+            "method": "POST",
+            "description": "JWT admin. submitted → rejected + motif.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"RC Pro illisible\"\n}"
+            },
+            "url": "{{baseUrl}}/admin/providers/{{providerId}}/reject"
           }
         },
         {

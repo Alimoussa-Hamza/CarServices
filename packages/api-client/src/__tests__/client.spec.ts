@@ -1270,6 +1270,74 @@ describe('api-client', () => {
       );
     });
 
+    it('liste / approve / reject KYC pending', async () => {
+      initApiClient({
+        baseUrl: 'http://api.test',
+        getAccessToken: jest.fn().mockResolvedValue('admin.jwt'),
+      });
+
+      fetchMock.mockResolvedValueOnce(
+        mockFetchResponse({
+          data: {
+            total: 1,
+            items: [
+              {
+                id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+                userId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+                companyName: null,
+                siret: '12345678901234',
+                washMethods: ['waterless'],
+                kycStatus: 'submitted',
+                submittedAt: '2026-09-16T10:00:00.000Z',
+                phone: '+33600000002',
+                email: null,
+                documents: [
+                  {
+                    id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+                    docType: 'rc_pro',
+                    fileUrl: 'https://cdn.example/rc.pdf',
+                    expiresAt: '2027-12-31',
+                    verifiedAt: null,
+                  },
+                ],
+              },
+            ],
+          },
+        }),
+      );
+      await expect(api.admin.listPendingProviders()).resolves.toMatchObject({
+        total: 1,
+      });
+
+      fetchMock.mockResolvedValueOnce(
+        mockFetchResponse({
+          data: {
+            providerId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+            kycStatus: 'approved',
+            rejectionReason: null,
+          },
+        }),
+      );
+      await expect(
+        api.admin.approveProvider('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),
+      ).resolves.toMatchObject({ kycStatus: 'approved' });
+
+      fetchMock.mockResolvedValueOnce(
+        mockFetchResponse({
+          data: {
+            providerId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+            kycStatus: 'rejected',
+            rejectionReason: 'RC Pro illisible',
+          },
+        }),
+      );
+      await expect(
+        api.admin.rejectProvider('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', {
+          reason: 'RC Pro illisible',
+        }),
+      ).resolves.toMatchObject({ kycStatus: 'rejected' });
+    });
+
     it('rembourse un booking (admin)', async () => {
       const refunded = {
         bookingId: '77777777-7777-4777-8777-777777777777',

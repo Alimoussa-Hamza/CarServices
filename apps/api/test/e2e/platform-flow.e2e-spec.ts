@@ -147,6 +147,9 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
   });
 
   it('CS-M04 KYC submit + alerte RC Pro + approve mock admin', async () => {
+    const adminPhone = `+33690${suffix}`;
+    const adminToken = await loginAdmin(http, adminPhone, userIds, prisma);
+
     const submit = await http()
       .post('/api/v1/providers/kyc/submit')
       .set('Authorization', `Bearer ${tokens.providerA}`)
@@ -187,9 +190,33 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
       })
       .expect(201);
 
+    const pending = await http()
+      .get('/api/v1/admin/providers/pending')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+    const pendingItems = (
+      pending.body as Envelope<{
+        items: Array<{ id: string; phone: string }>;
+        total: number;
+      }>
+    ).data.items;
+    expect(pendingItems.length).toBeGreaterThanOrEqual(2);
+
+    for (const item of pendingItems.filter((row) =>
+      [phones.providerA, phones.providerB].includes(row.phone),
+    )) {
+      const approved = await http()
+        .post(`/api/v1/admin/providers/${item.id}/approve`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+      expect(
+        (approved.body as Envelope<{ kycStatus: string }>).data.kycStatus,
+      ).toBe('approved');
+    }
+
     await prisma.providerProfile.updateMany({
       where: { user: { phone: { in: [phones.providerA, phones.providerB] } } },
-      data: { kycStatus: 'approved', chargesEnabled: true },
+      data: { chargesEnabled: true },
     });
 
     const eligibility = await http()
