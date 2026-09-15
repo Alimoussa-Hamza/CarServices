@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { SentryModule } from '@sentry/nestjs/setup';
+import { LoggerModule } from 'nestjs-pino';
 import { AppController } from './app.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { BookingsModule } from './modules/bookings/bookings.module';
@@ -18,9 +20,37 @@ import { AddressesModule } from './modules/addresses/addresses.module';
 import { ClientsModule } from './modules/clients/clients.module';
 import { PrismaModule } from './prisma/prisma.module';
 
+const isProd = process.env.NODE_ENV === 'production';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    SentryModule.forRoot(),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        level: process.env.LOG_LEVEL ?? (isProd ? 'info' : 'debug'),
+        transport: isProd
+          ? undefined
+          : {
+              target: 'pino-pretty',
+              options: { singleLine: true, colorize: true },
+            },
+        redact: {
+          paths: [
+            'req.headers.authorization',
+            'req.headers.cookie',
+            'req.body.phone',
+            'req.body.email',
+            'req.body.code',
+            'req.body.password',
+          ],
+          censor: '[Filtered]',
+        },
+        autoLogging: {
+          ignore: (req) => req.url?.includes('/health') === true,
+        },
+      },
+    }),
     PrismaModule,
     RedisModule,
     HealthModule,
