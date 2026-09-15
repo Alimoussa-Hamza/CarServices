@@ -170,6 +170,32 @@ Erreurs : `AUTH_INVALID_CREDENTIALS` (401), `AUTH_RATE_LIMIT` (429), `VALIDATION
 { "data": { "covered": false, "leadCaptured": false } }
 ```
 
+### Addresses (CS-M15-S01)
+
+JWT **client**. Ownership `userId`.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/addresses` | Liste mes adresses |
+| POST | `/addresses` | Créer |
+| PATCH | `/addresses/:id` | Update partiel |
+| DELETE | `/addresses/:id` | Supprimer |
+
+```json
+// POST /addresses
+{
+  "label": "Maison",
+  "street": "10 rue de la République",
+  "city": "Lyon",
+  "postalCode": "69002",
+  "lat": 45.764,
+  "lng": 4.8357,
+  "country": "FR"
+}
+```
+
+Erreurs : `ADDRESS_NOT_FOUND` (404), `ADDRESS_IN_USE` (409 si base pro), `VALIDATION_ERROR` (400).
+
 ### POST `/zones/leads`
 
 ```json

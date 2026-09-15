@@ -149,6 +149,56 @@ export const AddressSnapshotSchema = z.object({
 });
 export type AddressSnapshot = z.infer<typeof AddressSnapshotSchema>;
 
+/** Saved client addresses — CS-M15-S01 */
+export const AddressSchema = z.object({
+  id: z.string().uuid(),
+  label: z.string().max(100).nullable(),
+  street: z.string().min(1).max(255),
+  complement: z.string().max(255).nullable(),
+  city: z.string().min(1).max(100),
+  postalCode: z.string().min(4).max(10),
+  country: z.string().length(2),
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
+  instructions: z.string().max(1000).nullable(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+export type Address = z.infer<typeof AddressSchema>;
+
+export const CreateAddressSchema = z.object({
+  label: z.string().trim().min(1).max(100).optional(),
+  street: z.string().trim().min(1).max(255),
+  complement: z.string().trim().max(255).nullable().optional(),
+  city: z.string().trim().min(1).max(100),
+  postalCode: z.string().trim().min(4).max(10),
+  country: z.string().length(2).default('FR'),
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
+  instructions: z.string().trim().max(1000).nullable().optional(),
+});
+export type CreateAddressDto = z.infer<typeof CreateAddressSchema>;
+export type CreateAddressInput = z.input<typeof CreateAddressSchema>;
+
+export const UpdateAddressSchema = z
+  .object({
+    label: z.string().trim().min(1).max(100).nullable().optional(),
+    street: z.string().trim().min(1).max(255).optional(),
+    complement: z.string().trim().max(255).nullable().optional(),
+    city: z.string().trim().min(1).max(100).optional(),
+    postalCode: z.string().trim().min(4).max(10).optional(),
+    country: z.string().length(2).optional(),
+    lat: z.number().min(-90).max(90).optional(),
+    lng: z.number().min(-180).max(180).optional(),
+    instructions: z.string().trim().max(1000).nullable().optional(),
+  })
+  .refine((dto) => Object.keys(dto).length > 0, 'Aucun champ à mettre à jour.')
+  .refine(
+    (dto) => (dto.lat === undefined) === (dto.lng === undefined),
+    'lat et lng doivent être fournis ensemble.',
+  );
+export type UpdateAddressDto = z.infer<typeof UpdateAddressSchema>;
+
 export const PricingSnapshotSchema = z.object({
   base: z.number().int().nonnegative(),
   vehicleSurcharge: z.number().int().nonnegative(),

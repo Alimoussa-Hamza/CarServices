@@ -428,6 +428,41 @@ describe('api-client', () => {
     });
   });
 
+  describe('api.addresses', () => {
+    it('crée et liste des adresses client', async () => {
+      initApiClient({
+        baseUrl: 'http://api.test',
+        getAccessToken: jest.fn().mockResolvedValue('client.jwt'),
+      });
+      const address = {
+        id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+        label: 'Maison',
+        street: '10 rue de la République',
+        complement: null,
+        city: 'Lyon',
+        postalCode: '69002',
+        country: 'FR' as const,
+        lat: 45.764,
+        lng: 4.8357,
+        instructions: null,
+        createdAt: '2026-09-16T10:00:00.000Z',
+        updatedAt: '2026-09-16T10:00:00.000Z',
+      };
+      fetchMock.mockResolvedValueOnce(mockFetchResponse({ data: address }));
+      await expect(
+        api.addresses.create({
+          street: address.street,
+          city: address.city,
+          postalCode: address.postalCode,
+          lat: address.lat,
+          lng: address.lng,
+        }),
+      ).resolves.toMatchObject({ id: address.id });
+      fetchMock.mockResolvedValueOnce(mockFetchResponse({ data: [address] }));
+      await expect(api.addresses.list()).resolves.toEqual([address]);
+    });
+  });
+
   describe('api.providers', () => {
     const providerProfile = {
       id: '11111111-1111-4111-8111-111111111111',

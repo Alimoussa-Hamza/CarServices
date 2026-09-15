@@ -82,6 +82,9 @@ import {
   VerifyOtpDto,
   ZoneCheckDto,
   ZoneCheckResponseSchema,
+  AddressSchema,
+  CreateAddressInput,
+  UpdateAddressDto,
 } from '@carservice/shared-types';
 
 export class ApiError extends Error {
@@ -208,6 +211,27 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(dto),
       }),
+  },
+  addresses: {
+    list: () =>
+      apiRequest('/api/v1/addresses').then((data) =>
+        AddressSchema.array().parse(data),
+      ),
+    create: (dto: CreateAddressInput) =>
+      apiRequest('/api/v1/addresses', {
+        method: 'POST',
+        body: JSON.stringify(dto),
+      }).then((data) => AddressSchema.parse(data)),
+    update: (addressId: string, dto: UpdateAddressDto) =>
+      apiRequest(`/api/v1/addresses/${addressId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(dto),
+      }).then((data) => AddressSchema.parse(data)),
+    remove: (addressId: string) =>
+      apiRequest<{ id: string; deleted: true }>(
+        `/api/v1/addresses/${addressId}`,
+        { method: 'DELETE' },
+      ),
   },
   providers: {
     me: () =>

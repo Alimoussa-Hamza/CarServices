@@ -317,6 +317,50 @@
             },
             "url": "{{baseUrl}}/zones/leads"
           }
+        },
+        {
+          "name": "List Addresses",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/addresses"
+          }
+        },
+        {
+          "name": "Create Address",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"Maison\",\n  \"street\": \"10 rue de la République\",\n  \"city\": \"Lyon\",\n  \"postalCode\": \"69002\",\n  \"lat\": 45.764,\n  \"lng\": 4.8357,\n  \"country\": \"FR\"\n}"
+            },
+            "url": "{{baseUrl}}/addresses"
+          }
         }
       ]
     },

@@ -1,5 +1,8 @@
 import {
   AddressSnapshotSchema,
+  AddressSchema,
+  CreateAddressSchema,
+  UpdateAddressSchema,
   AuthTokensResponseSchema,
   AdminLoginSchema,
   BOOKING_DISPUTE_WINDOW_HOURS,
@@ -827,6 +830,41 @@ describe('AddressSnapshotSchema', () => {
         instructions: null,
       }).success,
     ).toBe(false);
+  });
+});
+
+describe('CreateAddressSchema / UpdateAddressSchema', () => {
+  it('applique country FR par défaut', () => {
+    expect(
+      CreateAddressSchema.parse({
+        street: '10 rue de la République',
+        city: 'Lyon',
+        postalCode: '69002',
+        lat: 45.764,
+        lng: 4.8357,
+      }),
+    ).toMatchObject({ country: 'FR' });
+  });
+
+  it('refuse update vide et lat sans lng', () => {
+    expect(UpdateAddressSchema.safeParse({}).success).toBe(false);
+    expect(UpdateAddressSchema.safeParse({ lat: 45.7 }).success).toBe(false);
+    expect(
+      AddressSchema.parse({
+        id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+        label: 'Maison',
+        street: '10 rue',
+        complement: null,
+        city: 'Lyon',
+        postalCode: '69002',
+        country: 'FR',
+        lat: 45.764,
+        lng: 4.8357,
+        instructions: null,
+        createdAt: '2026-09-16T10:00:00.000Z',
+        updatedAt: '2026-09-16T10:00:00.000Z',
+      }),
+    ).toMatchObject({ postalCode: '69002' });
   });
 });
 

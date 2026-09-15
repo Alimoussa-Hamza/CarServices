@@ -28,7 +28,7 @@
 | O — Mobile pro (M12) | 0/11 | — en attente maquettes |
 | P — Admin web (M13) | 0/8 | — après M10 |
 | Q — QA & launch (M14) | 0/6 | — fin de parcours |
-| R — Fermeture backend (M15) | 0/6 | CS-M15-S01 addresses |
+| R — Fermeture backend (M15) | 1/6 | CS-M15-S02 profil client |
 
 ---
 
@@ -416,7 +416,8 @@ Détail écrans → pistes **N** (M11) et **O** (M12).
 
 Cahier : [cahier-fermeture-backend.md](../cahier-fermeture-backend.md)
 
-- [ ] **CS-M15-S01** CRUD `/addresses`
+- [x] **CS-M15-S01** CRUD `/addresses`
+  - [x] GET/POST/PATCH/DELETE + ownership + ADDRESS_IN_USE
 - [ ] **CS-M15-S02** Profil client + suppression compte (RG-SEC-03)
 - [ ] **CS-M15-S03** Admin soft-disable users
 - [ ] **CS-M15-S04** Sentry + logging Pino (API)

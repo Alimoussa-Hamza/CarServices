@@ -14,6 +14,7 @@ import { DisputesModule } from './modules/disputes/disputes.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { ZonesModule } from './modules/zones/zones.module';
+import { AddressesModule } from './modules/addresses/addresses.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -25,6 +26,7 @@ import { PrismaModule } from './prisma/prisma.module';
     AuthModule,
     CatalogModule,
     ZonesModule,
+    AddressesModule,
     ProvidersModule,
     MediaModule,
     PaymentsModule,
