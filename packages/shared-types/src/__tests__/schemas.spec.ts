@@ -44,6 +44,9 @@ import {
   AdminResolveDisputeSchema,
   AdminPlatformConfigSchema,
   AdminUpdatePlatformConfigSchema,
+  AdminListUsersQuerySchema,
+  AdminUpdateUserSchema,
+  AdminUsersListResponseSchema,
   RegisterPushTokenSchema,
   RegisteredPushTokenSchema,
   MEDIA_UPLOAD_TTL_SECONDS,
@@ -2235,6 +2238,40 @@ describe('AdminPlatformConfig schemas (CS-M10-S08)', () => {
     expect(
       AdminUpdatePlatformConfigSchema.parse({ matchingTimeoutT1Minutes: 45 }),
     ).toEqual({ matchingTimeoutT1Minutes: 45 });
+  });
+});
+
+describe('Admin users schemas (CS-M15-S03)', () => {
+  it('applique page/pageSize par défaut et valide update', () => {
+    expect(AdminListUsersQuerySchema.parse({})).toEqual({
+      page: 1,
+      pageSize: 20,
+    });
+    expect(
+      AdminListUsersQuerySchema.parse({ q: '336', role: 'client', page: '2' }),
+    ).toMatchObject({ q: '336', role: 'client', page: 2 });
+    expect(AdminUpdateUserSchema.parse({ isActive: false })).toEqual({
+      isActive: false,
+    });
+    expect(
+      AdminUsersListResponseSchema.parse({
+        items: [
+          {
+            id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+            phone: '+33601020304',
+            email: null,
+            role: 'client',
+            isActive: true,
+            createdAt: '2026-09-16T10:00:00.000Z',
+            clientProfile: null,
+            providerProfile: null,
+          },
+        ],
+        total: 1,
+        page: 1,
+        pageSize: 20,
+      }),
+    ).toMatchObject({ total: 1 });
   });
 });
 

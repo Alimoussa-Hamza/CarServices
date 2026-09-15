@@ -26,6 +26,10 @@ import {
   AdminResolvedDisputeSchema,
   AdminPlatformConfigSchema,
   AdminUpdatePlatformConfigDto,
+  AdminListUsersQuery,
+  AdminUsersListResponseSchema,
+  AdminUpdateUserDto,
+  AdminUserListItemSchema,
   AdminRefundBookingDto,
   AdminRefundResponseSchema,
   AuthTokensResponseSchema,
@@ -502,6 +506,30 @@ export const api = {
         method: 'PATCH',
         body: JSON.stringify(dto),
       }).then((data) => AdminPlatformConfigSchema.parse(data)),
+    listUsers: (query: Partial<AdminListUsersQuery> = {}) => {
+      const params = new URLSearchParams();
+      if (query.q) {
+        params.set('q', query.q);
+      }
+      if (query.role) {
+        params.set('role', query.role);
+      }
+      if (query.page !== undefined) {
+        params.set('page', String(query.page));
+      }
+      if (query.pageSize !== undefined) {
+        params.set('pageSize', String(query.pageSize));
+      }
+      const qs = params.toString();
+      return apiRequest(`/api/v1/admin/users${qs ? `?${qs}` : ''}`).then(
+        (data) => AdminUsersListResponseSchema.parse(data),
+      );
+    },
+    updateUser: (userId: string, dto: AdminUpdateUserDto) =>
+      apiRequest(`/api/v1/admin/users/${userId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(dto),
+      }).then((data) => AdminUserListItemSchema.parse(data)),
     refundBooking: (bookingId: string, dto: AdminRefundBookingDto = {}) =>
       apiRequest(`/api/v1/admin/bookings/${bookingId}/refund`, {
         method: 'POST',

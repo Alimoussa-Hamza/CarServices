@@ -28,7 +28,7 @@
 | O — Mobile pro (M12) | 0/11 | — en attente maquettes |
 | P — Admin web (M13) | 0/8 | — après M10 |
 | Q — QA & launch (M14) | 0/6 | — fin de parcours |
-| R — Fermeture backend (M15) | 2/6 | CS-M15-S03 admin users |
+| R — Fermeture backend (M15) | 3/6 | CS-M15-S04 Sentry + Pino |
 
 ---
 
@@ -420,7 +420,8 @@ Cahier : [cahier-fermeture-backend.md](../cahier-fermeture-backend.md)
   - [x] GET/POST/PATCH/DELETE + ownership + ADDRESS_IN_USE
 - [x] **CS-M15-S02** Profil client + suppression compte (RG-SEC-03)
   - [x] GET/PATCH/DELETE `/clients/me` + anonymisation RG-SEC-03
-- [ ] **CS-M15-S03** Admin soft-disable users
+- [x] **CS-M15-S03** Admin soft-disable users
+  - [x] GET/PATCH `/admin/users` + révocation tokens
 - [ ] **CS-M15-S04** Sentry + logging Pino (API)
 - [ ] **CS-M15-S05** Helmet + Throttler Nest
 - [ ] **CS-M15-S06** Pack QA + smoke + charge k6

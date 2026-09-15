@@ -1691,6 +1691,52 @@ export type AdminUpdatePlatformConfigDto = z.infer<
   typeof AdminUpdatePlatformConfigSchema
 >;
 
+/** Admin users — CS-M15-S03 */
+export const AdminListUsersQuerySchema = z.object({
+  q: z.string().trim().min(1).max(100).optional(),
+  role: UserRoleSchema.optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(50).default(20),
+});
+export type AdminListUsersQuery = z.infer<typeof AdminListUsersQuerySchema>;
+
+export const AdminUserListItemSchema = z.object({
+  id: z.string().uuid(),
+  phone: z.string(),
+  email: z.string().email().nullable(),
+  role: UserRoleSchema,
+  isActive: z.boolean(),
+  createdAt: z.string().datetime(),
+  clientProfile: z
+    .object({
+      firstName: z.string().nullable(),
+      lastName: z.string().nullable(),
+    })
+    .nullable(),
+  providerProfile: z
+    .object({
+      companyName: z.string().nullable(),
+      kycStatus: z.string(),
+    })
+    .nullable(),
+});
+export type AdminUserListItem = z.infer<typeof AdminUserListItemSchema>;
+
+export const AdminUsersListResponseSchema = z.object({
+  items: z.array(AdminUserListItemSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().min(1),
+  pageSize: z.number().int().min(1),
+});
+export type AdminUsersListResponse = z.infer<
+  typeof AdminUsersListResponseSchema
+>;
+
+export const AdminUpdateUserSchema = z.object({
+  isActive: z.boolean(),
+});
+export type AdminUpdateUserDto = z.infer<typeof AdminUpdateUserSchema>;
+
 /** Formats Expo : ExponentPushToken[...] ou ExpoPushToken[...] */
 export const ExpoPushTokenSchema = z
   .string()

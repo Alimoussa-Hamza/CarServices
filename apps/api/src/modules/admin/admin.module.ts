@@ -14,6 +14,8 @@ import { AdminDashboardService } from './admin-dashboard.service';
 import { AdminDisputesController } from './admin-disputes.controller';
 import { AdminDisputesService } from './admin-disputes.service';
 import { AdminKycService } from './admin-kyc.service';
+import { AdminUsersController } from './admin-users.controller';
+import { AdminUsersService } from './admin-users.service';
 import { AdminZonesController } from './admin-zones.controller';
 import { AdminZonesService } from './admin-zones.service';
 import { AdminController } from './admin.controller';
@@ -32,6 +34,7 @@ import { AdminController } from './admin.controller';
     AdminBookingsController,
     AdminDisputesController,
     AdminConfigController,
+    AdminUsersController,
   ],
   providers: [
     AdminDashboardService,
@@ -40,6 +43,7 @@ import { AdminController } from './admin.controller';
     AdminZonesService,
     AdminBookingsService,
     AdminDisputesService,
+    AdminUsersService,
     JwtAuthGuard,
     RolesGuard,
   ],
@@ -50,6 +54,7 @@ import { AdminController } from './admin.controller';
     AdminZonesService,
     AdminBookingsService,
     AdminDisputesService,
+    AdminUsersService,
   ],
 })
 export class AdminModule {}

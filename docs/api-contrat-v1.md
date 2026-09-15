@@ -1276,6 +1276,43 @@ JWT **admin**. Persistance `platform_config` (key/json). Defaults = constantes s
 
 Erreurs : `VALIDATION_ERROR` (400).
 
+### Admin users (CS-M15-S03)
+
+JWT **admin**. Soft-disable ops (ne remplace pas `DELETE /clients/me`).
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/admin/users` | Recherche paginée (`q` phone/email, `role`, `page`, `pageSize`) |
+| PATCH | `/admin/users/:id` | `{ isActive: true\|false }` — révoque refresh tokens si désactivation |
+
+```json
+// GET /admin/users?q=336&role=client&page=1
+{
+  "data": {
+    "items": [
+      {
+        "id": "uuid",
+        "phone": "+33601020304",
+        "email": null,
+        "role": "client",
+        "isActive": true,
+        "createdAt": "2026-09-16T10:00:00.000Z",
+        "clientProfile": { "firstName": "Ada", "lastName": null },
+        "providerProfile": null
+      }
+    ],
+    "total": 1,
+    "page": 1,
+    "pageSize": 20
+  }
+}
+
+// PATCH /admin/users/:id
+{ "isActive": false }
+```
+
+Erreurs : `USER_NOT_FOUND` (404), `CANNOT_DISABLE_SELF` (403), `VALIDATION_ERROR` (400).
+
 ### GET `/admin/dashboard`
 
 JWT **admin**. KPIs A02 (CS-M10-S02), fenêtres UTC :

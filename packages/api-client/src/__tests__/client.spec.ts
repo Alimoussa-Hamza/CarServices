@@ -1741,6 +1741,38 @@ describe('api-client', () => {
         api.admin.updateConfig({ matchingTimeoutT1Minutes: 45 }),
       ).resolves.toMatchObject({ matchingTimeoutT1Minutes: 45 });
     });
+
+    it('liste et désactive des users admin', async () => {
+      initApiClient({
+        baseUrl: 'http://api.test',
+        getAccessToken: jest.fn().mockResolvedValue('admin.jwt'),
+      });
+      const user = {
+        id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+        phone: '+33601020304',
+        email: null,
+        role: 'client' as const,
+        isActive: true,
+        createdAt: '2026-09-16T10:00:00.000Z',
+        clientProfile: { firstName: 'Ada', lastName: null },
+        providerProfile: null,
+      };
+      fetchMock.mockResolvedValueOnce(
+        mockFetchResponse({
+          data: { items: [user], total: 1, page: 1, pageSize: 20 },
+        }),
+      );
+      await expect(
+        api.admin.listUsers({ q: '336', role: 'client' }),
+      ).resolves.toMatchObject({ total: 1, items: [{ phone: user.phone }] });
+
+      fetchMock.mockResolvedValueOnce(
+        mockFetchResponse({ data: { ...user, isActive: false } }),
+      );
+      await expect(
+        api.admin.updateUser(user.id, { isActive: false }),
+      ).resolves.toMatchObject({ isActive: false });
+    });
   });
 
   describe('api.media', () => {
