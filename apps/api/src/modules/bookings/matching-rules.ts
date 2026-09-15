@@ -55,6 +55,70 @@ export function rangesOverlap(
   return leftStart.getTime() < rightEnd.getTime() && leftEnd.getTime() > rightStart.getTime();
 }
 
+/** Statuts qui occupent réellement le créneau d’un pro (RG-MATCH-01). */
+export const MATCHING_BUSY_STATUSES = [
+  'accepted',
+  'en_route',
+  'in_progress',
+] as const;
+
+export function providerCanTakeSlot(input: {
+  slotStart: Date;
+  slotEnd: Date;
+  availability: Array<{
+    dayOfWeek: number;
+    startTime: Date;
+    endTime: Date;
+    isActive: boolean;
+  }>;
+  blockedSlots: Array<{ startAt: Date; endAt: Date }>;
+  busyRanges: Array<{ start: Date; end: Date }>;
+  distanceKm: number;
+  radiusKm: number | null;
+  radiusMultiplier?: number;
+}): boolean {
+  if (
+    !slotFitsWeeklyAvailability(
+      input.slotStart,
+      input.slotEnd,
+      input.availability,
+    )
+  ) {
+    return false;
+  }
+
+  if (
+    input.blockedSlots.some((blocked) =>
+      rangesOverlap(
+        input.slotStart,
+        input.slotEnd,
+        blocked.startAt,
+        blocked.endAt,
+      ),
+    )
+  ) {
+    return false;
+  }
+
+  if (
+    input.busyRanges.some((busy) =>
+      rangesOverlap(input.slotStart, input.slotEnd, busy.start, busy.end),
+    )
+  ) {
+    return false;
+  }
+
+  const multiplier =
+    input.radiusMultiplier && input.radiusMultiplier > 0
+      ? input.radiusMultiplier
+      : 1;
+  if (input.radiusKm !== null && input.distanceKm > input.radiusKm * multiplier) {
+    return false;
+  }
+
+  return true;
+}
+
 export function slotFitsWeeklyAvailability(
   slotStart: Date,
   slotEnd: Date,

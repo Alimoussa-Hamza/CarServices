@@ -857,3 +857,45 @@ export const BookingDetailSchema = BookingListItemSchema.extend({
   client: BookingDetailClientSchema.nullable(),
 });
 export type BookingDetail = z.infer<typeof BookingDetailSchema>;
+
+/** Calendrier C07 : de J à J+14 inclus. */
+export const SLOT_PICKER_HORIZON_DAYS = 14;
+/** Grille horaire 1 h (CDC C07). */
+export const SLOT_PICKER_INTERVAL_MINUTES = 60;
+/** Première heure de début (UTC), alignée sur les plages pro. */
+export const SLOT_PICKER_WINDOW_START_MINUTES = 8 * 60;
+/** Fin exclusive de la fenêtre de début (UTC). */
+export const SLOT_PICKER_WINDOW_END_MINUTES = 20 * 60;
+
+export const SlotPickerRequestSchema = z.object({
+  offerId: z.string().uuid(),
+  vehicleType: VehicleTypeSchema,
+  optionIds: z.array(z.string().uuid()).default([]),
+  addressId: z.string().uuid(),
+});
+export type SlotPickerRequest = z.infer<typeof SlotPickerRequestSchema>;
+
+export const SlotPickerSlotSchema = z.object({
+  start: z.string().datetime(),
+  end: z.string().datetime(),
+  available: z.boolean(),
+});
+export type SlotPickerSlot = z.infer<typeof SlotPickerSlotSchema>;
+
+export const SlotPickerDaySchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  slots: z.array(SlotPickerSlotSchema),
+});
+export type SlotPickerDay = z.infer<typeof SlotPickerDaySchema>;
+
+export const SlotPickerResponseSchema = z.object({
+  durationMinutes: z.number().int().positive(),
+  minBookingLeadHours: z.number().int().nonnegative(),
+  horizonDays: z.literal(SLOT_PICKER_HORIZON_DAYS),
+  zone: z.object({
+    slug: z.string(),
+    name: z.string(),
+  }),
+  days: z.array(SlotPickerDaySchema),
+});
+export type SlotPickerResponse = z.infer<typeof SlotPickerResponseSchema>;

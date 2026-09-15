@@ -35,6 +35,9 @@ import {
   resolveBookingListStatuses,
   BookingListItemSchema,
   BookingDetailSchema,
+  SlotPickerRequestSchema,
+  SlotPickerResponseSchema,
+  SLOT_PICKER_HORIZON_DAYS,
   CreateStripeOnboardingLinkSchema,
   DirtLevelSchema,
   KycDocumentTypeSchema,
@@ -535,6 +538,46 @@ describe('BookingListItemSchema / BookingDetailSchema', () => {
         client: null,
       }),
     ).toMatchObject({ status: 'accepted', timeline: [{ toStatus: 'draft' }] });
+  });
+});
+
+describe('SlotPickerRequestSchema / SlotPickerResponseSchema', () => {
+  it('applique optionIds vide par défaut', () => {
+    expect(
+      SlotPickerRequestSchema.parse({
+        offerId: '44444444-4444-4444-8444-444444444444',
+        vehicleType: 'suv',
+        addressId: '33333333-3333-4333-8333-333333333333',
+      }),
+    ).toEqual({
+      offerId: '44444444-4444-4444-8444-444444444444',
+      vehicleType: 'suv',
+      optionIds: [],
+      addressId: '33333333-3333-4333-8333-333333333333',
+    });
+  });
+
+  it('valide la grille C07 J→J+14', () => {
+    expect(
+      SlotPickerResponseSchema.parse({
+        durationMinutes: 90,
+        minBookingLeadHours: 2,
+        horizonDays: SLOT_PICKER_HORIZON_DAYS,
+        zone: { slug: 'lyon', name: 'Lyon' },
+        days: [
+          {
+            date: '2026-09-16',
+            slots: [
+              {
+                start: '2026-09-16T08:00:00.000Z',
+                end: '2026-09-16T09:30:00.000Z',
+                available: true,
+              },
+            ],
+          },
+        ],
+      }).days[0]?.slots[0]?.available,
+    ).toBe(true);
   });
 });
 

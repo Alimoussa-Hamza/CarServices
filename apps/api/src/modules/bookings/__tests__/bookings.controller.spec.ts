@@ -1,6 +1,7 @@
 import { UserRole } from '@prisma/client';
 import { BookingsController } from '../bookings.controller';
 import { BookingsService } from '../bookings.service';
+import { SlotPickerService } from '../slot-picker.service';
 
 const user = {
   sub: '11111111-1111-4111-8111-111111111111',
@@ -16,14 +17,19 @@ const dto = {
   clientPhotoIds: [],
 };
 
+function controllerOf(bookingsService: object, slotPickerService: object = {}) {
+  return new BookingsController(
+    bookingsService as unknown as BookingsService,
+    slotPickerService as unknown as SlotPickerService,
+  );
+}
+
 describe('BookingsController', () => {
   it('délègue POST /bookings au service avec user.sub', async () => {
     const bookingsService = {
       create: jest.fn().mockResolvedValue({ data: { booking: { id: 'b1' } } }),
     };
-    const controller = new BookingsController(
-      bookingsService as unknown as BookingsService,
-    );
+    const controller = controllerOf(bookingsService);
 
     await expect(controller.create(user, dto)).resolves.toEqual({
       data: { booking: { id: 'b1' } },
@@ -36,9 +42,7 @@ describe('BookingsController', () => {
       create: jest.fn(),
       listAvailable: jest.fn().mockResolvedValue({ data: [] }),
     };
-    const controller = new BookingsController(
-      bookingsService as unknown as BookingsService,
-    );
+    const controller = controllerOf(bookingsService);
 
     await expect(
       controller.listAvailable({
@@ -55,9 +59,7 @@ describe('BookingsController', () => {
     const bookingsService = {
       accept: jest.fn().mockResolvedValue({ data: { status: 'accepted' } }),
     };
-    const controller = new BookingsController(
-      bookingsService as unknown as BookingsService,
-    );
+    const controller = controllerOf(bookingsService);
 
     await expect(
       controller.accept(
@@ -75,9 +77,7 @@ describe('BookingsController', () => {
     const bookingsService = {
       decline: jest.fn().mockResolvedValue({ data: { declined: true } }),
     };
-    const controller = new BookingsController(
-      bookingsService as unknown as BookingsService,
-    );
+    const controller = controllerOf(bookingsService);
 
     await expect(
       controller.decline(
@@ -94,9 +94,7 @@ describe('BookingsController', () => {
         .fn()
         .mockResolvedValue({ data: { status: 'en_route' } }),
     };
-    const controller = new BookingsController(
-      bookingsService as unknown as BookingsService,
-    );
+    const controller = controllerOf(bookingsService);
 
     await expect(
       controller.updateStatus(
@@ -116,9 +114,7 @@ describe('BookingsController', () => {
     const bookingsService = {
       cancel: jest.fn().mockResolvedValue({ data: { status: 'cancelled_by_client' } }),
     };
-    const controller = new BookingsController(
-      bookingsService as unknown as BookingsService,
-    );
+    const controller = controllerOf(bookingsService);
 
     await expect(
       controller.cancel(user, '77777777-7777-4777-8777-777777777777', {}),
@@ -135,9 +131,7 @@ describe('BookingsController', () => {
     const bookingsService = {
       list: jest.fn().mockResolvedValue({ data: [] }),
     };
-    const controller = new BookingsController(
-      bookingsService as unknown as BookingsService,
-    );
+    const controller = controllerOf(bookingsService);
 
     await expect(controller.list(user, { group: 'upcoming' })).resolves.toEqual({
       data: [],
@@ -151,9 +145,7 @@ describe('BookingsController', () => {
     const bookingsService = {
       getById: jest.fn().mockResolvedValue({ data: { id: 'b1' } }),
     };
-    const controller = new BookingsController(
-      bookingsService as unknown as BookingsService,
-    );
+    const controller = controllerOf(bookingsService);
 
     await expect(
       controller.getById(user, '77777777-7777-4777-8777-777777777777'),
@@ -163,5 +155,23 @@ describe('BookingsController', () => {
       user.role,
       '77777777-7777-4777-8777-777777777777',
     );
+  });
+
+  it('délègue POST /bookings/slots au slot picker', async () => {
+    const slotDto = {
+      offerId: dto.offerId,
+      vehicleType: 'suv' as const,
+      optionIds: [] as string[],
+      addressId: dto.addressId,
+    };
+    const slotPickerService = {
+      listSlots: jest.fn().mockResolvedValue({ data: { days: [] } }),
+    };
+    const controller = controllerOf({}, slotPickerService);
+
+    await expect(controller.listSlots(user, slotDto)).resolves.toEqual({
+      data: { days: [] },
+    });
+    expect(slotPickerService.listSlots).toHaveBeenCalledWith(user.sub, slotDto);
   });
 });

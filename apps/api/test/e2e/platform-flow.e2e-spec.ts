@@ -814,6 +814,58 @@ describe('E2E plateforme (DB réelle, OTP/SMS/Stripe mock)', () => {
       'BOOKING_NOT_ASSIGNED',
     );
   });
+
+  it('CS-M05-S10 créneaux J→J+14 avec capacité zone', async () => {
+    const slots = await http()
+      .post('/api/v1/bookings/slots')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({
+        offerId,
+        vehicleType: 'suv',
+        optionIds: [],
+        addressId: clientAddressId,
+      })
+      .expect(200);
+
+    const payload = (
+      slots.body as Envelope<{
+        durationMinutes: number;
+        minBookingLeadHours: number;
+        horizonDays: number;
+        zone: { slug: string };
+        days: Array<{
+          date: string;
+          slots: Array<{ start: string; available: boolean }>;
+        }>;
+      }>
+    ).data;
+
+    expect(payload.horizonDays).toBe(14);
+    expect(payload.days).toHaveLength(15);
+    expect(payload.zone.slug).toBe('lyon');
+    expect(payload.durationMinutes).toBeGreaterThanOrEqual(90);
+    expect(payload.minBookingLeadHours).toBe(2);
+
+    const targetStart = futureSlotIso();
+    const targetDate = targetStart.slice(0, 10);
+    const day = payload.days.find((row) => row.date === targetDate);
+    expect(day).toBeDefined();
+    expect(
+      day?.slots.some((slot) => slot.start === targetStart && slot.available),
+    ).toBe(true);
+
+    const unknown = await http()
+      .post('/api/v1/bookings/slots')
+      .set('Authorization', `Bearer ${tokens.client}`)
+      .send({
+        offerId,
+        vehicleType: 'suv',
+        optionIds: [],
+        addressId: '00000000-0000-4000-8000-000000000000',
+      })
+      .expect(404);
+    expect((unknown.body as ErrorEnvelope).error.code).toBe('ADDRESS_NOT_FOUND');
+  });
 });
 
 async function login(

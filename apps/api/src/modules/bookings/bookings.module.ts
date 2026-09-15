@@ -10,6 +10,7 @@ import { BookingStateMachine } from './booking-state.machine';
 import { BookingsController } from './bookings.controller';
 import { BookingsService } from './bookings.service';
 import { MatchingQueueService } from './matching-queue.service';
+import { SlotPickerService } from './slot-picker.service';
 
 @Module({
   imports: [AuthModule, CatalogModule, ZonesModule, ProvidersModule],
@@ -19,6 +20,7 @@ import { MatchingQueueService } from './matching-queue.service';
     BookingMatchingService,
     MatchingQueueService,
     BookingsService,
+    SlotPickerService,
     JwtAuthGuard,
     RolesGuard,
   ],
@@ -27,6 +29,7 @@ import { MatchingQueueService } from './matching-queue.service';
     BookingMatchingService,
     MatchingQueueService,
     BookingsService,
+    SlotPickerService,
   ],
 })
 export class BookingsModule {}

@@ -1130,6 +1130,50 @@ describe('api-client', () => {
       );
     });
 
+    it('récupère la grille de créneaux C07', async () => {
+      const slots = {
+        durationMinutes: 90,
+        minBookingLeadHours: 2,
+        horizonDays: 14 as const,
+        zone: { slug: 'lyon', name: 'Lyon' },
+        days: [
+          {
+            date: '2026-09-16',
+            slots: [
+              {
+                start: '2026-09-16T08:00:00.000Z',
+                end: '2026-09-16T09:30:00.000Z',
+                available: true,
+              },
+            ],
+          },
+        ],
+      };
+      fetchMock.mockResolvedValue(mockFetchResponse({ data: slots }));
+
+      await expect(
+        api.bookings.slots({
+          offerId: '22222222-2222-4222-8222-222222222222',
+          vehicleType: 'suv',
+          optionIds: [],
+          addressId: '33333333-3333-4333-8333-333333333333',
+        }),
+      ).resolves.toEqual(slots);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://api.test/api/v1/bookings/slots',
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            offerId: '22222222-2222-4222-8222-222222222222',
+            vehicleType: 'suv',
+            optionIds: [],
+            addressId: '33333333-3333-4333-8333-333333333333',
+          }),
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    });
+
     it('remonte ZONE_NOT_COVERED depuis la création booking', async () => {
       fetchMock.mockResolvedValue(
         mockFetchResponse(

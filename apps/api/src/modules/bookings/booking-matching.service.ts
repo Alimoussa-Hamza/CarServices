@@ -16,15 +16,27 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { BookingStateMachine } from './booking-state.machine';
 import {
+  MATCHING_BUSY_STATUSES,
   computeMatchingScore,
   haversineKm,
   isRcProValid,
-  rangesOverlap,
-  slotFitsWeeklyAvailability,
+  providerCanTakeSlot,
 } from './matching-rules';
 
 const FALLBACK_DISTANCE_KM = 15;
-const BUSY_STATUSES = ['accepted', 'en_route', 'in_progress'] as const;
+
+export type CapacityCandidate = {
+  availability: Array<{
+    dayOfWeek: number;
+    startTime: Date;
+    endTime: Date;
+    isActive: boolean;
+  }>;
+  blockedSlots: Array<{ startAt: Date; endAt: Date }>;
+  busyRanges: Array<{ start: Date; end: Date }>;
+  distanceKm: number;
+  radiusKm: number | null;
+};
 
 export type MatchingBroadcastResult = {
   broadcastCount: number;
@@ -164,11 +176,11 @@ export class BookingMatchingService {
         },
         bookings: {
           where: {
-            status: { in: [...BUSY_STATUSES] },
+            status: { in: [...MATCHING_BUSY_STATUSES] },
             slotStart: { lt: input.slotEnd },
             slotEnd: { gt: input.slotStart },
           },
-          select: { id: true },
+          select: { id: true, slotStart: true, slotEnd: true },
         },
       },
     });
@@ -180,39 +192,24 @@ export class BookingMatchingService {
         continue;
       }
 
-      if (provider.bookings.length > 0) {
-        continue;
-      }
-
-      if (
-        !slotFitsWeeklyAvailability(
-          input.slotStart,
-          input.slotEnd,
-          provider.availability,
-        )
-      ) {
-        continue;
-      }
-
-      if (
-        provider.blockedSlots.some((blocked) =>
-          rangesOverlap(
-            input.slotStart,
-            input.slotEnd,
-            blocked.startAt,
-            blocked.endAt,
-          ),
-        )
-      ) {
-        continue;
-      }
-
       const distanceKm = this.distanceKm(provider.baseAddress, input.destination);
       const radiusKm = this.toNumber(provider.providerZones[0]?.radiusKm);
-      const multiplier = input.radiusMultiplier && input.radiusMultiplier > 0
-        ? input.radiusMultiplier
-        : 1;
-      if (radiusKm !== null && distanceKm > radiusKm * multiplier) {
+
+      if (
+        !providerCanTakeSlot({
+          slotStart: input.slotStart,
+          slotEnd: input.slotEnd,
+          availability: provider.availability,
+          blockedSlots: provider.blockedSlots,
+          busyRanges: provider.bookings.map((booking) => ({
+            start: booking.slotStart,
+            end: booking.slotEnd,
+          })),
+          distanceKm,
+          radiusKm,
+          radiusMultiplier: input.radiusMultiplier,
+        })
+      ) {
         continue;
       }
 
@@ -227,6 +224,62 @@ export class BookingMatchingService {
     }
 
     return eligible.sort((left, right) => right.score - left.score);
+  }
+
+  async loadCapacityPool(input: {
+    offerId: string;
+    zoneId: string;
+    destination: { lat: number; lng: number };
+    horizonStart: Date;
+    horizonEnd: Date;
+    now?: Date;
+  }): Promise<CapacityCandidate[]> {
+    const now = input.now ?? new Date();
+    const providers = await this.prisma.providerProfile.findMany({
+      where: {
+        kycStatus: 'approved',
+        capabilities: {
+          some: { offerId: input.offerId, isActive: true },
+        },
+        providerZones: {
+          some: { zoneId: input.zoneId },
+        },
+      },
+      include: {
+        baseAddress: true,
+        availability: true,
+        blockedSlots: true,
+        providerZones: { where: { zoneId: input.zoneId } },
+        kycDocuments: {
+          where: { docType: 'rc_pro' },
+          orderBy: { expiresAt: 'desc' },
+          take: 1,
+        },
+        bookings: {
+          where: {
+            status: { in: [...MATCHING_BUSY_STATUSES] },
+            slotStart: { lt: input.horizonEnd },
+            slotEnd: { gt: input.horizonStart },
+          },
+          select: { slotStart: true, slotEnd: true },
+        },
+      },
+    });
+
+    return providers
+      .filter((provider) =>
+        isRcProValid(provider.kycDocuments[0]?.expiresAt ?? null, now),
+      )
+      .map((provider) => ({
+        availability: provider.availability,
+        blockedSlots: provider.blockedSlots,
+        busyRanges: provider.bookings.map((booking) => ({
+          start: booking.slotStart,
+          end: booking.slotEnd,
+        })),
+        distanceKm: this.distanceKm(provider.baseAddress, input.destination),
+        radiusKm: this.toNumber(provider.providerZones[0]?.radiusKm),
+      }));
   }
 
   async listAvailable(userId: string) {

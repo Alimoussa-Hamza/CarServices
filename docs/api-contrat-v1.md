@@ -443,6 +443,7 @@ Erreurs : `VALIDATION_ERROR` (URLs invalides), `STRIPE_REQUEST_FAILED` / `STRIPE
 | Method | Path | Rôle | Description |
 |--------|------|------|-------------|
 | POST | `/bookings` | client | Créer + init paiement |
+| POST | `/bookings/slots` | client | Créneaux C07 (J→J+14) |
 | GET | `/bookings` | client/provider | Liste (filtres status) |
 | GET | `/bookings/:id` | client/provider | Détail + timeline |
 | PATCH | `/bookings/:id/cancel` | client/provider | Annuler |
@@ -486,6 +487,41 @@ Erreurs : `VALIDATION_ERROR` (URLs invalides), `STRIPE_REQUEST_FAILED` / `STRIPE
 ```
 
 `status` = `pending_provider` si au moins un pro a été notifié, sinon `payment_authorized`.
+
+### POST `/bookings/slots`
+
+JWT client. Calendrier **J → J+14** (C07), créneaux 1 h UTC (08:00–20:00). `available: false` = aucun pro éligible (RG-MATCH-01 : KYC, RC Pro, capability, zone/rayon, dispo hebdo, pas de conflit). Créneaux `< now + minBookingLeadHours` (zone, défaut 2 h) **omis**.
+
+```json
+// Request
+{
+  "offerId": "uuid",
+  "vehicleType": "suv",
+  "optionIds": [],
+  "addressId": "uuid"
+}
+
+// Response 200
+{
+  "data": {
+    "durationMinutes": 90,
+    "minBookingLeadHours": 2,
+    "horizonDays": 14,
+    "zone": { "slug": "lyon", "name": "Lyon" },
+    "days": [
+      {
+        "date": "2026-09-16",
+        "slots": [
+          { "start": "2026-09-16T08:00:00.000Z", "end": "2026-09-16T09:30:00.000Z", "available": true },
+          { "start": "2026-09-16T09:00:00.000Z", "end": "2026-09-16T10:30:00.000Z", "available": false }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Erreurs : `ADDRESS_NOT_FOUND` (404), `ZONE_NOT_COVERED` (400), `OFFER_NOT_FOUND` (404), `INVALID_OPTIONS` (400).
 
 ### GET `/bookings`
 

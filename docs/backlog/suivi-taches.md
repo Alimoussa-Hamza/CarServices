@@ -18,7 +18,7 @@
 | E — Catalogue & zones (M03) | 7/7 | — terminé |
 | F — Apps clientes | 3/6 | — en attente maquettes |
 | G — Backend Pros & KYC (M04) | 8/8 | — terminé |
-| H — Bookings (M05) | 9/10 | CS-M05-S10 Créneaux |
+| H — Bookings (M05) | 10/10 | — terminé |
 
 ---
 
@@ -232,7 +232,11 @@
   - [x] `GET /bookings/:id` + timeline `booking_status_history`
   - [x] RG-SEC-02 : adresse/tel masqués tant que le pro n’a pas accepté
   - [x] Postman List/Get + `api.bookings.list` / `get`
-- [ ] **CS-M05-S10** Créneaux disponibles (slot picker API)
+- [x] **CS-M05-S10** Créneaux disponibles (slot picker API)
+  - [x] `POST /bookings/slots` — grille J→J+14, créneaux 1 h
+  - [x] Capacité zone = au moins 1 pro RG-MATCH-01 (dispo, rayon, conflits)
+  - [x] Délai min `minBookingLeadHours` (masque J+0 trop tôt)
+  - [x] Postman List Booking Slots + `api.bookings.slots`
 
 ---
 

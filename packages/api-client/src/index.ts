@@ -15,6 +15,8 @@ import {
   DeclinedBookingSchema,
   ListBookingsQuery,
   PatchBookingStatusDto,
+  SlotPickerRequest,
+  SlotPickerResponseSchema,
   CreateStripeOnboardingLinkDto,
   HealthResponseSchema,
   KycStatusResponseSchema,
@@ -227,6 +229,11 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(dto),
       }).then((data) => CreateBookingResponseSchema.parse(data)),
+    slots: (dto: SlotPickerRequest) =>
+      apiRequest('/api/v1/bookings/slots', {
+        method: 'POST',
+        body: JSON.stringify(dto),
+      }).then((data) => SlotPickerResponseSchema.parse(data)),
     available: () =>
       apiRequest('/api/v1/bookings/available').then((data) =>
         AvailableBookingSchema.array().parse(data),
@@ -277,6 +284,7 @@ export type {
   PatchBookingStatusDto,
   CancelBookingDto,
   ListBookingsQuery,
+  SlotPickerRequest,
   CreateStripeOnboardingLinkDto,
   OutOfZoneLeadDto,
   SubmitKycDto,

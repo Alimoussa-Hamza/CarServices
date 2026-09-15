@@ -22,6 +22,8 @@ import {
   ListBookingsQuerySchema,
   PatchBookingStatusDto,
   PatchBookingStatusSchema,
+  SlotPickerRequest,
+  SlotPickerRequestSchema,
 } from '@carservice/shared-types';
 import {
   AuthPayload,
@@ -33,11 +35,15 @@ import { KycApprovedGuard } from '../../common/guards/kyc-approved.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { BookingsService } from './bookings.service';
+import { SlotPickerService } from './slot-picker.service';
 
 @Controller('bookings')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class BookingsController {
-  constructor(private readonly bookingsService: BookingsService) {}
+  constructor(
+    private readonly bookingsService: BookingsService,
+    private readonly slotPickerService: SlotPickerService,
+  ) {}
 
   @Get('available')
   @Roles(UserRole.provider)
@@ -63,6 +69,16 @@ export class BookingsController {
     @Param('id', new ParseUUIDPipe()) bookingId: string,
   ) {
     return this.bookingsService.getById(user.sub, user.role, bookingId);
+  }
+
+  @Post('slots')
+  @HttpCode(200)
+  @Roles(UserRole.client)
+  listSlots(
+    @CurrentUser() user: AuthPayload,
+    @Body(new ZodValidationPipe(SlotPickerRequestSchema)) dto: SlotPickerRequest,
+  ) {
+    return this.slotPickerService.listSlots(user.sub, dto);
   }
 
   @Post()
