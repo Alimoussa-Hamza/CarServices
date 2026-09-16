@@ -1,13 +1,24 @@
-import {
-  initPaymentSheet,
-  presentPaymentSheet,
-} from '@stripe/stripe-react-native';
 import { env, parseUseMocks } from '../config/env';
 
 export type PaymentSheetResult = 'success' | 'canceled' | 'failed';
 
 function useMocksNow(): boolean {
   return parseUseMocks(process.env.EXPO_PUBLIC_USE_MOCKS, env.useMocks);
+}
+
+type StripeNative = {
+  initPaymentSheet: (params: {
+    paymentIntentClientSecret: string;
+    merchantDisplayName: string;
+  }) => Promise<{ error?: { code?: string; message?: string } }>;
+  presentPaymentSheet: () => Promise<{
+    error?: { code?: string; message?: string };
+  }>;
+};
+
+function loadStripeNative(): StripeNative {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return require('@stripe/stripe-react-native') as StripeNative;
 }
 
 /**
@@ -24,6 +35,8 @@ export async function presentPaymentSheetFlow(input: {
     }
     return 'success';
   }
+
+  const { initPaymentSheet, presentPaymentSheet } = loadStripeNative();
 
   const { error: initError } = await initPaymentSheet({
     paymentIntentClientSecret: input.clientSecret,

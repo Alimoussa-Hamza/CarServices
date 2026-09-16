@@ -12,6 +12,15 @@ config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(workspaceRoot, 'node_modules'),
 ];
-// Keep hierarchical lookup so peer deps of gesture-handler resolve under pnpm
+config.resolver.unstable_enableSymlinks = true;
+
+// pnpm: force Metro to the app-local symlink (Expo Go + monorepo)
+config.resolver.extraNodeModules = {
+  ...config.resolver.extraNodeModules,
+  '@stripe/stripe-react-native': path.resolve(
+    projectRoot,
+    'node_modules/@stripe/stripe-react-native',
+  ),
+};
 
 module.exports = config;
