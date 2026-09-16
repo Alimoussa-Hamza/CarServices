@@ -33,11 +33,12 @@ export default function ConfigScreen() {
   const [quoting, setQuoting] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Mount-only: do not re-redirect when draft is cleared after checkout (stack still mounted).
   useEffect(() => {
-    if (!offerId) {
+    if (!useBookingDraftStore.getState().offerId) {
       router.replace('/book/catalog');
     }
-  }, [offerId]);
+  }, []);
 
   useEffect(() => {
     if (!offerId) {

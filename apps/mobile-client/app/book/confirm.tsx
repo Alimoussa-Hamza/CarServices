@@ -1,7 +1,9 @@
+import { useEffect } from 'react';
 import { Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Button } from '../../src/components/ui/button';
 import { formatPriceEur } from '../../src/lib/format';
+import { useBookingDraftStore } from '../../src/stores/booking-draft.store';
 import { useTheme } from '../../src/theme/theme-provider';
 
 /** C09 Confirmation — CS-M11-S05 / S06 light */
@@ -14,6 +16,10 @@ export default function ConfirmScreen() {
   }>();
 
   const totalCents = params.totalCents ? Number(params.totalCents) : null;
+
+  useEffect(() => {
+    useBookingDraftStore.getState().reset();
+  }, []);
 
   return (
     <View

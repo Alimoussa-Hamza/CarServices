@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Checkbox } from '../../src/components/ui/checkbox';
@@ -23,21 +23,20 @@ export default function PayScreen() {
   const address = useBookingDraftStore((s) => s.address);
   const slotStart = useBookingDraftStore((s) => s.slotStart);
   const slotEnd = useBookingDraftStore((s) => s.slotEnd);
-  const reset = useBookingDraftStore((s) => s.reset);
 
   const [acceptCgv, setAcceptCgv] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  /** Prevents catalog redirect after a successful checkout clears the draft. */
-  const completingRef = useRef(false);
 
   const draftReady = Boolean(offerId && quote && slotStart && address);
 
+  // Mount-only: stacked screens must not steal navigation after draft reset.
   useEffect(() => {
-    if (!draftReady && !completingRef.current) {
+    const draft = useBookingDraftStore.getState();
+    if (!draft.offerId || !draft.quote || !draft.slotStart || !draft.address) {
       router.replace('/book/catalog');
     }
-  }, [draftReady]);
+  }, []);
 
   const totalLabel = useMemo(() => {
     if (!quote) {
@@ -88,7 +87,6 @@ export default function PayScreen() {
       }
 
       const { reference, id: bookingId, pricingSnapshot } = created.booking;
-      completingRef.current = true;
       router.replace({
         pathname: '/book/confirm',
         params: {
@@ -97,7 +95,6 @@ export default function PayScreen() {
           totalCents: String(pricingSnapshot.totalCents),
         },
       });
-      reset();
     } catch (err) {
       setError(mapApiError(err));
     } finally {
@@ -109,7 +106,7 @@ export default function PayScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.neutral[100], justifyContent: 'center' }}>
         <Text style={{ textAlign: 'center', color: colors.neutral[700] }}>
-          {completingRef.current ? 'Confirmation…' : 'Redirection…'}
+          Redirection…
         </Text>
       </View>
     );

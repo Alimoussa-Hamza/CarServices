@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -31,9 +31,16 @@ export default function SlotScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Mount-only: avoid racing confirm when checkout resets the draft.
+  useEffect(() => {
+    const draft = useBookingDraftStore.getState();
+    if (!draft.offerId || !draft.address?.addressId) {
+      router.replace('/book/catalog');
+    }
+  }, []);
+
   const load = useCallback(async () => {
     if (!offerId || !addressId) {
-      router.replace('/book/catalog');
       return;
     }
     setLoading(true);

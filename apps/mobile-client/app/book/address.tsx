@@ -31,11 +31,12 @@ export default function AddressScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Mount-only: do not re-redirect when draft is cleared after checkout (stack still mounted).
   useEffect(() => {
-    if (!offerId) {
+    if (!useBookingDraftStore.getState().offerId) {
       router.replace('/book/catalog');
     }
-  }, [offerId]);
+  }, []);
 
   const onContinue = async () => {
     setError(null);
