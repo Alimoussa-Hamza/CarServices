@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
+import { AddressAutocomplete } from '../../src/components/booking/address-autocomplete';
 import { BookingStepper } from '../../src/components/booking/booking-stepper';
 import { ErrorBanner } from '../../src/components/ui/error-banner';
 import { Input } from '../../src/components/ui/input';
 import { StickyCta } from '../../src/components/ui/sticky-cta';
 import { checkZone } from '../../src/data/zones';
 import { resolveBookingAddressId } from '../../src/data/addresses';
+import type { ResolvedPlace } from '../../src/data/places';
 import { mapApiError } from '../../src/lib/api-errors';
 import { useBookingDraftStore } from '../../src/stores/booking-draft.store';
 import { useTheme } from '../../src/theme/theme-provider';
@@ -19,7 +21,7 @@ const LYON_DEMO = {
   lng: 4.8357,
 };
 
-/** C06 Adresse + zone check — CS-M11-S04 (Places = S12) */
+/** C06 Adresse + Places autocomplete — CS-M11-S12 */
 export default function AddressScreen() {
   const { colors, spacing, typography } = useTheme();
   const setAddressResult = useBookingDraftStore((s) => s.setAddressResult);
@@ -28,31 +30,47 @@ export default function AddressScreen() {
   const [line1, setLine1] = useState(LYON_DEMO.line1);
   const [city, setCity] = useState(LYON_DEMO.city);
   const [postalCode, setPostalCode] = useState(LYON_DEMO.postalCode);
+  const [complement, setComplement] = useState('');
+  const [lat, setLat] = useState(LYON_DEMO.lat);
+  const [lng, setLng] = useState(LYON_DEMO.lng);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Mount-only: do not re-redirect when draft is cleared after checkout (stack still mounted).
   useEffect(() => {
     if (!useBookingDraftStore.getState().offerId) {
       router.replace('/book/catalog');
     }
   }, []);
 
+  const onPlaceResolved = (place: ResolvedPlace) => {
+    setLine1(place.line1);
+    setCity(place.city);
+    setPostalCode(place.postalCode);
+    setLat(place.lat);
+    setLng(place.lng);
+    setError(null);
+  };
+
   const onContinue = async () => {
     setError(null);
     if (line1.trim().length < 5 || city.trim().length < 2 || postalCode.trim().length < 4) {
-      setError('Complète une adresse valide.');
+      setError('Complète une adresse valide (ou choisis une suggestion).');
       return;
     }
     setLoading(true);
     try {
-      const lat = postalCode.startsWith('69') ? LYON_DEMO.lat : 48.8566;
-      const lng = postalCode.startsWith('69') ? LYON_DEMO.lng : 2.3522;
-      const result = await checkZone({ lat, lng, postalCode: postalCode.trim() });
+      const result = await checkZone({
+        lat,
+        lng,
+        postalCode: postalCode.trim(),
+      });
+      const lineWithComplement = complement.trim()
+        ? `${line1.trim()} (${complement.trim()})`
+        : line1.trim();
       if (!result.covered) {
         setAddressResult({
           address: {
-            line1: line1.trim(),
+            line1: lineWithComplement,
             city: city.trim(),
             postalCode: postalCode.trim(),
             lat,
@@ -66,13 +84,13 @@ export default function AddressScreen() {
       }
       setAddressResult({
         address: {
-          line1: line1.trim(),
+          line1: lineWithComplement,
           city: city.trim(),
           postalCode: postalCode.trim(),
           lat,
           lng,
           addressId: await resolveBookingAddressId({
-            line1: line1.trim(),
+            line1: lineWithComplement,
             city: city.trim(),
             postalCode: postalCode.trim(),
             lat,
@@ -104,12 +122,26 @@ export default function AddressScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.neutral[100] }}>
       <BookingStepper current={2} />
-      <ScrollView contentContainerStyle={{ padding: spacing[5], gap: spacing[4], paddingBottom: 140 }}>
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ padding: spacing[5], gap: spacing[4], paddingBottom: 140 }}
+      >
         <Text style={{ fontSize: typography.size.body, color: colors.neutral[700] }}>
-          Où doit se faire le lavage ? (autocomplete Places = S12)
+          Où doit se faire le lavage ?
         </Text>
         {error ? <ErrorBanner message={error} /> : null}
-        <Input label="Adresse" value={line1} onChangeText={setLine1} testID="address-line1" />
+        <AddressAutocomplete
+          value={line1}
+          onChangeText={setLine1}
+          onPlaceResolved={onPlaceResolved}
+        />
+        <Input
+          label="Complément (digicode, étage…)"
+          value={complement}
+          onChangeText={setComplement}
+          testID="address-complement"
+          placeholder="Optionnel"
+        />
         <Input label="Ville" value={city} onChangeText={setCity} testID="address-city" />
         <Input
           label="Code postal"
