@@ -52,3 +52,6 @@ apps/api/prisma/*.db-journal
 
 # Misc
 *.tsbuildinfo
+
+# UX Pilot review scratch
+docs/ux/_review/

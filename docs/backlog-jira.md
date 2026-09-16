@@ -344,6 +344,8 @@
 
 ## Module M11 — Mobile Client (Expo)
 
+Cahier exécutable : [cahier-mobile-client-m11.md](cahier-mobile-client-m11.md) · Maquettes PDF : [ux/maquettes-client-carwash.pdf](ux/maquettes-client-carwash.pdf)
+
 | ID | Story | P | Pts | Sprint |
 |----|-------|---|-----|--------|
 | CS-M11-S01 | Setup Expo Router + design tokens | P0 | 3 | S6 |

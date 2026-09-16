@@ -429,5 +429,6 @@ Commission %, frais service, délais annulation, timeout matching, feature flags
 
 - [Wireframes textuels](wireframes.md)
 - [Spécification Figma](spec-figma.md)
+- [Prompt IA UX (imagination moderne)](ux/prompt-ia-ux-carservice.md)
 - [Règles de gestion](regles-de-gestion.md)
 - [Schéma base de données](schema-base-de-donnees.md)

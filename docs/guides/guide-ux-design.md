@@ -1,6 +1,8 @@
 # Guide UX & Design — CARSERVICE
 
-> **Phase :** pré-développement · **Livrables :** parcours, personas, copy, critères UX
+> **Phase :** pré-développement · **Livrables :** parcours, personas, copy, critères UX  
+> **Prompt UX Pilot (Autoflow) :** [prompt-ia-ux-carservice.md](../ux/prompt-ia-ux-carservice.md)  
+> **Pendant le build mobile :** [cahier-bonnes-pratiques-ui.md](../cahier-bonnes-pratiques-ui.md) — design, couleurs, nommage, composants, anti-dérive
 
 ---
 
@@ -72,7 +74,7 @@ Inscription → KYC wizard → Validation admin → Mission reçue → Accept
 ### Global
 | Clé | Texte |
 |-----|-------|
-| `app.name` | CARSERVICE |
+| `app.name` | CarWash |
 | `app.tagline` | Lavage auto à domicile, éco et assuré |
 | `cta.book` | Réserver maintenant |
 | `cta.continue` | Continuer |
@@ -166,4 +168,4 @@ Designer doit maquetter **minimum** : default + loading + error pour écrans P0.
 
 ---
 
-→ [Wireframes](../wireframes.md) · [Spec Figma](../spec-figma.md)
+→ [Wireframes](../wireframes.md) · [Spec Figma](../spec-figma.md) · [Prompt IA UX](../ux/prompt-ia-ux-carservice.md)

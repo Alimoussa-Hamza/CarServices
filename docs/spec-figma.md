@@ -3,14 +3,15 @@
 > **Version :** 1.0  
 > **Usage :** Brief design complet pour création maquettes Figma  
 > **Cible :** Mobile iOS/Android (375 × 812 px base) + variantes  
-> **Références :** [Wireframes](wireframes.md) · [Cahier des charges](cahier-des-charges.md)
+> **Références :** [Wireframes](wireframes.md) · [Cahier des charges](cahier-des-charges.md)  
+> **Prompt UX Pilot (Autoflow Client/Pro/Admin) :** [ux/prompt-ia-ux-carservice.md](ux/prompt-ia-ux-carservice.md)
 
 ---
 
 ## 1. Brief créatif
 
 ### Positionnement
-**CARSERVICE** = marketplace premium-accessible de lavage auto à domicile.  
+**CarWash** = marketplace premium-accessible de lavage auto à domicile.  
 Ton : **confiance + simplicité + écologie**, jamais cheap ni agressif.
 
 ### Mots-clés visuels

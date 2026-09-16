@@ -1,0 +1,12 @@
+What I'm building: a multi-screen mobile app flow (Hi-fi Autoflow) for CarWash — eco car wash booking at home (French UI).
+
+Who it's for: Client car owners (persona Claire, 34, Lyon, iPhone) who want to book a waterless/steam wash without going to a station.
+
+Platform: Mobile iOS 390x844, light theme, Autoflow ON.
+
+Screens in order:
+Splash → Auth OTP → Home → Catalog → Config → Address → Time slot → Payment → Confirmation → Mission tracking → Review → My bookings → Profile
+
+Look: modern, clean, premium-eco, brand green #0D6E4F, navy #1A3A5C, French copy, sticky bottom CTAs, one-composition Home hero (brand CarWash + headline + CTA + car photo). No purple gradients, no clutter.
+
+Use attached document only as extra detail if present.

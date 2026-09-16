@@ -16,7 +16,7 @@
 | C — Auth & Users (M02) | 6/6 | — terminé |
 | D — Tests & qualité | 9/9 | — terminé |
 | E — Catalogue & zones (M03) | 7/7 | — terminé |
-| F — Apps clientes | 3/6 | — en attente maquettes |
+| F — Apps clientes | 6/6 | M11 S01–S03 ✅ · next S04 booking |
 | G — Backend Pros & KYC (M04) | 8/8 | — terminé |
 | H — Bookings (M05) | 10/10 | — terminé |
 | I — Paiements Stripe (M06) | 6/6 | — terminé |
@@ -24,7 +24,7 @@
 | K — Avis & litiges (M08) | 4/4 | — terminé |
 | L — Notifications (M09) | 4/4 | — terminé |
 | M — Admin API (M10) | 8/8 | — terminé |
-| N — Mobile client (M11) | 0/12 | — en attente maquettes |
+| N — Mobile client (M11) | 0/12 | Cahier prêt — CS-M11-S01 |
 | O — Mobile pro (M12) | 0/11 | — en attente maquettes |
 | P — Admin web (M13) | 0/8 | — après M10 |
 | Q — QA & launch (M14) | 5/9 | EAS / stores / SC staging / prod deploy |
@@ -358,9 +358,11 @@ Détail écrans → pistes **N** (M11) et **O** (M12).
 
 ## Piste N — Mobile client · Module M11
 
-- [ ] **CS-M11-S01** Setup Expo Router + design tokens
-- [ ] **CS-M11-S02** Écrans auth C01 (OTP) — en attente maquettes
-- [ ] **CS-M11-S03** C03 Home + navigation tabs
+Cahier : [cahier-mobile-client-m11.md](../cahier-mobile-client-m11.md) · BP UI : [cahier-bonnes-pratiques-ui.md](../cahier-bonnes-pratiques-ui.md) · Maquettes : [ux/maquettes-client-carwash.pdf](../ux/maquettes-client-carwash.pdf)
+
+- [x] **CS-M11-S01** Setup Expo Router + design tokens
+- [x] **CS-M11-S02** Écrans auth C01 (OTP)
+- [x] **CS-M11-S03** C03 Home + navigation tabs
 - [ ] **CS-M11-S04** Parcours booking C04–C07 (formule→créneau)
 - [ ] **CS-M11-S05** C08 Paiement Stripe PaymentSheet
 - [ ] **CS-M11-S06** C09 Confirmation

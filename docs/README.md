@@ -49,6 +49,7 @@
 | 20 | [Guide sécurité & RGPD](guides/guide-securite-conformite.md) | Sécurité | ✅ Fait |
 | 21 | [Checklist pré-développement](checklist-pre-developpement.md) | Go/No-Go | ✅ Fait |
 | 22 | [Standards développement](standards-developpement.md) | Code | ✅ Fait |
+| 22b | [Cahier bonnes pratiques UI](cahier-bonnes-pratiques-ui.md) | Design / Mobile | ✅ Fait |
 | 23 | [Tech stack & docs officielles](tech-stack/README.md) | Tooling | ✅ Fait — **index complet liens** |
 | 24 | [Skill IA dev + bugs](.cursor/skills/carservice-dev/SKILL.md) | Tooling | ✅ Fait |
 | 25 | Maquettes Figma (.fig) | Design | ⏳ À faire |

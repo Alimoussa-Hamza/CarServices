@@ -1,0 +1,16 @@
+What I'm building: refine EXISTING CarWash CLIENT mobile booking screens (Section Edit on current design). Not a new app.
+
+Who it's for: Client car owners (Claire, Lyon) booking eco home car wash.
+
+Apply ALL fixes in one pass, keep green #0D6E4F / French UI / current flow:
+
+1) Catalog MUST have 4 formulas: Extérieur express, Intérieur, Complet (Populaire), Detailing — duration + À partir de + eco badge.
+2) Dirt levels = Léger / Normal / Fort only.
+3) Splash FIRST before Auth; logo = car-shine/leaf (NO water drop).
+4) Home: hero CarWash + Lavage à domicile + Pro certifié, sans eau, chez vous + Réserver maintenant + Zone couverte · Lyon; simplify below.
+5) Auth: phone, Envoyer le code, 6 OTP, CGU, Continuer.
+6) Payment: pré-auth text + Payer {amount}.
+7) Tracking timeline FR statuses; full address only after Pro confirmé.
+8) Add empty Réservations, OTP error « Code incorrect. », payment error « Paiement refusé. Vérifiez votre carte. »
+9) Profile: adresses, paiement, aide, Supprimer mon compte.
+10) Consistent sticky CTAs, tabs Accueil|Réservations|Profil. No chat, no new features.

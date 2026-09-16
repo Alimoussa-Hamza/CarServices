@@ -102,6 +102,16 @@ carservice/
 
 **Scopes :** `api`, `admin`, `mobile-client`, `mobile-provider`, `shared-types`, `infra`
 
+### 3.2bis Delivery par feature (obligatoire mobile / API)
+
+| Règle | Détail |
+|-------|--------|
+| **1 feature = 1 commit** | Story `CS-Mxx-Sxx` isolée autant que possible |
+| **Push après chaque feature** | `git push` dès que tests + typecheck verts |
+| **Tests unitaires** | Obligatoires sur logique ajoutée (hooks, repos, formatters, stores) |
+| **Évolutif** | Tokens / `src/data` / composants UI — pas de métier booking côté mobile |
+| **Pas de monolithe PR** | Éviter d’empiler S01+S02+S03 non poussés |
+
 **Exemples :**
 ```
 feat(api): add booking state transition guard
@@ -510,6 +520,8 @@ apps/mobile-client/
 | Pas de secrets | Clés API maps via env EAS, pas hardcodées |
 
 ### 8.3 Conventions composants
+
+Voir aussi le **cahier anti-dérive UI** : [cahier-bonnes-pratiques-ui.md](cahier-bonnes-pratiques-ui.md) (couleurs, nommage, catalogue, checklist PR).
 
 ```typescript
 // components/booking/service-offer-card.tsx
