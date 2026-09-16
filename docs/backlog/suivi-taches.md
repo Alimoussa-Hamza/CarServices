@@ -26,7 +26,7 @@
 | M — Admin API (M10) | 8/8 | — terminé |
 | N — Mobile client (M11) | 12/12 | — terminé (gate smoke) |
 | O — Mobile pro (M12) | 0/11 | — en attente maquettes |
-| P — Admin web (M13) | 0/8 | — après M10 |
+| P — Admin web (M13) | 1/8 | CS-M13-S01 ✅ · next S02 dashboard |
 | Q — QA & launch (M14) | 5/9 | EAS / stores / SC staging / prod deploy |
 | R — Fermeture backend (M15) | 6/6 | — terminé |
 | S — DevOps & Qualité (M16) | 5/5 | — terminé (staging cloud = playbook) |
@@ -394,7 +394,7 @@ Cahier : [cahier-mobile-client-m11.md](../cahier-mobile-client-m11.md) · BP UI 
 
 ## Piste P — Admin web · Module M13
 
-- [ ] **CS-M13-S01** Setup Next.js + shadcn + auth
+- [x] **CS-M13-S01** Setup Next.js + auth admin (login email/mdp + shell)
 - [ ] **CS-M13-S02** A02 Dashboard KPIs
 - [ ] **CS-M13-S03** A03 Validation KYC pros
 - [ ] **CS-M13-S04** A04 CRUD catalog

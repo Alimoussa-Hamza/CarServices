@@ -12,7 +12,7 @@
 | # | ID | Tâche | Dépendances | Statut |
 |---|-----|--------|-------------|--------|
 | 1 | **T01** | GATE-03 — Brancher mobile-client sur API + DB réelle | Docker Postgres + API up + seed Lyon | `[x]` |
-| 2 | **T02** | M13-S01 — Setup admin Next.js + shadcn + auth | Backend M10 ✅ | `[~]` |
+| 2 | **T02** | M13-S01 — Setup admin Next.js + shadcn + auth | Backend M10 ✅ | `[x]` |
 | 3 | **T03** | M13-S02 — Dashboard KPIs (A02) | T02 | `[ ]` |
 | 4 | **T04** | M13-S03 — Validation KYC pros (A03) | T02 | `[ ]` |
 | 5 | **T05** | Maquettes M12 prêtes (UX Pilot) → démarrer M12-S01 | Hors code / UX | `[ ]` |
@@ -47,19 +47,22 @@
 
 **But :** socle `apps/admin` authentifié contre l’API (JWT admin).
 
-### Checklist (à détailler au démarrage T02)
+### Checklist
 
-- [ ] Lire story CS-M13-S01 + contrat auth admin
-- [ ] Auth login admin (OTP ou credentials selon contrat)
-- [ ] Layout shell + navigation
-- [ ] Tests + typecheck + build
-- [ ] Commit + push
+- [x] Login `/login` → `POST /auth/admin/login`
+- [x] Session localStorage + `initApiClient`
+- [x] Shell nav (dashboard / kyc / catalog / zones / bookings / disputes / settings)
+- [x] Composants UI style shadcn (Button, Input, Label, Card) via `ui-tokens`
+- [x] Tests auth-storage + typecheck + build
+- [x] Commit + push
+
+Note : Tailwind/shadcn CLI complet reporté — composants maison alignés tokens (évite dette install).
 
 ---
 
 ## T03 — CS-M13-S02 Dashboard KPIs
 
-Bloqué jusqu’à T02.
+Bloqué jusqu’à T02. → **prêt**
 
 ---
 
@@ -87,4 +90,4 @@ EAS / SC-01…06 staging / stores — après T01 et apps stables.
 |------|-------|-------|
 | 2026-09-16 | T01 démarré | Docker CLI inaccessible sandbox ; Postgres/Redis déjà up |
 | 2026-09-16 | T01 API GO | Rebuild API, booking `CS-20260917-1A78`, script smoke-m11-gate03 |
-| 2026-09-16 | T02 démarré | Suite immédiate après commit T01 |
+| 2026-09-16 | T02 done | Login admin + shell + placeholders routes |
