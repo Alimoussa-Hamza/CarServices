@@ -123,11 +123,11 @@ Livrer l’app **client** iOS/Android alignée maquettes PDF : auth OTP → book
 
 | ID | Tâche | Critère |
 |----|--------|---------|
-| GATE-01 | Typecheck + lint mobile | OK |
-| GATE-02 | Parcours mock bout-en-bout (OTP fake → pay mock → suivi) | Démo 3 min |
-| GATE-03 | Parcours API réelle seed Lyon (OTP e2e pepper / Twilio mock) | Réservation créée en DB |
-| GATE-04 | Fichier e2e ou doc `m11-client-smoke.md` | Présent |
-| GATE-05 | Suivi piste N cochée + commit | Push `main` |
+| GATE-01 | Typecheck + lint mobile | OK | ✅ |
+| GATE-02 | Parcours mock bout-en-bout (OTP fake → pay mock → suivi) | Démo 3 min | checklist dans smoke |
+| GATE-03 | Parcours API réelle seed Lyon (OTP e2e pepper / Twilio mock) | Réservation créée en DB | optionnel pre-store |
+| GATE-04 | Fichier e2e ou doc `m11-client-smoke.md` | Présent | ✅ `docs/qa/m11-client-smoke.md` |
+| GATE-05 | Suivi piste N cochée + commit | Push `main` | ✅ |
 
 ---
 

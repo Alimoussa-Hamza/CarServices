@@ -62,6 +62,7 @@ Avant d’ouvrir M(n+1), le fichier `apps/api/test/e2e/mxx-*.e2e-spec.ts` doit �
 | M08 Reviews/Disputes | `m08-reviews-disputes.e2e-spec.ts` | oui |
 | M09 Notifications | `m09-notifications.e2e-spec.ts` | oui |
 | M10 Admin | `m10-admin.e2e-spec.ts` | partiel |
+| M11 Mobile client | [m11-client-smoke.md](m11-client-smoke.md) | N/A (app Expo) |
 | **ALL** | `all-apis.e2e-spec.ts` | hit exhaustif endpoints |
 
 → Backlog M14 : [backlog-jira.md](../backlog-jira.md) · Suivi : [suivi-taches.md](../backlog/suivi-taches.md)

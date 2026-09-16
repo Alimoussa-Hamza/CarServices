@@ -16,7 +16,7 @@
 | C — Auth & Users (M02) | 6/6 | — terminé |
 | D — Tests & qualité | 9/9 | — terminé |
 | E — Catalogue & zones (M03) | 7/7 | — terminé |
-| F — Apps clientes | 12/12 | M11 S01–S12 ✅ · gate M11 next |
+| F — Apps clientes | 12/12 | M11 ✅ gate (`docs/qa/m11-client-smoke.md`) |
 | G — Backend Pros & KYC (M04) | 8/8 | — terminé |
 | H — Bookings (M05) | 10/10 | — terminé |
 | I — Paiements Stripe (M06) | 6/6 | — terminé |
@@ -24,7 +24,7 @@
 | K — Avis & litiges (M08) | 4/4 | — terminé |
 | L — Notifications (M09) | 4/4 | — terminé |
 | M — Admin API (M10) | 8/8 | — terminé |
-| N — Mobile client (M11) | 0/12 | Cahier prêt — CS-M11-S01 |
+| N — Mobile client (M11) | 12/12 | — terminé (gate smoke) |
 | O — Mobile pro (M12) | 0/11 | — en attente maquettes |
 | P — Admin web (M13) | 0/8 | — après M10 |
 | Q — QA & launch (M14) | 5/9 | EAS / stores / SC staging / prod deploy |
@@ -372,6 +372,7 @@ Cahier : [cahier-mobile-client-m11.md](../cahier-mobile-client-m11.md) · BP UI 
 - [x] **CS-M11-S10** C13 Profil + adresses
 - [x] **CS-M11-S11** Push notifications client
 - [x] **CS-M11-S12** Google Places autocomplete C06
+- [x] **Gate fin M11** — `docs/qa/m11-client-smoke.md` (typecheck + 72 tests + checklist mock)
 
 ---
 
