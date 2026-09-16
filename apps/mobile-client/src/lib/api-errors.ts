@@ -5,6 +5,7 @@ const FR_BY_CODE: Record<string, string> = {
   OTP_RATE_LIMIT: 'Trop de tentatives. Réessaie dans quelques minutes.',
   AUTH_RATE_LIMIT: 'Trop de tentatives. Réessaie plus tard.',
   VALIDATION_ERROR: 'Vérifie les informations saisies.',
+  ZONE_NOT_COVERED: 'Cette adresse est hors zone.',
   NETWORK_ERROR: 'Connexion impossible. Vérifie ton réseau.',
   UNKNOWN_ERROR: 'Une erreur est survenue. Réessaie.',
 };

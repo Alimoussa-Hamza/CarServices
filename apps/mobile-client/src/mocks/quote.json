@@ -1,0 +1,11 @@
+{
+  "breakdown": {
+    "base": 3900,
+    "vehicleSurcharge": 0,
+    "options": [],
+    "serviceFee": 200,
+    "totalCents": 4100,
+    "currency": "EUR"
+  },
+  "durationMinutes": 75
+}
