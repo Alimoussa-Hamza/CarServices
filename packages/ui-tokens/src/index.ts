@@ -43,6 +43,24 @@ export const radius = {
 
 export const typography = {
   fontFamily: {
+    /** Web / admin fallback stack */
     sans: 'Inter, system-ui, sans-serif',
+    /** RN: loaded via expo-font (Inter until brand fonts land) */
+    display: 'Inter',
+    body: 'Inter',
+  },
+  size: {
+    display: 32,
+    title: 24,
+    body: 16,
+    caption: 14,
+    label: 12,
+  },
+  lineHeight: {
+    display: 40,
+    title: 32,
+    body: 24,
+    caption: 20,
+    label: 16,
   },
 } as const;

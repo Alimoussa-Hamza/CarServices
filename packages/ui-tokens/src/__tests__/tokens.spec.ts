@@ -61,6 +61,15 @@ describe('ui-tokens', () => {
     it('définit Inter comme police produit principale avec fallback système', () => {
       expect(typography.fontFamily.sans).toContain('Inter');
       expect(typography.fontFamily.sans).toContain('system-ui');
+      expect(typography.fontFamily.display).toBe('Inter');
+      expect(typography.fontFamily.body).toBe('Inter');
+    });
+
+    it('expose une échelle de tailles mobile cohérente', () => {
+      expect(typography.size.display).toBeGreaterThan(typography.size.title);
+      expect(typography.size.title).toBeGreaterThan(typography.size.body);
+      expect(typography.size.body).toBeGreaterThan(typography.size.caption);
+      expect(typography.size.caption).toBeGreaterThan(typography.size.label);
     });
   });
 });
