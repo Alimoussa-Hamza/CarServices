@@ -15,6 +15,7 @@ import { Button } from '../../src/components/ui/button';
 import { ErrorBanner } from '../../src/components/ui/error-banner';
 import { deleteClientAccount, getClientProfile } from '../../src/data/profile';
 import { mapApiError } from '../../src/lib/api-errors';
+import { enableAndRegisterPush } from '../../src/lib/push-notifications';
 import { useAuthStore } from '../../src/stores/auth.store';
 import { useTheme } from '../../src/theme/theme-provider';
 
@@ -192,6 +193,26 @@ export default function ProfileScreen() {
           label="Mes adresses"
           testID="profile-addresses"
           onPress={() => router.push('/account/addresses')}
+        />
+        <MenuRow
+          label="Activer les notifications"
+          testID="profile-push"
+          onPress={() => {
+            void (async () => {
+              const result = await enableAndRegisterPush();
+              if (result.ok) {
+                Alert.alert(
+                  'Notifications',
+                  'Push activé. Tu seras prévenu des changements de statut.',
+                );
+                return;
+              }
+              Alert.alert(
+                'Notifications',
+                'Impossible d’activer les notifications sur cet appareil (permission ou simulateur).',
+              );
+            })();
+          }}
         />
         <MenuRow
           label="Moyen de paiement"

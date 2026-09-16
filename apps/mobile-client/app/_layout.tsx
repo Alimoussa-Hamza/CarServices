@@ -5,6 +5,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { bootstrapApiClient } from '../src/data/api-bootstrap';
+import { usePushRegistration } from '../src/hooks/use-push-registration';
 import { StripeGate } from '../src/lib/stripe-gate';
 import { useSecureTokenStore } from '../src/lib/token-storage';
 import { useAuthStore } from '../src/stores/auth.store';
@@ -14,6 +15,7 @@ function RootNavigator() {
   const { colors } = useTheme();
   const hydrated = useAuthStore((s) => s.hydrated);
   const hydrate = useAuthStore((s) => s.hydrate);
+  usePushRegistration();
 
   useEffect(() => {
     useSecureTokenStore();

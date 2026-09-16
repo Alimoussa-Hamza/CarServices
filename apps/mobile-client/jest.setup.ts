@@ -10,6 +10,29 @@ jest.mock('expo-secure-store', () => ({
   deleteItemAsync: jest.fn(async () => undefined),
 }));
 
+jest.mock(
+  'expo-notifications',
+  () => ({
+    getPermissionsAsync: jest.fn(async () => ({ status: 'granted' })),
+    requestPermissionsAsync: jest.fn(async () => ({ status: 'granted' })),
+    getExpoPushTokenAsync: jest.fn(async () => ({
+      data: 'ExponentPushToken[testxxxxxxxxxxxxxxxx]',
+    })),
+    setNotificationHandler: jest.fn(),
+    addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
+    getLastNotificationResponseAsync: jest.fn(async () => null),
+  }),
+  { virtual: true },
+);
+
+jest.mock(
+  'expo-device',
+  () => ({
+    isDevice: true,
+  }),
+  { virtual: true },
+);
+
 jest.mock('@carservice/api-client', () => {
   class ApiError extends Error {
     code: string;
