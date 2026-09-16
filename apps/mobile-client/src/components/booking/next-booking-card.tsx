@@ -6,6 +6,14 @@ import { useTheme } from '../../theme/theme-provider';
 import { Badge } from '../ui/badge';
 import { Card, CardTitle } from '../ui/card';
 
+const CANCELLED_STATUSES = new Set([
+  'cancelled_by_client',
+  'cancelled_by_provider',
+  'cancelled_by_admin',
+  'expired',
+  'unassigned',
+]);
+
 export type NextBookingCardProps = {
   booking: HomeBookingSummary;
   onPress?: () => void;
@@ -14,6 +22,7 @@ export type NextBookingCardProps = {
 
 export function NextBookingCard({ booking, onPress, testID }: NextBookingCardProps) {
   const { colors, spacing, typography } = useTheme();
+  const cancelled = CANCELLED_STATUSES.has(booking.status);
 
   return (
     <Card
@@ -21,7 +30,7 @@ export function NextBookingCard({ booking, onPress, testID }: NextBookingCardPro
       testID={testID}
       contentStyle={{
         borderLeftWidth: 4,
-        borderLeftColor: colors.brand.primary,
+        borderLeftColor: cancelled ? colors.semantic.warning : colors.brand.primary,
       }}
     >
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: spacing[3] }}>
@@ -40,7 +49,10 @@ export function NextBookingCard({ booking, onPress, testID }: NextBookingCardPro
         {formatSlotFr(booking.scheduledAt)} · {booking.reference}
       </Text>
       <View style={{ marginTop: spacing[3] }}>
-        <Badge label={formatBookingStatus(booking.status)} tone="success" />
+        <Badge
+          label={formatBookingStatus(booking.status)}
+          tone={cancelled ? 'warning' : 'success'}
+        />
       </View>
     </Card>
   );

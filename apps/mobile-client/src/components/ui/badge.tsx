@@ -3,7 +3,7 @@ import { useTheme } from '../../theme/theme-provider';
 
 export type BadgeProps = {
   label: string;
-  tone?: 'brand' | 'success' | 'neutral';
+  tone?: 'brand' | 'success' | 'neutral' | 'warning';
   testID?: string;
 };
 
@@ -15,13 +15,17 @@ export function Badge({ label, tone = 'brand', testID }: BadgeProps) {
       ? colors.brand.primaryLight
       : tone === 'neutral'
         ? colors.neutral[100]
-        : colors.brand.primaryLight;
+        : tone === 'warning'
+          ? '#FDF2E9'
+          : colors.brand.primaryLight;
   const fg =
     tone === 'success'
       ? colors.semantic.success
       : tone === 'neutral'
         ? colors.neutral[700]
-        : colors.brand.primary;
+        : tone === 'warning'
+          ? colors.semantic.warning
+          : colors.brand.primary;
 
   return (
     <View

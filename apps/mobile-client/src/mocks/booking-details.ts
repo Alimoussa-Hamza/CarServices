@@ -5,6 +5,7 @@ export const MOCK_BOOKING_ID = 'e1111111-1111-4111-8111-111111111501';
 export const MOCK_BOOKING_ACCEPTED_ID = 'e1111111-1111-4111-8111-111111111502';
 export const MOCK_BOOKING_UNASSIGNED_ID = 'e1111111-1111-4111-8111-111111111503';
 export const MOCK_BOOKING_COMPLETED_ID = 'e1111111-1111-4111-8111-111111111504';
+export const MOCK_BOOKING_CANCELLED_ID = 'e1111111-1111-4111-8111-111111111505';
 
 const BASE_PRICING = {
   base: 3900,
@@ -87,6 +88,15 @@ function buildDetail(input: {
       actorType: 'system',
       reason: 'matching_timeout',
       createdAt: '2026-09-16T20:00:00.000Z',
+    });
+  }
+  if (input.status === 'cancelled_by_client') {
+    timeline.push({
+      fromStatus: 'pending_provider',
+      toStatus: 'cancelled_by_client',
+      actorType: 'client',
+      reason: 'client_cancel',
+      createdAt: '2026-09-09T12:00:00.000Z',
     });
   }
 
@@ -173,6 +183,13 @@ const DETAILS: Record<string, BookingDetail> = {
     status: 'completed',
     withProvider: true,
     withFullAddress: true,
+  }),
+  [MOCK_BOOKING_CANCELLED_ID]: buildDetail({
+    id: MOCK_BOOKING_CANCELLED_ID,
+    reference: 'CS-20260910-CANC',
+    status: 'cancelled_by_client',
+    withProvider: false,
+    withFullAddress: false,
   }),
 };
 

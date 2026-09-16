@@ -16,7 +16,7 @@
 | C — Auth & Users (M02) | 6/6 | — terminé |
 | D — Tests & qualité | 9/9 | — terminé |
 | E — Catalogue & zones (M03) | 7/7 | — terminé |
-| F — Apps clientes | 8/12 | M11 S01–S08 ✅ · next S09 liste |
+| F — Apps clientes | 9/12 | M11 S01–S09 ✅ · next S10 profil |
 | G — Backend Pros & KYC (M04) | 8/8 | — terminé |
 | H — Bookings (M05) | 10/10 | — terminé |
 | I — Paiements Stripe (M06) | 6/6 | — terminé |
@@ -368,7 +368,7 @@ Cahier : [cahier-mobile-client-m11.md](../cahier-mobile-client-m11.md) · BP UI 
 - [x] **CS-M11-S06** C09 Confirmation
 - [x] **CS-M11-S07** C10 Suivi mission (timeline)
 - [x] **CS-M11-S08** C11 Avis
-- [ ] **CS-M11-S09** C12 Liste réservations
+- [x] **CS-M11-S09** C12 Liste réservations
 - [ ] **CS-M11-S10** C13 Profil + adresses
 - [ ] **CS-M11-S11** Push notifications client
 - [ ] **CS-M11-S12** Google Places autocomplete C06
