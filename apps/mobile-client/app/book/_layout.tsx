@@ -18,6 +18,7 @@ export default function BookLayout() {
       <Stack.Screen name="out-of-zone" options={{ title: 'Hors zone' }} />
       <Stack.Screen name="slot" options={{ title: 'Créneau' }} />
       <Stack.Screen name="pay" options={{ title: 'Paiement' }} />
+      <Stack.Screen name="confirm" options={{ title: 'Confirmation', headerBackVisible: false }} />
     </Stack>
   );
 }

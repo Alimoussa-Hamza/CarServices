@@ -1,13 +1,24 @@
 import 'react-native-gesture-handler';
-import { useEffect } from 'react';
+import { useEffect, type ReactElement } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { StripeProvider } from '@stripe/stripe-react-native';
 import { bootstrapApiClient } from '../src/data/api-bootstrap';
+import { env } from '../src/config/env';
 import { useSecureTokenStore } from '../src/lib/token-storage';
 import { useAuthStore } from '../src/stores/auth.store';
 import { ThemeProvider, useTheme } from '../src/theme/theme-provider';
+
+function StripeGate({ children }: { children: ReactElement | ReactElement[] }) {
+  if (!env.stripePublishableKey) {
+    return <>{children}</>;
+  }
+  return (
+    <StripeProvider publishableKey={env.stripePublishableKey}>{children}</StripeProvider>
+  );
+}
 
 function RootNavigator() {
   const { colors } = useTheme();
@@ -49,9 +60,11 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.root}>
-      <ThemeProvider>
-        <RootNavigator />
-      </ThemeProvider>
+      <StripeGate>
+        <ThemeProvider>
+          <RootNavigator />
+        </ThemeProvider>
+      </StripeGate>
     </GestureHandlerRootView>
   );
 }

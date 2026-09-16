@@ -16,7 +16,7 @@
 | C — Auth & Users (M02) | 6/6 | — terminé |
 | D — Tests & qualité | 9/9 | — terminé |
 | E — Catalogue & zones (M03) | 7/7 | — terminé |
-| F — Apps clientes | 6/6 | M11 S01–S04 ✅ · next S05 paiement |
+| F — Apps clientes | 6/6 | M11 S01–S06 ✅ · next S07 suivi |
 | G — Backend Pros & KYC (M04) | 8/8 | — terminé |
 | H — Bookings (M05) | 10/10 | — terminé |
 | I — Paiements Stripe (M06) | 6/6 | — terminé |
@@ -364,8 +364,8 @@ Cahier : [cahier-mobile-client-m11.md](../cahier-mobile-client-m11.md) · BP UI 
 - [x] **CS-M11-S02** Écrans auth C01 (OTP)
 - [x] **CS-M11-S03** C03 Home + navigation tabs
 - [x] **CS-M11-S04** Parcours booking C04–C07 (formule→créneau)
-- [ ] **CS-M11-S05** C08 Paiement Stripe PaymentSheet
-- [ ] **CS-M11-S06** C09 Confirmation
+- [x] **CS-M11-S05** C08 Paiement Stripe PaymentSheet
+- [x] **CS-M11-S06** C09 Confirmation
 - [ ] **CS-M11-S07** C10 Suivi mission (timeline)
 - [ ] **CS-M11-S08** C11 Avis
 - [ ] **CS-M11-S09** C12 Liste réservations

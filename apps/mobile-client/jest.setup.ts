@@ -1,3 +1,9 @@
+jest.mock('@stripe/stripe-react-native', () => ({
+  StripeProvider: ({ children }: { children: unknown }) => children,
+  initPaymentSheet: jest.fn(async () => ({ error: undefined })),
+  presentPaymentSheet: jest.fn(async () => ({ error: undefined })),
+}));
+
 jest.mock('expo-secure-store', () => ({
   getItemAsync: jest.fn(async () => null),
   setItemAsync: jest.fn(async () => undefined),
