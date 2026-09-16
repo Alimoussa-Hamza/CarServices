@@ -1,0 +1,18 @@
+{
+  "id": "client-claire",
+  "firstName": "Claire",
+  "lastName": "Martin",
+  "phone": "+33601020304",
+  "email": "claire@example.com",
+  "addresses": [
+    {
+      "id": "addr-lyon",
+      "label": "Domicile",
+      "line1": "12 rue de la République",
+      "city": "Lyon",
+      "postalCode": "69001",
+      "lat": 45.764,
+      "lng": 4.8357
+    }
+  ]
+}

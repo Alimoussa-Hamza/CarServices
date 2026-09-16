@@ -1,0 +1,30 @@
+[
+  {
+    "id": "offer-express",
+    "name": "Express",
+    "priceCents": 2900,
+    "durationMinutes": 45,
+    "description": "Extérieur rapide, sans eau"
+  },
+  {
+    "id": "offer-confort",
+    "name": "Confort",
+    "priceCents": 3900,
+    "durationMinutes": 75,
+    "description": "Extérieur + habitacle"
+  },
+  {
+    "id": "offer-prestige",
+    "name": "Prestige",
+    "priceCents": 5900,
+    "durationMinutes": 120,
+    "description": "Détailing complet"
+  },
+  {
+    "id": "offer-signature",
+    "name": "Signature",
+    "priceCents": 12900,
+    "durationMinutes": 180,
+    "description": "Prestige + protection céramique"
+  }
+]
