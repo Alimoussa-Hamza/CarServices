@@ -43,6 +43,7 @@ function RootNavigator() {
         <Stack.Screen name="(auth)/login" options={{ presentation: 'card' }} />
         <Stack.Screen name="book" options={{ headerShown: false }} />
         <Stack.Screen name="bookings/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="account" options={{ headerShown: false }} />
       </Stack>
     </>
   );

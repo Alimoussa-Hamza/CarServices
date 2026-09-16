@@ -11,6 +11,9 @@ const FR_BY_CODE: Record<string, string> = {
   REVIEW_WINDOW_EXPIRED: 'La fenêtre de 72 h pour laisser un avis est terminée.',
   REVIEW_BOOKING_NOT_COMPLETED: 'Avis possible uniquement après une mission terminée.',
   BOOKING_NOT_FOUND: 'Réservation introuvable.',
+  ADDRESS_NOT_FOUND: 'Adresse introuvable.',
+  CLIENT_NOT_FOUND: 'Compte introuvable.',
+  ACCOUNT_ALREADY_DELETED: 'Ce compte a déjà été supprimé.',
   NETWORK_ERROR: 'Connexion impossible. Vérifie ton réseau.',
   UNKNOWN_ERROR: 'Une erreur est survenue. Réessaie.',
 };

@@ -1,4 +1,5 @@
 import { Stack } from 'expo-router';
+import { ScreenBackButton } from '../../../src/components/ui/screen-back-button';
 import { useTheme } from '../../../src/theme/theme-provider';
 
 export default function BookingIdLayout() {
@@ -10,6 +11,8 @@ export default function BookingIdLayout() {
         headerTintColor: colors.brand.secondary,
         headerStyle: { backgroundColor: colors.neutral[0] },
         contentStyle: { backgroundColor: colors.neutral[100] },
+        headerBackVisible: false,
+        headerLeft: () => <ScreenBackButton fallback="/(tabs)/bookings" />,
       }}
     >
       <Stack.Screen name="index" options={{ title: 'Suivi' }} />

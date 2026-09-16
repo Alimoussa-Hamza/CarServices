@@ -119,9 +119,6 @@ export default function BookingTrackingScreen() {
       <Stack.Screen
         options={{
           title: detail?.reference ? `Suivi ${detail.reference.slice(-4)}` : 'Suivi',
-          headerShown: true,
-          headerTintColor: colors.brand.secondary,
-          headerStyle: { backgroundColor: colors.neutral[0] },
         }}
       />
       <ScrollView

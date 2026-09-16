@@ -5,6 +5,7 @@ import type { ReviewTag } from '@carservice/shared-types';
 import { Button } from '../../../src/components/ui/button';
 import { ErrorBanner } from '../../../src/components/ui/error-banner';
 import { Input } from '../../../src/components/ui/input';
+import { ScreenBackButton } from '../../../src/components/ui/screen-back-button';
 import { StickyCta } from '../../../src/components/ui/sticky-cta';
 import { createReview } from '../../../src/data/reviews';
 import { mapApiError } from '../../../src/lib/api-errors';
@@ -76,7 +77,13 @@ export default function BookingReviewScreen() {
   if (done) {
     return (
       <>
-        <Stack.Screen options={{ title: 'Merci', headerBackVisible: false }} />
+        <Stack.Screen
+          options={{
+            title: 'Merci',
+            headerBackVisible: false,
+            headerLeft: () => <ScreenBackButton fallback="/(tabs)/bookings" />,
+          }}
+        />
         <View
           style={{
             flex: 1,
