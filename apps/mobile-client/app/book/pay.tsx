@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Checkbox } from '../../src/components/ui/checkbox';
@@ -28,11 +28,13 @@ export default function PayScreen() {
   const [acceptCgv, setAcceptCgv] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Prevents catalog redirect after a successful checkout clears the draft. */
+  const completingRef = useRef(false);
 
   const draftReady = Boolean(offerId && quote && slotStart && address);
 
   useEffect(() => {
-    if (!draftReady) {
+    if (!draftReady && !completingRef.current) {
       router.replace('/book/catalog');
     }
   }, [draftReady]);
@@ -86,7 +88,7 @@ export default function PayScreen() {
       }
 
       const { reference, id: bookingId, pricingSnapshot } = created.booking;
-      reset();
+      completingRef.current = true;
       router.replace({
         pathname: '/book/confirm',
         params: {
@@ -95,6 +97,7 @@ export default function PayScreen() {
           totalCents: String(pricingSnapshot.totalCents),
         },
       });
+      reset();
     } catch (err) {
       setError(mapApiError(err));
     } finally {
@@ -106,7 +109,7 @@ export default function PayScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.neutral[100], justifyContent: 'center' }}>
         <Text style={{ textAlign: 'center', color: colors.neutral[700] }}>
-          Redirection…
+          {completingRef.current ? 'Confirmation…' : 'Redirection…'}
         </Text>
       </View>
     );
