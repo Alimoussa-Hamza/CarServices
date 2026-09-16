@@ -8,23 +8,27 @@ import {
   Text,
   View,
 } from 'react-native';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, router, useLocalSearchParams } from 'expo-router';
 import type { BookingDetail } from '@carservice/shared-types';
-import { StatusTimeline } from '../../src/components/booking/status-timeline';
-import { Badge } from '../../src/components/ui/badge';
-import { Button } from '../../src/components/ui/button';
-import { ErrorBanner } from '../../src/components/ui/error-banner';
-import { getBookingDetail } from '../../src/data/bookings';
-import { mapApiError } from '../../src/lib/api-errors';
-import { formatBookingStatus } from '../../src/lib/booking-status';
+import { StatusTimeline } from '../../../src/components/booking/status-timeline';
+import { Badge } from '../../../src/components/ui/badge';
+import { Button } from '../../../src/components/ui/button';
+import { ErrorBanner } from '../../../src/components/ui/error-banner';
+import { getBookingDetail } from '../../../src/data/bookings';
+import { mapApiError } from '../../../src/lib/api-errors';
+import { formatBookingStatus } from '../../../src/lib/booking-status';
 import {
   buildClientTimeline,
   canRevealFullAddress,
   canShowCancelCta,
   isTerminalUnassigned,
-} from '../../src/lib/booking-timeline';
-import { formatPriceEur, formatSlotFr } from '../../src/lib/format';
-import { useTheme } from '../../src/theme/theme-provider';
+} from '../../../src/lib/booking-timeline';
+import {
+  canLeaveReview,
+  completedAtFromTimeline,
+} from '../../../src/lib/review-eligibility';
+import { formatPriceEur, formatSlotFr } from '../../../src/lib/format';
+import { useTheme } from '../../../src/theme/theme-provider';
 
 const POLL_MS = 15_000;
 
@@ -259,6 +263,18 @@ export default function BookingTrackingScreen() {
             detail.status === 'in_progress' ? (
               <Button variant="secondary" onPress={onCallSupport} testID="tracking-report">
                 Signaler un problème
+              </Button>
+            ) : null}
+
+            {canLeaveReview({
+              status: detail.status,
+              completedAtIso: completedAtFromTimeline(detail.timeline),
+            }) ? (
+              <Button
+                testID="tracking-review"
+                onPress={() => router.push(`/bookings/${detail.id}/review`)}
+              >
+                Laisser un avis
               </Button>
             ) : null}
           </>

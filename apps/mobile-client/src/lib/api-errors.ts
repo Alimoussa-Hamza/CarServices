@@ -7,6 +7,10 @@ const FR_BY_CODE: Record<string, string> = {
   VALIDATION_ERROR: 'Vérifie les informations saisies.',
   PAYMENT_FAILED: 'Paiement refusé. Réessaie ou change de carte.',
   ZONE_NOT_COVERED: 'Cette adresse est hors zone.',
+  REVIEW_ALREADY_EXISTS: 'Tu as déjà laissé un avis pour cette mission.',
+  REVIEW_WINDOW_EXPIRED: 'La fenêtre de 72 h pour laisser un avis est terminée.',
+  REVIEW_BOOKING_NOT_COMPLETED: 'Avis possible uniquement après une mission terminée.',
+  BOOKING_NOT_FOUND: 'Réservation introuvable.',
   NETWORK_ERROR: 'Connexion impossible. Vérifie ton réseau.',
   UNKNOWN_ERROR: 'Une erreur est survenue. Réessaie.',
 };
