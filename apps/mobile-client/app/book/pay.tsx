@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Checkbox } from '../../src/components/ui/checkbox';
@@ -28,6 +28,14 @@ export default function PayScreen() {
   const [acceptCgv, setAcceptCgv] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const draftReady = Boolean(offerId && quote && slotStart && address);
+
+  useEffect(() => {
+    if (!draftReady) {
+      router.replace('/book/catalog');
+    }
+  }, [draftReady]);
 
   const totalLabel = useMemo(() => {
     if (!quote) {
@@ -94,10 +102,12 @@ export default function PayScreen() {
     }
   };
 
-  if (!offerId || !quote || !slotStart || !address) {
+  if (!draftReady || !offerId || !quote || !slotStart || !address) {
     return (
-      <View style={{ flex: 1, padding: spacing[7], justifyContent: 'center' }}>
-        <Text style={{ color: colors.neutral[700] }}>Aucune réservation en cours.</Text>
+      <View style={{ flex: 1, backgroundColor: colors.neutral[100], justifyContent: 'center' }}>
+        <Text style={{ textAlign: 'center', color: colors.neutral[700] }}>
+          Redirection…
+        </Text>
       </View>
     );
   }

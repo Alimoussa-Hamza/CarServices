@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { BookingStepper } from '../../src/components/booking/booking-stepper';
@@ -31,9 +31,11 @@ export default function AddressScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (!offerId) {
-    router.replace('/book/catalog');
-  }
+  useEffect(() => {
+    if (!offerId) {
+      router.replace('/book/catalog');
+    }
+  }, [offerId]);
 
   const onContinue = async () => {
     setError(null);
@@ -87,6 +89,16 @@ export default function AddressScreen() {
       setLoading(false);
     }
   };
+
+  if (!offerId) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.neutral[100], justifyContent: 'center' }}>
+        <Text style={{ textAlign: 'center', color: colors.neutral[700] }}>
+          Redirection…
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.neutral[100] }}>
