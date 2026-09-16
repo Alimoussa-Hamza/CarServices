@@ -1,5 +1,4 @@
-import { Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Pressable, Text } from 'react-native';
 import type { Href } from 'expo-router';
 import { goBackOr } from '../../lib/navigation';
 import { useTheme } from '../../theme/theme-provider';
@@ -9,12 +8,16 @@ export type ScreenBackButtonProps = {
   testID?: string;
 };
 
-/** Explicit back for nested stacks that have no parent history (e.g. C10 from tabs). */
+/**
+ * Explicit back for nested stacks without parent history (e.g. C10 from tabs).
+ * Plain Text (not @expo/vector-icons) — Ionicons breaks in native stack headers
+ * under Expo Go / bridgeless ("useContext of null").
+ */
 export function ScreenBackButton({
   fallback = '/(tabs)',
   testID = 'screen-back',
 }: ScreenBackButtonProps) {
-  const { colors, spacing } = useTheme();
+  const { colors, spacing, typography } = useTheme();
 
   return (
     <Pressable
@@ -23,9 +26,24 @@ export function ScreenBackButton({
       accessibilityLabel="Retour"
       hitSlop={12}
       onPress={() => goBackOr(fallback)}
-      style={{ paddingHorizontal: spacing[2], marginLeft: -spacing[2] }}
+      style={{
+        paddingHorizontal: spacing[2],
+        marginLeft: -spacing[2],
+        minWidth: 44,
+        minHeight: 44,
+        justifyContent: 'center',
+      }}
     >
-      <Ionicons name="chevron-back" size={28} color={colors.brand.secondary} />
+      <Text
+        style={{
+          color: colors.brand.secondary,
+          fontSize: typography.size.title,
+          fontWeight: '600',
+          lineHeight: 28,
+        }}
+      >
+        ‹
+      </Text>
     </Pressable>
   );
 }
