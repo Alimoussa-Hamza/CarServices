@@ -25,3 +25,11 @@ export function formatSlotFr(iso: string): string {
     minute: '2-digit',
   }).format(date);
 }
+
+export function formatTimeFr(iso: string): string {
+  const date = new Date(iso);
+  return new Intl.DateTimeFormat('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+}

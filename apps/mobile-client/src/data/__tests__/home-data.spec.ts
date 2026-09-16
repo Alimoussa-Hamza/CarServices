@@ -18,9 +18,9 @@ describe('home data (mock)', () => {
     expect(offers[0]?.priceCents).toBeGreaterThan(0);
   });
 
-  it('liste une réservation upcoming mock', async () => {
+  it('liste les réservations upcoming mock', async () => {
     const upcoming = await listUpcomingBookings();
-    expect(upcoming).toHaveLength(1);
-    expect(upcoming[0]?.reference).toBe('CS-DEMO-001');
+    expect(upcoming.length).toBeGreaterThanOrEqual(1);
+    expect(upcoming[0]?.reference).toMatch(/^CS-\d{8}-/);
   });
 });

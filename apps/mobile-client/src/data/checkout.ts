@@ -40,7 +40,7 @@ export function buildMockCreateBookingResponse(
   return {
     booking: {
       id,
-      reference: 'CS-20260916-MOCK',
+      reference: 'CS-20260920-DEMO',
       status: 'pending_provider',
       pricingSnapshot: input.pricing,
       slotStart: input.slotStart,

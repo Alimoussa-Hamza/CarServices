@@ -83,7 +83,12 @@ export default function BookingsScreen() {
             />
           ) : (
             upcoming.map((b) => (
-              <NextBookingCard key={b.id} booking={b} testID={`booking-${b.id}`} />
+              <NextBookingCard
+                key={b.id}
+                booking={b}
+                testID={`booking-${b.id}`}
+                onPress={() => router.push(`/bookings/${b.id}`)}
+              />
             ))
           )}
 
@@ -96,7 +101,12 @@ export default function BookingsScreen() {
             </Text>
           ) : (
             past.map((b) => (
-              <NextBookingCard key={b.id} booking={b} testID={`booking-past-${b.id}`} />
+              <NextBookingCard
+                key={b.id}
+                booking={b}
+                testID={`booking-past-${b.id}`}
+                onPress={() => router.push(`/bookings/${b.id}`)}
+              />
             ))
           )}
         </>

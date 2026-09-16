@@ -184,7 +184,7 @@ export default function HomeScreen() {
           <NextBookingCard
             booking={nextBooking}
             testID="home-next-booking"
-            onPress={() => router.push('/(tabs)/bookings')}
+            onPress={() => router.push(`/bookings/${nextBooking.id}`)}
           />
         ) : (
           <EmptyState

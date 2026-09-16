@@ -55,7 +55,20 @@ export default function ConfirmScreen() {
         Un pro va être recherché. Tu pourras suivre la mission dans Réservations.
       </Text>
       <Button
+        testID="confirm-tracking"
+        onPress={() => {
+          if (params.bookingId) {
+            router.replace(`/bookings/${params.bookingId}`);
+            return;
+          }
+          router.replace('/(tabs)/bookings');
+        }}
+      >
+        Suivre ma réservation
+      </Button>
+      <Button
         testID="confirm-bookings"
+        variant="secondary"
         onPress={() => router.replace('/(tabs)/bookings')}
       >
         Voir mes réservations
