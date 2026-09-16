@@ -55,15 +55,19 @@ OTP mock : `000000`
 
 ## GATE-03 — API réelle (optionnel hors mocks)
 
-Prérequis : API up + seed Lyon, `EXPO_PUBLIC_USE_MOCKS=false`, OTP e2e.
+Prérequis : API up + seed Lyon (+ pro démo éligible), `EXPO_PUBLIC_USE_MOCKS=false`, OTP dans logs API (`[DEV OTP]`).
 
-| Check | Attendu |
-|-------|---------|
-| Auth OTP réel / pepper test | Session JWT |
-| Booking create + PaymentSheet test | Booking en DB `pending_provider` |
-| GET booking detail | Timeline API |
+| Check | Attendu | Résultat 2026-09-16 |
+|-------|---------|---------------------|
+| Auth OTP réel / pepper | Session JWT | ✅ |
+| Booking create + PaymentSheet test | Booking en DB `pending_provider` | ✅ `CS-20260917-1A78` |
+| GET booking detail | Timeline API | ✅ |
 
-Statut gate M11 : **non bloquant** si mocks verts (GATE-01/02/04). À rejouer avant release store.
+Automatisé : `./tools/smoke-m11-gate03.sh` (inject OTP Redis + create booking + assert Postgres).
+
+Mobile UI : `EXPO_PUBLIC_USE_MOCKS=false` dans `apps/mobile-client/.env`, restart Expo, OTP = ligne `[DEV OTP]` des logs API.
+
+Statut gate M11 : **GO API** (script) · checklist manuelle app = à rejouer sur device.
 
 ---
 

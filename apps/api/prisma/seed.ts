@@ -257,6 +257,135 @@ async function main() {
     });
   }
   console.log(`Seed platform_config: ${configDefaults.length} keys`);
+
+  // Pro démo éligible matching (GATE-03 / smoke mobile API réelle)
+  const demoProviderPhone = process.env.SEED_PROVIDER_PHONE ?? '+33600000001';
+  const providerUser = await prisma.user.upsert({
+    where: { phone: demoProviderPhone },
+    update: { role: UserRole.provider, isActive: true },
+    create: {
+      phone: demoProviderPhone,
+      role: UserRole.provider,
+      isActive: true,
+    },
+  });
+
+  const washComplete = createdOffers.find((o) => o.slug === 'wash-complete');
+  if (!washComplete) {
+    throw new Error('wash-complete offer missing after catalog seed');
+  }
+
+  let providerProfile = await prisma.providerProfile.findUnique({
+    where: { userId: providerUser.id },
+  });
+
+  if (!providerProfile) {
+    providerProfile = await prisma.providerProfile.create({
+      data: {
+        userId: providerUser.id,
+        companyName: 'Clean Auto Lyon',
+        siret: '39999999999999',
+        bio: 'Lavage écologique sans eau (seed démo).',
+        washMethods: ['waterless'],
+        kycStatus: 'approved',
+        chargesEnabled: true,
+      },
+    });
+  } else {
+    providerProfile = await prisma.providerProfile.update({
+      where: { id: providerProfile.id },
+      data: {
+        companyName: providerProfile.companyName ?? 'Clean Auto Lyon',
+        siret: providerProfile.siret ?? '39999999999999',
+        kycStatus: 'approved',
+        chargesEnabled: true,
+        washMethods:
+          providerProfile.washMethods.length > 0
+            ? providerProfile.washMethods
+            : ['waterless'],
+      },
+    });
+  }
+
+  let baseAddressId = providerProfile.baseAddressId;
+  if (!baseAddressId) {
+    const baseAddress = await prisma.address.create({
+      data: {
+        userId: providerUser.id,
+        label: 'Base',
+        street: 'Place Bellecour',
+        city: 'Lyon',
+        postalCode: '69002',
+        country: 'FR',
+        lat: 45.7578,
+        lng: 4.832,
+      },
+    });
+    baseAddressId = baseAddress.id;
+    await prisma.providerProfile.update({
+      where: { id: providerProfile.id },
+      data: { baseAddressId },
+    });
+  }
+
+  await prisma.providerZone.upsert({
+    where: {
+      providerId_zoneId: { providerId: providerProfile.id, zoneId: zone.id },
+    },
+    update: { radiusKm: 15 },
+    create: {
+      providerId: providerProfile.id,
+      zoneId: zone.id,
+      radiusKm: 15,
+    },
+  });
+
+  await prisma.providerCapability.upsert({
+    where: {
+      providerId_offerId: {
+        providerId: providerProfile.id,
+        offerId: washComplete.id,
+      },
+    },
+    update: { isActive: true },
+    create: {
+      providerId: providerProfile.id,
+      offerId: washComplete.id,
+      isActive: true,
+    },
+  });
+
+  await prisma.providerKycDocument.deleteMany({
+    where: { providerId: providerProfile.id, docType: 'rc_pro' },
+  });
+  await prisma.providerKycDocument.create({
+    data: {
+      providerId: providerProfile.id,
+      docType: 'rc_pro',
+      fileUrl: 'https://example.com/rc-pro-seed.pdf',
+      expiresAt: new Date('2027-12-31'),
+      verifiedAt: new Date(),
+    },
+  });
+
+  await prisma.providerAvailability.deleteMany({
+    where: { providerId: providerProfile.id },
+  });
+  for (let dayOfWeek = 0; dayOfWeek <= 6; dayOfWeek += 1) {
+    await prisma.providerAvailability.create({
+      data: {
+        providerId: providerProfile.id,
+        dayOfWeek,
+        startTime: new Date('1970-01-01T08:00:00.000Z'),
+        endTime: new Date('1970-01-01T20:00:00.000Z'),
+        isActive: true,
+      },
+    });
+  }
+
+  console.log(
+    `Seed demo provider: ${providerProfile.id} (${demoProviderPhone}) — KYC approved + slots`,
+  );
 }
 
 main()
