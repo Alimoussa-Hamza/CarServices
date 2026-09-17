@@ -16,6 +16,7 @@
 | 3 | **T03** | M13-S02 — Dashboard KPIs (A02) | T02 | `[x]` |
 | 4 | **T04** | M13-S03 — Validation KYC pros (A03) | T02 | `[x]` |
 | 4b | **T04b** | M13-S04 — CRUD catalog (A04) | T02 | `[x]` |
+| 4c | **T04c** | M13-S05 — Zones + pricing (A05) | T02 | `[x]` |
 | 5 | **T05** | Maquettes M12 prêtes (UX Pilot) → démarrer M12-S01 | Hors code / UX | `[ ]` |
 | 6 | **T06** | M14 restant — EAS preview, SC staging, stores | T01 vert + apps stables | `[ ]` |
 
@@ -99,6 +100,19 @@ Note : Tailwind/shadcn CLI complet reporté — composants maison alignés token
 
 ---
 
+## T04c — CS-M13-S05 Zones + pricing
+
+**But :** A05 coefficient, délai, activation, pricing par offre (polygone = copie Lyon, pas de carte).
+
+### Checklist
+
+- [x] Liste zones + toggle + coeff / lead
+- [x] Créer zone (copie polygone, inactive)
+- [x] Pricing override + surcharges véhicule
+- [x] Tests parse + typecheck + build
+
+---
+
 ## T05 — Maquettes M12
 
 Hors repo code : finaliser UX Pilot pro → puis `CS-M12-S01`.
@@ -121,3 +135,4 @@ EAS / SC-01…06 staging / stores — après T01 et apps stables.
 | 2026-09-17 | T03 done | Dashboard A02 `GET /admin/dashboard` |
 | 2026-09-17 | T04 done | KYC pending + approve/reject |
 | 2026-09-17 | T04b done | Catalogue admin A04 |
+| 2026-09-17 | T04c done | Zones + pricing A05 |

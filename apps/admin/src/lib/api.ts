@@ -3,6 +3,7 @@ import type {
   AdminCategory,
   AdminCreateOfferInput,
   AdminCreateOfferOptionInput,
+  AdminCreateZoneInput,
   AdminDashboard,
   AdminKycDecisionResponse,
   AdminOffer,
@@ -11,6 +12,10 @@ import type {
   AdminUpdateCategoryDto,
   AdminUpdateOfferDto,
   AdminUpdateOfferOptionDto,
+  AdminUpdateZoneDto,
+  AdminUpsertZonePricingDto,
+  AdminZone,
+  AdminZonePricing,
 } from '@carservice/shared-types';
 import { env } from './env';
 import {
@@ -133,4 +138,40 @@ export async function patchAdminOfferOption(
 ): Promise<AdminOfferOption> {
   bootstrapAdminApi();
   return api.admin.updateOfferOption(optionId, dto);
+}
+
+export async function fetchAdminZones(): Promise<AdminZone[]> {
+  bootstrapAdminApi();
+  return api.admin.listZones();
+}
+
+export async function createAdminZone(
+  dto: AdminCreateZoneInput,
+): Promise<AdminZone> {
+  bootstrapAdminApi();
+  return api.admin.createZone(dto);
+}
+
+export async function patchAdminZone(
+  zoneId: string,
+  dto: AdminUpdateZoneDto,
+): Promise<AdminZone> {
+  bootstrapAdminApi();
+  return api.admin.updateZone(zoneId, dto);
+}
+
+export async function fetchAdminZonePricing(
+  zoneId: string,
+): Promise<AdminZonePricing[]> {
+  bootstrapAdminApi();
+  return api.admin.listZonePricing(zoneId);
+}
+
+export async function putAdminZonePricing(
+  zoneId: string,
+  offerId: string,
+  dto: AdminUpsertZonePricingDto,
+): Promise<AdminZonePricing> {
+  bootstrapAdminApi();
+  return api.admin.upsertZonePricing(zoneId, offerId, dto);
 }
