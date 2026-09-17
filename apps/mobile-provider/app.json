@@ -1,19 +1,35 @@
 {
   "expo": {
-    "name": "CARSERVICE Pro",
+    "name": "CarWash Pro",
     "slug": "carservice-provider",
     "version": "0.0.1",
     "orientation": "portrait",
     "scheme": "carservice-provider",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B5FA5"
+    },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "fr.carservice.provider"
     },
     "android": {
-      "package": "fr.carservice.provider"
+      "package": "fr.carservice.provider",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0B5FA5"
+      }
     },
-    "plugins": [],
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": ["expo-router", "expo-secure-store"],
+    "experiments": {
+      "typedRoutes": true
+    }
   }
 }

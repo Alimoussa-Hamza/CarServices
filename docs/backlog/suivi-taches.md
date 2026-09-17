@@ -25,9 +25,9 @@
 | L — Notifications (M09) | 4/4 | — terminé |
 | M — Admin API (M10) | 8/8 | — terminé |
 | N — Mobile client (M11) | 12/12 | — terminé (gate smoke) |
-| O — Mobile pro (M12) | 0/11 | — en attente maquettes |
+| O — Mobile pro (M12) | 2/11 | prochaine **N06** KYC · cahier [`m12-cahier.md`](m12-cahier.md) |
 | P — Admin web (M13) | 8/8 | — terminé |
-| Q — QA & launch (M14) | 5/9 | EAS / stores / SC staging / prod deploy |
+| Q — QA & launch (M14) | 5/9 | **après gate M12 (N15)** — EAS / stores |
 | R — Fermeture backend (M15) | 6/6 | — terminé |
 | S — DevOps & Qualité (M16) | 5/5 | — terminé (staging cloud = playbook) |
 
@@ -378,8 +378,8 @@ Cahier : [cahier-mobile-client-m11.md](../cahier-mobile-client-m11.md) · BP UI 
 
 ## Piste O — Mobile pro · Module M12
 
-- [ ] **CS-M12-S01** Setup Expo Router pro + tabs — en attente maquettes
-- [ ] **CS-M12-S02** Auth P00 OTP
+- [x] **CS-M12-S01** Setup Expo Router pro + tabs — **N04** `[x]` (GO N03 2026-09-17)
+- [x] **CS-M12-S02** Auth P00 OTP — **N05** `[x]`
 - [ ] **CS-M12-S03** KYC wizard P01 (7 steps)
 - [ ] **CS-M12-S04** P02 Liste missions (3 tabs)
 - [ ] **CS-M12-S05** P03 Détail + accept/decline

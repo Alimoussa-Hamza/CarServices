@@ -1,164 +1,210 @@
-# Prochaines tâches — post M11
+# Prochaines tâches — post M13 (file unique)
 
-> Plan séquencé (exécuté une tâche à la fois). Mis à jour au fil de l’eau.
-> Origine : gate M11 fermée · client encore en mocks.
+> **Une seule tâche à la fois.** Dis « ok » pour exécuter la suivante **codable**.  
+> Les tâches `humain` : tu les fais ; l’IA prépare le brief / vérifie le GO.  
+> Origine : M11 client ✅ · M13 admin ✅ · **trou produit = app pro (M12 0/11)**.
 
-**Légende :** `[x]` fait · `[~]` en cours · `[ ]` à faire · `[!]` bloqué
+**Légende :** `[x]` fait · `[~]` en cours · `[ ]` à faire · `[!]` bloqué · `humain` / `ia`
+
+**Règle architecte :** métier (prix, statuts, matching) **uniquement API**. Mobile = affichage + appels. Pas d’EAS/stores avant gate M12. Pas de polish admin (A08, carte zones, 2FA) dans cette file.
 
 ---
 
 ## Ordre d’exécution
 
-| # | ID | Tâche | Dépendances | Statut |
-|---|-----|--------|-------------|--------|
-| 1 | **T01** | GATE-03 — Brancher mobile-client sur API + DB réelle | Docker Postgres + API up + seed Lyon | `[x]` |
-| 2 | **T02** | M13-S01 — Setup admin Next.js + shadcn + auth | Backend M10 ✅ | `[x]` |
-| 3 | **T03** | M13-S02 — Dashboard KPIs (A02) | T02 | `[x]` |
-| 4 | **T04** | M13-S03 — Validation KYC pros (A03) | T02 | `[x]` |
-| 4b | **T04b** | M13-S04 — CRUD catalog (A04) | T02 | `[x]` |
-| 4c | **T04c** | M13-S05 — Zones + pricing (A05) | T02 | `[x]` |
-| 5 | **T05** | Maquettes M12 prêtes (UX Pilot) → démarrer M12-S01 | Hors code / UX | `[ ]` |
-| 6 | **T06** | M14 restant — EAS preview, SC staging, stores | T01 vert + apps stables | `[ ]` |
+| # | ID | Tâche | Owner | Dépend | Statut |
+|---|-----|--------|-------|--------|--------|
+| 1 | **N01** | Smoke manuel client Expo (OTP → booking DB) | humain | API :3000 | `[ ]` |
+| 2 | **N02** | Brief UX Pilot **pro** prêt à coller | ia | — | `[x]` |
+| 3 | **N03** | Maquettes M12 générées + GO collé | humain | N02 | `[x]` |
+| 4 | **N04** | CS-M12-S01 Setup Expo Router pro + tabs | ia | N03 GO | `[x]` |
+| 5 | **N05** | CS-M12-S02 Auth P00 OTP | ia | N04 | `[x]` |
+| 6 | **N06** | CS-M12-S03 KYC wizard P01 (7 steps) | ia | N05 | `[ ]` |
+| 7 | **N07** | CS-M12-S10 Stripe Connect onboarding | ia | N06 | `[ ]` |
+| 8 | **N08** | CS-M12-S04 P02 Liste missions (3 tabs) | ia | N07 | `[ ]` |
+| 9 | **N09** | CS-M12-S05 P03 Détail accept / refuse | ia | N08 | `[ ]` |
+| 10 | **N10** | CS-M12-S06 P04 En route + Maps + tel | ia | N09 | `[ ]` |
+| 11 | **N11** | CS-M12-S07 P05 Checklist + photos 2+2 | ia | N10 | `[ ]` |
+| 12 | **N12** | CS-M12-S09 P07 Planning disponibilités | ia | N11 | `[ ]` |
+| 13 | **N13** | CS-M12-S08 P08 Gains | ia | N12 | `[ ]` |
+| 14 | **N14** | CS-M12-S11 Push nouvelle mission | ia | N13 | `[ ]` |
+| 15 | **N15** | Gate M12 — golden path client→pro→capture | ia+humain | N14 | `[ ]` |
+| 16 | **N16** | M14-S03 EAS preview TestFlight + APK | humain+ia | N15 | `[ ]` |
+| 17 | **N17** | M14-S02 SC-01…06 manuels staging | humain | N16 | `[ ]` |
+| 18 | **N18** | M14-S04/S05 prod + stores | humain | N17 | `[ ]` |
+
+**Hors file (volontaire) :** A08 avis admin · éditeur carte zones · reassign booking · Twilio FR · Sentry mobile · 2FA admin.
+
+**Cahier M12 (détail écrans/API/tests) :** [`m12-cahier.md`](m12-cahier.md)  
+**Maquettes v2 :** [`docs/ux/uxpilot-pro-html-v2/`](../ux/uxpilot-pro-html-v2/)
+
+**En cours :** prochaine = **N06** KYC wizard (dis « ok »).
 
 ---
 
-## T01 — GATE-03 API réelle (mobile-client)
+## N01 — Smoke manuel client (humain)
 
-**But :** prouver qu’une réservation créée depuis l’app existe en Postgres.
+**But :** le parcours Claire existe vraiment sur téléphone, pas seulement le script GATE-03.
 
 ### Checklist
 
-- [x] API Nest rebuild (AddressesModule) sur `:3000`
-- [x] Seed Lyon + **pro démo éligible** (`prisma/seed.ts` → `+33600000001`)
-- [x] `apps/mobile-client/.env` → `EXPO_PUBLIC_USE_MOCKS=false`
-- [x] Auth OTP → adresse → slots → booking → Postgres (`pending_provider`)
-- [x] GET détail booking OK
-- [x] Script `./tools/smoke-m11-gate03.sh`
-- [x] Doc `docs/qa/m11-client-smoke.md` GATE-03 = GO
-- [ ] Parcours **manuel** Expo (OTP log API) — à faire sur device après restart Expo
+- [ ] Expo client restart (`EXPO_PUBLIC_USE_MOCKS=false`)
+- [ ] OTP (log API si Twilio off)
+- [ ] Adresse Lyon → slots → Stripe test → référence `CS-…` en admin `/bookings`
+- [ ] Noter 3 bugs max (P0 seulement)
 
-### Critères de done
-
-1. ~~Login OTP hors mock~~ ✅ (script + JWT)
-2. ~~Au moins 1 booking en DB~~ ✅
-3. ~~Smoke GATE-03 GO~~ ✅ (API) · UI manuelle restante
+**Done :** une ligne dans le journal ci-dessous « N01 GO » ou « N01 KO + symptôme ».
 
 ---
 
-## T02 — CS-M13-S01 Setup admin
+## N02 — Brief UX pro (ia) ✅
 
-**But :** socle `apps/admin` authentifié contre l’API (JWT admin).
+Fichier à coller dans UX Pilot (nouveau fichier, **pas** le flow client) :
+
+[`docs/ux/uxpilot-pro-COLLER.txt`](../ux/uxpilot-pro-COLLER.txt)  
+Guide : [`docs/ux/uxpilot-prompt-pro.md`](../ux/uxpilot-prompt-pro.md)
+
+Réglages : Hi-fi · Mobile · Autoflow ON · 390×844 · light · FR.
+
+---
+
+## N03 — Maquettes M12 + GO (humain) `[!]`
+
+**But :** un Autoflow P00–P09 assez bon pour coder sans inventer d’écrans.
 
 ### Checklist
 
-- [x] Login `/login` → `POST /auth/admin/login`
-- [x] Session localStorage + `initApiClient`
-- [x] Shell nav (dashboard / kyc / catalog / zones / bookings / disputes / settings)
-- [x] Composants UI style shadcn (Button, Input, Label, Card) via `ui-tokens`
-- [x] Tests auth-storage + typecheck + build
-- [x] Commit + push
+- [x] Nouveau fichier UX Pilot (ne pas éditer le client)
+- [x] Coller `uxpilot-pro-COLLER.txt` → générer + 10 Section Edit
+- [x] Vérifier : 7 steps KYC, adresse masquée avant accept, 2+2 photos, « Vous gagnez {net} »
+- [x] Export HTML v2 dans `docs/ux/uxpilot-pro-html-v2/`
+- [x] GO M12 2026-09-17
 
-Note : Tailwind/shadcn CLI complet reporté — composants maison alignés tokens (évite dette install).
+**Done :** GO explicite. Cahier : [`m12-cahier.md`](m12-cahier.md).
 
 ---
 
-## T03 — CS-M13-S02 Dashboard KPIs
+## N04 — CS-M12-S01 Setup pro
 
-**But :** A02 back-office branché sur `GET /admin/dashboard`.
+**But :** `apps/mobile-provider` = Expo Router, tokens, tabs Missions | Planning | Gains | Profil, branche API (mocks flag comme le client).
 
 ### Checklist
 
-- [x] Cartes GMV J/7j/30j, bookings, acceptation, matching, litiges, KYC
-- [x] Barres GMV 30 j + table statuts FR
-- [x] Tests format + typecheck + build
-- [x] 401/403 → login
+- [x] Router + tabs FR
+- [x] `initApiClient` + `EXPO_PUBLIC_USE_MOCKS`
+- [x] Tests smoke écran + typecheck
+- [ ] Commit `feat(mobile-provider): …` (dis « commit » si tu veux)
 
 ---
 
-## T04 — CS-M13-S03 KYC validation
+## N05 — CS-M12-S02 Auth P00
 
-**But :** A03 file `submitted` + viewer docs + approve/reject (motif ≥ 5).
+**But :** OTP rôle `provider` (même API que le client, `role=provider`).
 
 ### Checklist
 
-- [x] Liste pending `GET /admin/providers/pending`
-- [x] Fiche + documents (image / lien)
-- [x] Approuver / Refuser + motif
-- [x] Tests kyc helpers + typecheck + build
+- [x] Phone + code 6 + CGU
+- [x] Session persistée
+- [x] KYC non approved → wizard, pas missions
+- [x] Tests (23) + typecheck
 
 ---
 
-## T04b — CS-M13-S04 Catalogue
+## N06 — CS-M12-S03 KYC P01
 
-**But :** A04 catégories / offres / options (soft-disable).
+**But :** wizard 7 steps, submit, écran pending. Missions bloquées tant que `kyc !== approved` (RG-KYC).
 
-### Checklist
+| Step | Contenu |
+|------|---------|
+| 1 | Société, SIRET, IBAN |
+| 2 | Upload RC Pro + expiry |
+| 3 | Méthodes waterless / steam (min 1) |
+| 4 | Zone + adresse de base |
+| 5 | Capabilities formules |
+| 6 | Dispo hebdo |
+| 7 | Photo + bio → submit |
 
-- [x] Liste + toggle catégorie
-- [x] Créer / éditer offre + options
-- [x] Tests slug/prix + typecheck + build
-
----
-
-## T04c — CS-M13-S05 Zones + pricing
-
-**But :** A05 coefficient, délai, activation, pricing par offre (polygone = copie Lyon, pas de carte).
-
-### Checklist
-
-- [x] Liste zones + toggle + coeff / lead
-- [x] Créer zone (copie polygone, inactive)
-- [x] Pricing override + surcharges véhicule
-- [x] Tests parse + typecheck + build
+S3 peut rester mock local si pas de bucket.
 
 ---
 
-## T04d — CS-M13-S06 Bookings + refund
+## N07 — CS-M12-S10 Stripe Connect
 
-**But :** A06 liste / détail / remboursement (GET + POST refund déjà M10).
+**But :** onboarding in-app jusqu’à `charges_enabled`. Sans ça, payout cassé.
 
-### Checklist
-
-- [x] Liste paginée + recherche `q` / filtre statut
-- [x] Détail `/bookings/[id]` timeline + paiement
-- [x] Refund RG-PAY-05 + tests parse motif
-- [x] Typecheck + build admin
+Ordre **avant** la file missions : un pro qui accepte sans Connect = dette paiement.
 
 ---
 
-## T04e — CS-M13-S07 Litiges
+## N08 — CS-M12-S04 Liste missions P02
 
-**But :** A07 file + resolve (GET /admin/disputes + PATCH resolve déjà M10).
-
-### Checklist
-
-- [x] File ouverts + filtre résolus
-- [x] Décisions client / pro / split (notes split obligatoires)
-- [x] Tests parse + typecheck + build
+Tabs **Nouvelles | À venir | En cours**. Carte : créneau, **quartier seul**, formule, **net pro**, distance. Empty KYC pending.
 
 ---
 
-## T04f — CS-M13-S08 Settings
+## N09 — CS-M12-S05 Détail + accept/refuse P03
 
-**But :** A09 GET/PATCH `/admin/config` (commission, matching, cancel, frais).
-
-### Checklist
-
-- [x] Formulaire bornes Zod (commission 0–100 exclus, timeouts)
-- [x] PATCH partiel des champs modifiés
-- [x] Tests parse + typecheck + build
+CTAs Accepter / Refuser. Après accept : adresse complète. Logique transition = API.
 
 ---
 
-## T05 — Maquettes M12
+## N10 — CS-M12-S06 En route P04
 
-Hors repo code : finaliser UX Pilot pro → puis `CS-M12-S01`.
+Maps + tel client. « Je suis en route » / « Je suis arrivé ». Géofence optionnelle (API).
 
 ---
 
-## T06 — M14 launch
+## N11 — CS-M12-S07 Exécution P05
 
-EAS / SC-01…06 staging / stores — après T01 et apps stables.
+Checklist + **2 photos avant + 2 après**. CTA Terminer disabled sinon (RG-BOOK-04). Clôture → capture côté API.
+
+---
+
+## N12 — CS-M12-S09 Planning P07
+
+Créneaux dispo = ce que le client voit au booking.
+
+---
+
+## N13 — CS-M12-S08 Gains P08
+
+Solde en transit + historique payouts Connect.
+
+---
+
+## N14 — CS-M12-S11 Push mission
+
+Token Expo + notif « Nouvelle mission » (high). Mock local si pas `EXPO_ACCESS_TOKEN`.
+
+---
+
+## N15 — Gate M12 (pyramide + golden path)
+
+**Critère unique de « ça marche » :**
+
+1. Client réserve (pre-auth)  
+2. Pro KYC+Connect accepte dans l’app  
+3. Photos 2+2 + clôture  
+4. Payment `captured`, commission 20 %  
+5. Booking visible admin  
+
++ `m12-*.e2e-spec.ts` + `pnpm test` / build mobile-provider. **Commit gate avant N16.**
+
+---
+
+## N16–N18 — Launch (M14)
+
+Uniquement après N15 vert. EAS preview → SC manuels staging → stores. Twilio FR et Places : clés staging ici, pas avant.
+
+---
+
+## Comment exécuter
+
+| Qui dit ça | Effet |
+|------------|--------|
+| « ok » | IA code la **prochaine** tâche `ia` débloquée |
+| « GO M12 » | N03 = `[x]` → N04 autorisé |
+| « N01 GO » | smoke client noté |
 
 ---
 
@@ -166,13 +212,12 @@ EAS / SC-01…06 staging / stores — après T01 et apps stables.
 
 | Date | Tâche | Notes |
 |------|-------|-------|
-| 2026-09-16 | T01 démarré | Docker CLI inaccessible sandbox ; Postgres/Redis déjà up |
-| 2026-09-16 | T01 API GO | Rebuild API, booking `CS-20260917-1A78`, script smoke-m11-gate03 |
-| 2026-09-16 | T02 done | Login admin + shell + placeholders routes |
-| 2026-09-17 | T03 done | Dashboard A02 `GET /admin/dashboard` |
-| 2026-09-17 | T04 done | KYC pending + approve/reject |
-| 2026-09-17 | T04b done | Catalogue admin A04 |
-| 2026-09-17 | T04c done | Zones + pricing A05 |
-| 2026-09-17 | T04d done | Bookings list/detail/refund A06 |
-| 2026-09-17 | T04e done | Litiges file + resolve A07 |
-| 2026-09-17 | T04f done | Settings A09 config plateforme |
+| 2026-09-17 | File N01–N18 créée | M13 8/8 fermé · N02 brief pro écrit |
+| 2026-09-17 | N02 done | `docs/ux/uxpilot-pro-COLLER.txt` |
+| 2026-09-17 | N03 GO M12 | maquettes v2 + [`m12-cahier.md`](m12-cahier.md) · N04 ouvert |
+| 2026-09-17 | N04 done | Expo Router + tabs FR + thème Navy · 7 tests |
+| 2026-09-17 | N05 done | OTP provider + gate KYC · 23 tests |
+
+### Historique file précédente (post-M11, close)
+
+T01 GATE-03 · T02–T04f M13 S01–S08 — tous `[x]` (commits `710d1f2` … `f9d614e`).
