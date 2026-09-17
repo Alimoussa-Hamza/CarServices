@@ -1,5 +1,8 @@
 process.env.JWT_ACCESS_TTL_SECONDS ??= '86400';
 process.env.THROTTLE_LIMIT ??= '10000';
+/** Gates isolées : PaymentIntent / Connect mock, pas d’appel réseau Stripe. */
+process.env.STRIPE_SECRET_KEY = '';
+process.env.STRIPE_WEBHOOK_SECRET = '';
 
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';

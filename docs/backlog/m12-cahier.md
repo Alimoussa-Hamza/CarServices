@@ -231,15 +231,11 @@ Bandeaux : offline · notifs off · toast 4 s nouvelle mission (**jamais** plein
 
 ### N15 — Gate M12
 
-Golden path :
+- [x] Golden path e2e : pré-auth → accept → 2+2 → `captured` 20 % → admin
+- [x] P0 photos : `BOOKING_PHOTOS_REQUIRED`
+- [x] `apps/api/test/e2e/m12-provider.e2e-spec.ts` + pyramide unit + build mobile-provider
 
-1. Client pré-auth  
-2. Pro KYC+Connect accepte dans l’app  
-3. Photos 2+2 + clôture  
-4. Payment `captured`, commission 20 %  
-5. Booking visible admin  
-
-+ `apps/api/test/e2e/m12-*.e2e-spec.ts` + `pnpm test` + build `mobile-provider`. **Commit gate avant EAS (N16).**
+**Commit gate avant EAS (N16).** Smoke Expo pro = test humain (pas d’EAS tant que tu n’as pas validé).
 
 ---
 
