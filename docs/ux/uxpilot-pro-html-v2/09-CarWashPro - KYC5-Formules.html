@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.FontAwesomeConfig = {
+          autoReplaceSvg: 'nest'
+        };
+      </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vos formules</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>body{font-family:'Inter',sans-serif;}</style>
+</head>
+<body class="bg-[#F5F7FA]">
+<div id="kyc5-screen" class="w-full h-[844px] max-w-[390px] mx-auto bg-[#F5F7FA] flex flex-col overflow-hidden relative">
+  <div class="h-[44px] w-full flex-shrink-0"></div>
+
+  <div id="kyc5-header" class="px-5 pt-2 pb-3 flex-shrink-0">
+    <div class="flex items-center justify-between mb-4">
+      <button class="w-9 h-9 flex items-center justify-center -ml-2"><i class="fa-solid fa-chevron-left text-[#0B1F33] text-lg"></i></button>
+      <span class="text-[#6B7280] text-xs font-semibold">5/7</span>
+    </div>
+    <div class="flex gap-1.5 mb-5">
+      <div class="h-1.5 flex-1 rounded-full bg-[#0B5FA5]"></div>
+      <div class="h-1.5 flex-1 rounded-full bg-[#0B5FA5]"></div>
+      <div class="h-1.5 flex-1 rounded-full bg-[#0B5FA5]"></div>
+      <div class="h-1.5 flex-1 rounded-full bg-[#0B5FA5]"></div>
+      <div class="h-1.5 flex-1 rounded-full bg-[#0B5FA5]"></div>
+      <div class="h-1.5 flex-1 rounded-full bg-[#E2E6EA]"></div>
+      <div class="h-1.5 flex-1 rounded-full bg-[#E2E6EA]"></div>
+    </div>
+    <h1 class="text-[#0B1F33] font-bold text-2xl tracking-tight mb-2">Vos formules</h1>
+    <p class="text-[#6B7280] text-sm font-medium">Cochez les formules que vous souhaitez proposer. Les tarifs sont fixés par la plateforme.</p>
+  </div>
+
+  <div id="kyc5-list" class="flex-1 overflow-y-auto px-5 pt-3 flex flex-col gap-3">
+    <div id="formule-exterieur" class="bg-white rounded-xl shadow-sm p-4 flex items-start gap-3">
+      <div class="w-6 h-6 rounded-md bg-[#0B5FA5] flex items-center justify-center flex-shrink-0 mt-0.5">
+        <i class="fa-solid fa-check text-white text-xs"></i>
+      </div>
+      <div class="flex-1">
+        <p class="text-[#0B1F33] font-semibold text-sm">Extérieur</p>
+        <p class="text-[#6B7280] text-xs font-medium mt-0.5">Carrosserie et jantes</p>
+      </div>
+    </div>
+
+    <div id="formule-interieur" class="bg-white rounded-xl shadow-sm p-4 flex items-start gap-3">
+      <div class="w-6 h-6 rounded-md bg-[#0B5FA5] flex items-center justify-center flex-shrink-0 mt-0.5">
+        <i class="fa-solid fa-check text-white text-xs"></i>
+      </div>
+      <div class="flex-1">
+        <p class="text-[#0B1F33] font-semibold text-sm">Intérieur</p>
+        <p class="text-[#6B7280] text-xs font-medium mt-0.5">Aspiration, plastiques, vitres</p>
+      </div>
+    </div>
+
+    <div id="formule-complet" class="bg-white rounded-xl shadow-sm p-4 flex items-start gap-3">
+      <div class="w-6 h-6 rounded-md bg-[#0B5FA5] flex items-center justify-center flex-shrink-0 mt-0.5">
+        <i class="fa-solid fa-check text-white text-xs"></i>
+      </div>
+      <div class="flex-1">
+        <p class="text-[#0B1F33] font-semibold text-sm">Complet</p>
+        <p class="text-[#6B7280] text-xs font-medium mt-0.5">Extérieur + intérieur détaillé</p>
+      </div>
+    </div>
+
+    <div id="formule-detailing" class="bg-white rounded-xl shadow-sm p-4 flex items-start gap-3">
+      <div class="w-6 h-6 rounded-md border-2 border-[#C9CFD6] flex-shrink-0 mt-0.5"></div>
+      <div class="flex-1">
+        <p class="text-[#0B1F33] font-semibold text-sm">Detailing</p>
+        <p class="text-[#6B7280] text-xs font-medium mt-0.5">Traitement céramique, cuir</p>
+      </div>
+    </div>
+
+    <div id="info-banner" class="flex items-start gap-2.5 px-1 pt-1">
+      <i class="fa-solid fa-circle-info text-[#9CA3AF] text-sm mt-0.5"></i>
+      <p class="text-[#6B7280] text-xs font-medium leading-snug">Au moins une formule est requise. Les prix et durées sont définis par CarWash Pro, pas par vous.</p>
+    </div>
+  </div>
+
+  <div id="kyc5-cta" class="px-4 pt-3 pb-3 flex-shrink-0 bg-[#F5F7FA]">
+    <button class="w-full h-14 rounded-xl bg-[#0B5FA5] text-white font-bold text-base shadow-sm">Continuer</button>
+  </div>
+  <div class="h-[24px] w-full flex-shrink-0 flex items-end justify-center pb-2">
+    <div class="w-32 h-1 rounded-full bg-[#0B1F33]/15"></div>
+  </div>
+</div>
+</body>
+</html>

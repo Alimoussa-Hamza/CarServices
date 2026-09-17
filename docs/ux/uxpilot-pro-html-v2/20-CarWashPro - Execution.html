@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.FontAwesomeConfig = {
+          autoReplaceSvg: 'nest'
+        };
+      </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exécution de la prestation</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>body{font-family:'Inter',sans-serif;}</style>
+</head>
+<body class="bg-[#F5F7FA]">
+<div id="execution-screen" class="w-full h-[844px] max-w-[390px] mx-auto bg-[#F5F7FA] flex flex-col overflow-hidden relative">
+  <div class="h-[44px] w-full flex-shrink-0"></div>
+
+  <div id="execution-header" class="px-5 pt-2 pb-3 flex-shrink-0 flex items-center justify-between">
+    <button class="w-9 h-9 flex items-center justify-center -ml-2"><i class="fa-solid fa-chevron-left text-[#0B1F33] text-lg"></i></button>
+    <span class="text-[#0B1F33] font-bold text-base">Complet — Lyon 3e</span>
+    <span class="flex items-center gap-1.5 bg-[#F0F2F4] rounded-full px-2.5 py-1.5">
+      <i class="fa-solid fa-stopwatch text-[#6B7280] text-xs"></i>
+      <span class="text-[#0B1F33] text-xs font-bold">12:34</span>
+    </span>
+  </div>
+
+  <div id="execution-content" class="flex-1 overflow-y-auto px-5 pt-2 flex flex-col gap-6">
+    <div>
+      <div class="flex items-center justify-between mb-0.5">
+        <p class="text-[#0B1F33] font-bold text-sm">Photos avant</p>
+        <span class="text-[10px] font-bold text-[#1B8A5A] bg-[#E9F5EE] rounded-full px-2 py-0.5">Avant 2/2</span>
+      </div>
+      <p class="text-[#6B7280] text-xs font-medium mb-3">Minimum 2 photos avant de commencer.</p>
+      <div class="flex gap-2">
+        <div class="relative w-[76px] h-[76px] rounded-xl bg-[#E2E6EA] flex items-center justify-center flex-shrink-0">
+          <i class="fa-regular fa-image text-[#9CA3AF] text-xl"></i>
+          <div class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#1B8A5A] border-2 border-white flex items-center justify-center">
+            <i class="fa-solid fa-check text-white text-[9px]"></i>
+          </div>
+        </div>
+        <div class="relative w-[76px] h-[76px] rounded-xl bg-[#E2E6EA] flex items-center justify-center flex-shrink-0">
+          <i class="fa-regular fa-image text-[#9CA3AF] text-xl"></i>
+          <div class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#1B8A5A] border-2 border-white flex items-center justify-center">
+            <i class="fa-solid fa-check text-white text-[9px]"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <p class="text-[#0B1F33] font-bold text-sm mb-3">Checklist</p>
+      <div class="bg-white rounded-xl shadow-sm divide-y divide-[#F0F2F4]">
+        <div class="flex items-center gap-3 p-4">
+          <div class="w-5 h-5 rounded-md bg-[#1B8A5A] flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-check text-white text-[10px]"></i></div>
+          <span class="text-[#0B1F33] font-medium text-sm">Aspiration intérieure</span>
+        </div>
+        <div class="flex items-center gap-3 p-4">
+          <div class="w-5 h-5 rounded-md bg-[#1B8A5A] flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-check text-white text-[10px]"></i></div>
+          <span class="text-[#0B1F33] font-medium text-sm">Nettoyage des vitres</span>
+        </div>
+        <div class="flex items-center gap-3 p-4">
+          <div class="w-5 h-5 rounded-md border-2 border-[#C9CFD6] flex-shrink-0"></div>
+          <span class="text-[#0B1F33] font-medium text-sm">Traitement des jantes</span>
+        </div>
+        <div class="flex items-center gap-3 p-4">
+          <div class="w-5 h-5 rounded-md border-2 border-[#C9CFD6] flex-shrink-0"></div>
+          <span class="text-[#0B1F33] font-medium text-sm">Plastiques et tableau de bord</span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="flex items-center justify-between mb-0.5">
+        <p class="text-[#0B1F33] font-bold text-sm">Photos après</p>
+        <span class="text-[10px] font-bold text-[#B7791E] bg-[#FBF0DD] rounded-full px-2 py-0.5">Après 0/2</span>
+      </div>
+      <p class="text-[#6B7280] text-xs font-medium mb-3">Minimum 2 photos après, obligatoires avant de terminer.</p>
+      <div class="flex gap-2">
+        <div class="w-[76px] h-[76px] rounded-xl border-2 border-dashed border-[#C9CFD6] bg-white flex items-center justify-center flex-shrink-0">
+          <i class="fa-solid fa-camera text-[#9CA3AF] text-lg"></i>
+        </div>
+        <div class="w-[76px] h-[76px] rounded-xl border-2 border-dashed border-[#C9CFD6] bg-white flex items-center justify-center flex-shrink-0">
+          <i class="fa-solid fa-camera text-[#9CA3AF] text-lg"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="execution-cta" class="px-4 pt-3 pb-2 flex-shrink-0 bg-[#F5F7FA]">
+    <p class="text-[#6B7280] text-xs font-medium text-center mb-3">Minimum 2 photos avant + 2 photos après et checklist complète pour terminer.</p>
+    <button class="w-full h-14 rounded-xl bg-[#E2E6EA] text-[#9CA3AF] font-bold text-base">Terminer la prestation</button>
+  </div>
+  <div class="h-[24px] w-full flex-shrink-0 flex items-end justify-center pb-2">
+    <div class="w-32 h-1 rounded-full bg-[#0B1F33]/15"></div>
+  </div>
+</div>
+</body>
+</html>

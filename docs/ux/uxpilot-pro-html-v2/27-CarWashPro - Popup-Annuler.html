@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.FontAwesomeConfig = {
+          autoReplaceSvg: 'nest'
+        };
+      </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Annuler la mission</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>body{font-family:'Inter',sans-serif;}</style>
+</head>
+<body class="bg-[#F5F7FA]">
+<div id="popup-annuler-screen" class="w-full h-[844px] max-w-[390px] mx-auto relative overflow-hidden bg-[#F5F7FA]">
+
+  <div id="backdrop" class="absolute inset-0 flex flex-col">
+    <div class="h-[44px]"></div>
+    <div class="px-5 pt-2 opacity-40">
+      <div class="h-[200px] w-full bg-[#C9CFD6] rounded-2xl mb-3"></div>
+      <div class="h-16 w-full bg-[#C9CFD6] rounded-xl mb-3"></div>
+      <div class="h-11 w-full bg-[#C9CFD6] rounded-xl"></div>
+    </div>
+    <div class="absolute inset-0 bg-[#0B1F33]/60"></div>
+  </div>
+
+  <div id="bottom-sheet" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-[20px] shadow-2xl flex flex-col">
+    <div class="flex justify-center pt-3 pb-2">
+      <div class="w-10 h-1.5 rounded-full bg-[#E2E6EA]"></div>
+    </div>
+
+    <div class="px-5 pb-4 flex flex-col items-center">
+      <div class="w-12 h-12 rounded-full bg-[#FBF0DD] flex items-center justify-center mb-3">
+        <i class="fa-solid fa-triangle-exclamation text-[#B7791E] text-lg"></i>
+      </div>
+      <h2 class="text-[#0B1F33] font-bold text-lg text-center mb-1">Annuler cette mission ?</h2>
+      <p class="text-[#6B7280] text-xs font-medium text-center mb-4">Merci d'indiquer un motif. Des annulations répétées peuvent affecter votre profil.</p>
+
+      <div class="w-full flex flex-col gap-2.5">
+        <div class="flex items-center gap-3 rounded-xl border-2 border-[#E2E6EA] p-3.5">
+          <div class="w-5 h-5 rounded-full border-2 border-[#C9CFD6] flex-shrink-0"></div>
+          <span class="text-[#0B1F33] font-medium text-sm">Client injoignable</span>
+        </div>
+        <div class="flex items-center gap-3 rounded-xl border-2 border-[#E2E6EA] p-3.5">
+          <div class="w-5 h-5 rounded-full border-2 border-[#C9CFD6] flex-shrink-0"></div>
+          <span class="text-[#0B1F33] font-medium text-sm">Empêchement personnel</span>
+        </div>
+        <div class="flex items-center gap-3 rounded-xl border-2 border-[#E2E6EA] p-3.5">
+          <div class="w-5 h-5 rounded-full border-2 border-[#C9CFD6] flex-shrink-0"></div>
+          <span class="text-[#0B1F33] font-medium text-sm">Problème de véhicule</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-5 pt-1 pb-3">
+      <p class="text-[#6B7280] text-xs font-medium text-center mb-3">Sélectionnez un motif pour continuer.</p>
+      <button class="w-full h-13 py-3.5 rounded-xl bg-[#E2E6EA] text-[#9CA3AF] font-bold text-base mb-2.5">Confirmer l'annulation</button>
+      <button class="w-full h-10 text-[#6B7280] font-semibold text-sm">Retour</button>
+    </div>
+    <div class="h-[24px] w-full flex-shrink-0"></div>
+  </div>
+</div>
+</body>
+</html>

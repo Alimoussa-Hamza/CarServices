@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.FontAwesomeConfig = {
+          autoReplaceSvg: 'nest'
+        };
+      </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profil</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>body{font-family:'Inter',sans-serif;}</style>
+</head>
+<body class="bg-[#F5F7FA]">
+<div id="profil-screen" class="w-full h-[844px] max-w-[390px] mx-auto bg-[#F5F7FA] flex flex-col overflow-hidden relative">
+  <div class="h-[44px] w-full flex-shrink-0"></div>
+
+  <div id="profil-header" class="px-5 pt-2 pb-3 flex-shrink-0">
+    <h1 class="text-[#0B1F33] font-bold text-xl tracking-tight">Profil</h1>
+  </div>
+
+  <div id="profil-content" class="flex-1 overflow-y-auto px-5 flex flex-col gap-4">
+    <div id="profile-summary-card" class="bg-white rounded-2xl shadow-sm p-5 flex items-center gap-4">
+      <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg" class="w-16 h-16 rounded-full object-cover flex-shrink-0" />
+      <div class="flex-1 min-w-0">
+        <p class="text-[#0B1F33] font-bold text-base">Marc Dubois</p>
+        <p class="text-[#6B7280] text-xs font-medium mt-0.5">Auto-entrepreneur · Lyon</p>
+        <div class="flex items-center gap-1 mt-1.5">
+          <i class="fa-solid fa-star text-[#B7791E] text-[11px]"></i>
+          <i class="fa-solid fa-star text-[#B7791E] text-[11px]"></i>
+          <i class="fa-solid fa-star text-[#B7791E] text-[11px]"></i>
+          <i class="fa-solid fa-star text-[#B7791E] text-[11px]"></i>
+          <span class="text-[#6B7280] text-xs font-medium ml-1">4.8 (56 avis)</span>
+        </div>
+      </div>
+      <i class="fa-solid fa-chevron-right text-[#C9CFD6] text-sm flex-shrink-0"></i>
+    </div>
+
+    <div id="section-pro" class="bg-white rounded-xl shadow-sm divide-y divide-[#F0F2F4]">
+      <div class="flex items-center gap-3 p-4">
+        <i class="fa-solid fa-building text-[#0B5FA5] text-base w-5"></i>
+        <span class="flex-1 text-[#0B1F33] font-medium text-sm">Mon entreprise</span>
+        <i class="fa-solid fa-chevron-right text-[#C9CFD6] text-xs"></i>
+      </div>
+      <div class="flex items-center gap-3 p-4">
+        <i class="fa-solid fa-shield-halved text-[#0B5FA5] text-base w-5"></i>
+        <div class="flex-1 flex items-center gap-2 min-w-0">
+          <span class="text-[#0B1F33] font-medium text-sm">Assurance</span>
+          <span class="text-[9px] font-bold text-[#B7791E] bg-[#FBF0DD] rounded-full px-2 py-0.5 whitespace-nowrap">RC Pro · expire dans 30 j</span>
+        </div>
+        <i class="fa-solid fa-chevron-right text-[#C9CFD6] text-xs flex-shrink-0"></i>
+      </div>
+      <div class="flex items-center gap-3 p-4">
+        <i class="fa-solid fa-spray-can text-[#0B5FA5] text-base w-5"></i>
+        <span class="flex-1 text-[#0B1F33] font-medium text-sm">Méthodes de lavage</span>
+        <i class="fa-solid fa-chevron-right text-[#C9CFD6] text-xs"></i>
+      </div>
+      <div class="flex items-center gap-3 p-4">
+        <i class="fa-solid fa-location-dot text-[#0B5FA5] text-base w-5"></i>
+        <span class="flex-1 text-[#0B1F33] font-medium text-sm">Zone d'intervention</span>
+        <i class="fa-solid fa-chevron-right text-[#C9CFD6] text-xs"></i>
+      </div>
+      <div class="flex items-center gap-3 p-4">
+        <i class="fa-solid fa-list-check text-[#0B5FA5] text-base w-5"></i>
+        <span class="flex-1 text-[#0B1F33] font-medium text-sm">Mes formules</span>
+        <i class="fa-solid fa-chevron-right text-[#C9CFD6] text-xs"></i>
+      </div>
+    </div>
+
+    <div id="section-app" class="bg-white rounded-xl shadow-sm divide-y divide-[#F0F2F4]">
+      <div class="flex items-center gap-3 p-4">
+        <i class="fa-regular fa-bell text-[#0B5FA5] text-base w-5"></i>
+        <span class="flex-1 text-[#0B1F33] font-medium text-sm">Notifications</span>
+        <i class="fa-solid fa-chevron-right text-[#C9CFD6] text-xs"></i>
+      </div>
+      <div class="flex items-center gap-3 p-4">
+        <i class="fa-solid fa-building-columns text-[#0B5FA5] text-base w-5"></i>
+        <span class="flex-1 text-[#0B1F33] font-medium text-sm">Virements et paiement</span>
+        <i class="fa-solid fa-chevron-right text-[#C9CFD6] text-xs"></i>
+      </div>
+      <div class="flex items-center gap-3 p-4">
+        <i class="fa-regular fa-circle-question text-[#0B5FA5] text-base w-5"></i>
+        <span class="flex-1 text-[#0B1F33] font-medium text-sm">Aide et support</span>
+        <i class="fa-solid fa-chevron-right text-[#C9CFD6] text-xs"></i>
+      </div>
+      <div class="flex items-center gap-3 p-4">
+        <i class="fa-solid fa-file-contract text-[#0B5FA5] text-base w-5"></i>
+        <span class="flex-1 text-[#0B1F33] font-medium text-sm">Conditions générales</span>
+        <i class="fa-solid fa-chevron-right text-[#C9CFD6] text-xs"></i>
+      </div>
+    </div>
+
+    <div id="section-logout" class="bg-white rounded-xl shadow-sm">
+      <div class="flex items-center gap-3 p-4">
+        <i class="fa-solid fa-arrow-right-from-bracket text-[#BE3B33] text-base w-5"></i>
+        <span class="flex-1 text-[#BE3B33] font-bold text-sm">Se déconnecter</span>
+      </div>
+    </div>
+
+    <p class="text-[#9CA3AF] text-xs font-medium text-center pb-3">CarWash Pro · Version 2.4.1</p>
+  </div>
+
+  <div id="bottom-tab-bar" class="flex-shrink-0 bg-white border-t border-[#E2E6EA] flex items-center justify-around pt-2 pb-1">
+    <div class="flex flex-col items-center gap-1">
+      <i class="fa-solid fa-list-check text-[#9CA3AF] text-lg"></i>
+      <span class="text-[#9CA3AF] text-[11px] font-semibold">Missions</span>
+    </div>
+    <div class="flex flex-col items-center gap-1">
+      <i class="fa-regular fa-calendar-days text-[#9CA3AF] text-lg"></i>
+      <span class="text-[#9CA3AF] text-[11px] font-semibold">Planning</span>
+    </div>
+    <div class="flex flex-col items-center gap-1">
+      <i class="fa-solid fa-wallet text-[#9CA3AF] text-lg"></i>
+      <span class="text-[#9CA3AF] text-[11px] font-semibold">Gains</span>
+    </div>
+    <div class="flex flex-col items-center gap-1">
+      <i class="fa-solid fa-user text-[#0B5FA5] text-lg"></i>
+      <span class="text-[#0B5FA5] text-[11px] font-bold">Profil</span>
+    </div>
+  </div>
+  <div class="h-[24px] w-full flex-shrink-0 bg-white flex items-end justify-center pb-2">
+    <div class="w-32 h-1 rounded-full bg-[#0B1F33]/15"></div>
+  </div>
+</div>
+</body>
+</html>

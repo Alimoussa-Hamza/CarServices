@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.FontAwesomeConfig = {
+          autoReplaceSvg: 'nest'
+        };
+      </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assurance RC Pro</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>body{font-family:'Inter',sans-serif;}</style>
+</head>
+<body class="bg-[#F5F7FA]">
+<div id="kyc2-screen" class="w-full h-[844px] max-w-[390px] mx-auto bg-[#F5F7FA] flex flex-col overflow-hidden relative">
+  <div class="h-[44px] w-full flex-shrink-0"></div>
+
+  <div id="kyc2-header" class="px-5 pt-2 pb-3 flex-shrink-0">
+    <div class="flex items-center justify-between mb-4">
+      <button class="w-9 h-9 flex items-center justify-center -ml-2"><i class="fa-solid fa-chevron-left text-[#0B1F33] text-lg"></i></button>
+      <span class="text-[#6B7280] text-xs font-semibold">2/7</span>
+    </div>
+    <div class="flex gap-1.5 mb-5">
+      <div class="h-1.5 flex-1 rounded-full bg-[#0B5FA5]"></div>
+      <div class="h-1.5 flex-1 rounded-full bg-[#0B5FA5]"></div>
+      <div class="h-1.5 flex-1 rounded-full bg-[#E2E6EA]"></div>
+      <div class="h-1.5 flex-1 rounded-full bg-[#E2E6EA]"></div>
+      <div class="h-1.5 flex-1 rounded-full bg-[#E2E6EA]"></div>
+      <div class="h-1.5 flex-1 rounded-full bg-[#E2E6EA]"></div>
+      <div class="h-1.5 flex-1 rounded-full bg-[#E2E6EA]"></div>
+    </div>
+    <h1 class="text-[#0B1F33] font-bold text-2xl tracking-tight mb-2">Assurance RC Pro</h1>
+    <p class="text-[#6B7280] text-sm font-medium">Un justificatif d'assurance responsabilité civile professionnelle en cours de validité est obligatoire.</p>
+  </div>
+
+  <div id="kyc2-form" class="flex-1 overflow-y-auto px-5 pt-3 flex flex-col gap-5">
+    <div>
+      <label class="block text-[#0B1F33] text-sm font-semibold mb-2">Justificatif d'assurance</label>
+      <div id="upload-card" class="rounded-xl border-2 border-dashed border-[#0B5FA5] bg-[#E7F0FA] flex flex-col items-center justify-center py-6 mb-3">
+        <i class="fa-solid fa-cloud-arrow-up text-[#0B5FA5] text-3xl mb-2"></i>
+        <span class="text-[#0B1F33] font-semibold text-sm mb-1">Ajouter un document</span>
+        <span class="text-[#6B7280] text-xs font-medium">PDF, JPG ou PNG — 10 Mo max</span>
+      </div>
+      <div id="uploaded-file-row" class="bg-white rounded-xl shadow-sm p-3.5 flex items-center gap-3">
+        <i class="fa-solid fa-file-pdf text-[#BE3B33] text-xl flex-shrink-0"></i>
+        <div class="flex-1 min-w-0">
+          <p class="text-[#0B1F33] font-semibold text-sm truncate">attestation-rc-pro-2025.pdf</p>
+          <p class="text-[#6B7280] text-xs font-medium">1.2 Mo</p>
+        </div>
+        <button class="w-8 h-8 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-trash text-[#6B7280] text-sm"></i></button>
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-[#0B1F33] text-sm font-semibold mb-2">Date d'expiration</label>
+      <div class="h-14 rounded-xl border-2 border-[#E2E6EA] bg-white flex items-center justify-between px-4">
+        <span class="text-[#0B1F33] text-base font-medium">31/12/2025</span>
+        <i class="fa-regular fa-calendar text-[#6B7280] text-base"></i>
+      </div>
+    </div>
+
+    <div id="date-wheel-card" class="bg-white rounded-2xl shadow-sm p-4">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-[#0B1F33] font-semibold text-sm">Choisir la date</span>
+        <button class="text-[#0B5FA5] font-semibold text-sm">Valider</button>
+      </div>
+      <div class="relative h-36">
+        <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-9 bg-[#E7F0FA] rounded-lg"></div>
+        <div class="grid grid-cols-3 h-full relative">
+          <div class="flex flex-col items-center justify-center gap-1.5 text-center">
+            <span class="text-[#C9CFD6] text-sm">29</span>
+            <span class="text-[#C9CFD6] text-sm">30</span>
+            <span class="text-[#0B1F33] font-bold text-base">31</span>
+            <span class="text-[#C9CFD6] text-sm">01</span>
+            <span class="text-[#C9CFD6] text-sm">02</span>
+          </div>
+          <div class="flex flex-col items-center justify-center gap-1.5 text-center border-x border-[#F0F2F4]">
+            <span class="text-[#C9CFD6] text-sm">Oct</span>
+            <span class="text-[#C9CFD6] text-sm">Nov</span>
+            <span class="text-[#0B1F33] font-bold text-base">Déc</span>
+            <span class="text-[#C9CFD6] text-sm">Jan</span>
+            <span class="text-[#C9CFD6] text-sm">Fév</span>
+          </div>
+          <div class="flex flex-col items-center justify-center gap-1.5 text-center">
+            <span class="text-[#C9CFD6] text-sm">2023</span>
+            <span class="text-[#C9CFD6] text-sm">2024</span>
+            <span class="text-[#0B1F33] font-bold text-base">2025</span>
+            <span class="text-[#C9CFD6] text-sm">2026</span>
+            <span class="text-[#C9CFD6] text-sm">2027</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="kyc2-cta" class="px-4 pt-3 pb-3 flex-shrink-0 bg-[#F5F7FA]">
+    <button class="w-full h-14 rounded-xl bg-[#0B5FA5] text-white font-bold text-base shadow-sm">Continuer</button>
+  </div>
+  <div class="h-[24px] w-full flex-shrink-0 flex items-end justify-center pb-2">
+    <div class="w-32 h-1 rounded-full bg-[#0B1F33]/15"></div>
+  </div>
+</div>
+</body>
+</html>

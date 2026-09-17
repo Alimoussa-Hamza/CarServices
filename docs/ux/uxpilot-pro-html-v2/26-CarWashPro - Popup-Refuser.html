@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.FontAwesomeConfig = {
+          autoReplaceSvg: 'nest'
+        };
+      </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Refuser la mission</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>body{font-family:'Inter',sans-serif;}</style>
+</head>
+<body class="bg-[#F5F7FA]">
+<div id="popup-refuser-screen" class="w-full h-[844px] max-w-[390px] mx-auto relative overflow-hidden bg-[#F5F7FA]">
+
+  <div id="backdrop" class="absolute inset-0 flex flex-col">
+    <div class="h-[44px]"></div>
+    <div class="px-5 pt-2 opacity-40">
+      <div class="h-6 w-1/2 bg-[#C9CFD6] rounded mb-4"></div>
+      <div class="h-28 w-full bg-[#C9CFD6] rounded-2xl mb-3"></div>
+      <div class="h-16 w-full bg-[#C9CFD6] rounded-xl mb-3"></div>
+      <div class="h-16 w-full bg-[#C9CFD6] rounded-xl"></div>
+    </div>
+    <div class="absolute inset-0 bg-[#0B1F33]/60"></div>
+  </div>
+
+  <div id="bottom-sheet" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-[20px] shadow-2xl flex flex-col">
+    <div class="flex justify-center pt-3 pb-2">
+      <div class="w-10 h-1.5 rounded-full bg-[#E2E6EA]"></div>
+    </div>
+
+    <div class="px-5 pb-4">
+      <h2 class="text-[#0B1F33] font-bold text-lg mb-1">Pourquoi refusez-vous cette mission ?</h2>
+      <p class="text-[#6B7280] text-xs font-medium mb-4">Cela nous aide à améliorer les propositions.</p>
+
+      <div class="flex flex-col gap-2.5">
+        <div class="flex items-center gap-3 rounded-xl border-2 border-[#E2E6EA] p-3.5">
+          <div class="w-5 h-5 rounded-full border-2 border-[#C9CFD6] flex-shrink-0"></div>
+          <span class="text-[#0B1F33] font-medium text-sm">Trop loin de ma zone</span>
+        </div>
+        <div class="flex items-center gap-3 rounded-xl border-2 border-[#0B5FA5] bg-[#E7F0FA] p-3.5">
+          <div class="w-5 h-5 rounded-full border-[6px] border-[#0B5FA5] bg-white flex-shrink-0"></div>
+          <span class="text-[#0B1F33] font-bold text-sm">Créneau horaire indisponible</span>
+        </div>
+        <div class="flex items-center gap-3 rounded-xl border-2 border-[#E2E6EA] p-3.5">
+          <div class="w-5 h-5 rounded-full border-2 border-[#C9CFD6] flex-shrink-0"></div>
+          <span class="text-[#0B1F33] font-medium text-sm">Montant trop bas</span>
+        </div>
+        <div class="rounded-xl border-2 border-[#E2E6EA] p-3.5">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="w-5 h-5 rounded-full border-2 border-[#C9CFD6] flex-shrink-0"></div>
+            <span class="text-[#0B1F33] font-medium text-sm">Autre raison</span>
+          </div>
+          <div class="h-9 rounded-lg bg-[#F5F7FA] flex items-center px-3">
+            <span class="text-[#9CA3AF] text-xs font-medium">Précisez (optionnel)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-5 pt-2 pb-3">
+      <button class="w-full h-13 py-3.5 rounded-xl bg-[#BE3B33] text-white font-bold text-base shadow-sm mb-2.5">Confirmer le refus</button>
+      <button class="w-full h-10 text-[#6B7280] font-semibold text-sm">Annuler</button>
+    </div>
+    <div class="h-[24px] w-full flex-shrink-0"></div>
+  </div>
+</div>
+</body>
+</html>

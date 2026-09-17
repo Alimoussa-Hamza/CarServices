@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.FontAwesomeConfig = {
+          autoReplaceSvg: 'nest'
+        };
+      </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notifications</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>body{font-family:'Inter',sans-serif;}</style>
+</head>
+<body class="bg-[#F5F7FA]">
+<div id="notifs-screen" class="w-full h-[844px] max-w-[390px] mx-auto bg-[#F5F7FA] flex flex-col overflow-hidden relative">
+  <div class="h-[44px] w-full flex-shrink-0"></div>
+
+  <div id="notifs-header" class="px-5 pt-2 pb-3 flex-shrink-0 flex items-center justify-center relative">
+    <button class="absolute left-5 w-9 h-9 flex items-center justify-center"><i class="fa-solid fa-chevron-left text-[#0B1F33] text-lg"></i></button>
+    <span class="text-[#0B1F33] font-bold text-base">Notifications</span>
+  </div>
+
+  <div id="notifs-content" class="flex-1 overflow-y-auto px-5 flex flex-col gap-5">
+    <div class="bg-white rounded-xl shadow-sm divide-y divide-[#F0F2F4]">
+      <div class="flex items-center justify-between p-4">
+        <div class="pr-3">
+          <span class="text-[#0B1F33] font-medium text-sm">Nouvelles missions</span>
+          <p class="text-[#9CA3AF] text-xs font-medium mt-0.5">Alertes quand une mission est disponible</p>
+        </div>
+        <div id="toggle-nouvelles" onclick="const t=document.getElementById('toggle-nouvelles'); const s=document.getElementById('toggle-son'); const h=document.getElementById('son-helper'); const on=t.dataset.on==='true'; t.dataset.on=(!on).toString(); if(on){t.classList.remove('bg-[#1B8A5A]');t.classList.add('bg-[#E2E6EA]');t.classList.remove('justify-end');t.classList.add('justify-start'); s.classList.add('opacity-50'); s.dataset.disabled='true'; h.classList.remove('hidden');} else {t.classList.add('bg-[#1B8A5A]');t.classList.remove('bg-[#E2E6EA]');t.classList.add('justify-end');t.classList.remove('justify-start'); s.classList.remove('opacity-50'); s.dataset.disabled='false'; h.classList.add('hidden');}" data-on="true" class="w-11 h-[26px] rounded-full bg-[#1B8A5A] flex items-center px-0.5 justify-end flex-shrink-0 cursor-pointer"><div class="w-[21px] h-[21px] rounded-full bg-white shadow"></div></div>
+      </div>
+      <div class="p-4">
+        <div id="son-row" class="flex items-center justify-between">
+          <span class="text-[#0B1F33] font-medium text-sm pr-3">Son</span>
+          <div id="toggle-son" data-disabled="false" class="w-11 h-[26px] rounded-full bg-[#E2E6EA] flex items-center px-0.5 justify-start flex-shrink-0"><div class="w-[21px] h-[21px] rounded-full bg-white shadow"></div></div>
+        </div>
+        <p id="son-helper" class="hidden text-[#9CA3AF] text-xs font-medium mt-2">Activez « Nouvelles missions » pour gérer le son.</p>
+      </div>
+      <div class="flex items-center justify-between p-4">
+        <div class="pr-3">
+          <span class="text-[#0B1F33] font-medium text-sm">Rappels H-1</span>
+          <p class="text-[#9CA3AF] text-xs font-medium mt-0.5">1h avant chaque mission planifiée</p>
+        </div>
+        <div class="w-11 h-[26px] rounded-full bg-[#1B8A5A] flex items-center px-0.5 justify-end flex-shrink-0"><div class="w-[21px] h-[21px] rounded-full bg-white shadow"></div></div>
+      </div>
+      <div class="flex items-center justify-between p-4">
+        <div class="pr-3">
+          <span class="text-[#0B1F33] font-medium text-sm">Compte</span>
+          <p class="text-[#9CA3AF] text-xs font-medium mt-0.5">Paiements, dossier, sécurité</p>
+        </div>
+        <div class="w-11 h-[26px] rounded-full bg-[#1B8A5A] flex items-center px-0.5 justify-end flex-shrink-0"><div class="w-[21px] h-[21px] rounded-full bg-white shadow"></div></div>
+      </div>
+    </div>
+
+    <div class="flex items-start gap-2.5 pb-4">
+      <i class="fa-solid fa-circle-info text-[#9CA3AF] text-sm mt-0.5"></i>
+      <p class="text-[#6B7280] text-xs font-medium leading-snug">Vous pouvez aussi gérer les autorisations dans les réglages de votre téléphone.</p>
+    </div>
+  </div>
+
+  <div class="h-[24px] w-full flex-shrink-0 flex items-end justify-center pb-2">
+    <div class="w-32 h-1 rounded-full bg-[#0B1F33]/15"></div>
+  </div>
+</div>
+</body>
+</html>

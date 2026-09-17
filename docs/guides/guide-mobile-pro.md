@@ -16,16 +16,25 @@ Permettre au pro de **recevoir, accepter et exécuter** des missions, avec **cl�
 
 | Route | Écran CDC | Priorité |
 |-------|-----------|----------|
-| `app/(auth)/login.tsx` | P00 Auth | P0 |
-| `app/(kyc)/wizard.tsx` | P01 KYC (multi-step) | P0 |
+| `app/index.tsx` | P00 Splash | P0 |
+| `app/(auth)/login.tsx` | P00 Auth OTP | P0 |
+| `app/(kyc)/[step].tsx` | P01 KYC 7 écrans | P0 |
 | `app/(kyc)/pending.tsx` | Attente validation | P0 |
-| `app/(tabs)/index.tsx` | P02 Missions | P0 |
+| `app/(kyc)/rejected.tsx` | Dossier refusé | P0 |
+| `app/(kyc)/connect.tsx` | Stripe Connect (pas de Skip) | P0 |
+| `app/(tabs)/missions.tsx` | P02 Missions | P0 |
 | `app/missions/[id].tsx` | P03 Détail (avant accept) | P0 |
 | `app/missions/[id]/active.tsx` | P04 En route / arrivé | P0 |
 | `app/missions/[id]/execute.tsx` | P05 Checklist + photos | P0 |
-| `app/(tabs)/earnings.tsx` | P08 Gains | P1 |
+| `app/missions/[id]/done.tsx` | P06 Clôture | P0 |
 | `app/(tabs)/planning.tsx` | P07 Planning | P1 |
-| `app/profile.tsx` | P09 Profil | P1 |
+| `app/(tabs)/gains.tsx` | P08 Gains | P1 |
+| `app/(tabs)/profil.tsx` | P09 Profil | P1 |
+| `app/profil/notifs.tsx` | P09b Toggles | P0 |
+
+Tabs bas **uniquement** après KYC approved + Connect `charges_enabled` : Missions \| Planning \| Gains \| Profil.
+
+Maquettes : [`docs/ux/uxpilot-pro-html-v2/`](../ux/uxpilot-pro-html-v2/) · cahier : [`docs/backlog/m12-cahier.md`](../backlog/m12-cahier.md).
 
 ---
 
@@ -55,9 +64,10 @@ Upload docs via presigned URL API.
 - **En cours** : in_progress today
 
 ### Détail P03
-- Timer countdown si broadcast exclusif
-- **Pas d’adresse exacte** avant accept (RG-SEC-02)
-- Afficher gain **net** après commission
+- Broadcast ~8 pros, **premier Accepter gagne** (fenêtre minutes). **Pas** de chrono 8 s Uber.
+- Helper : « Plusieurs pros voient cette mission… »
+- **Pas d’adresse exacte** avant accept (RG-SEC-02) — quartier seulement, pas de carte immeuble
+- Afficher gain **net** après commission (API, jamais calculé ici)
 
 ### Active P04
 - Adresse complète après accept
@@ -98,7 +108,7 @@ Upload docs via presigned URL API.
 |--------|--------|-----|
 | Bundle ID | `fr.carservice.client` | `fr.carservice.provider` |
 | Role JWT | `client` | `provider` |
-| Tab bar | Accueil, Réservations | Missions, Planning, Gains |
+| Tab bar | Accueil, Réservations, Profil | Missions, Planning, Gains, Profil |
 | Stripe | PaymentSheet | Connect onboarding |
 | KYC | Non | Oui |
 

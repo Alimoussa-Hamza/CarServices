@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.FontAwesomeConfig = {
+          autoReplaceSvg: 'nest'
+        };
+      </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notification</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>body{font-family:-apple-system,BlinkMacSystemFont,'Inter',Roboto,sans-serif;}</style>
+</head>
+<body class="bg-[#12141A]">
+<div id="lockscreen" class="w-full h-[844px] max-w-[390px] mx-auto bg-[#12141A] flex flex-col overflow-hidden relative">
+  <div class="h-[44px] w-full flex-shrink-0"></div>
+
+  <div id="lock-clock" class="flex flex-col items-center pt-6 pb-8 flex-shrink-0">
+    <span class="text-white font-light text-[56px] leading-none tracking-tight">14:02</span>
+    <span class="text-[#B8BCC4] text-sm font-medium mt-2">Lundi 12 mai</span>
+  </div>
+
+  <div id="notification-stack" class="px-4">
+    <div id="mission-notif-card" class="bg-[#F2F2F2]/95 rounded-2xl shadow-xl p-3.5">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-md bg-[#0B5FA5] flex items-center justify-center">
+            <span class="text-white font-extrabold text-[8px]">CW</span>
+          </div>
+          <span class="text-[#3C3C43] text-xs font-semibold">CARWASH PRO</span>
+        </div>
+        <span class="text-[#3C3C43]/60 text-xs font-medium">maintenant</span>
+      </div>
+      <p class="text-[#000000] font-semibold text-[15px] mb-0.5">Nouvelle mission disponible</p>
+      <p class="text-[#3C3C43]/90 text-sm leading-snug">Complet · Lyon 3e — Part-Dieu · 77,60 € net</p>
+    </div>
+  </div>
+
+  <div class="flex-1"></div>
+
+  <div id="lock-actions" class="px-6 pb-4 flex items-center justify-between flex-shrink-0">
+    <div class="w-12 h-12 rounded-full bg-white/15 flex items-center justify-center">
+      <i class="fa-solid fa-bolt text-white text-base"></i>
+    </div>
+    <div class="w-12 h-12 rounded-full bg-white/15 flex items-center justify-center">
+      <i class="fa-solid fa-camera text-white text-base"></i>
+    </div>
+  </div>
+  <div class="h-[24px] w-full flex-shrink-0 flex items-end justify-center pb-2">
+    <div class="w-32 h-1 rounded-full bg-white/40"></div>
+  </div>
+</div>
+</body>
+</html>

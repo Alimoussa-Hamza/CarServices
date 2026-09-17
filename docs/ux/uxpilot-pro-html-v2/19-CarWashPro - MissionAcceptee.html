@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.FontAwesomeConfig = {
+          autoReplaceSvg: 'nest'
+        };
+      </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission acceptée</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>body{font-family:'Inter',sans-serif;}</style>
+</head>
+<body class="bg-[#F5F7FA]">
+<div id="mission-accepted-screen" class="w-full h-[844px] max-w-[390px] mx-auto bg-[#F5F7FA] flex flex-col overflow-hidden relative">
+  <div class="h-[44px] w-full flex-shrink-0"></div>
+
+  <div id="accepted-header" class="px-5 pt-2 pb-2 flex-shrink-0 flex items-center justify-center relative">
+    <button class="absolute left-5 w-9 h-9 flex items-center justify-center"><i class="fa-solid fa-chevron-left text-[#0B1F33] text-lg"></i></button>
+    <span class="text-[#0B1F33] font-bold text-base">Mission acceptée</span>
+  </div>
+
+  <div id="map-area" class="relative w-full h-[330px] flex-shrink-0 bg-[#EAF0EC] overflow-hidden">
+    <div class="absolute top-[25%] left-0 right-0 h-px bg-white/70"></div>
+    <div class="absolute top-[60%] left-0 right-0 h-px bg-white/70"></div>
+    <div class="absolute left-[30%] top-0 bottom-0 w-px bg-white/70"></div>
+    <div class="absolute left-[70%] top-0 bottom-0 w-px bg-white/70"></div>
+    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-full">
+      <i class="fa-solid fa-location-dot text-[#BE3B33] text-4xl drop-shadow"></i>
+    </div>
+    <button class="absolute top-3 right-3 bg-white rounded-full shadow-sm px-3 py-2 flex items-center gap-1.5">
+      <i class="fa-solid fa-diamond-turn-right text-[#0B5FA5] text-xs"></i>
+      <span class="text-[#0B1F33] text-xs font-semibold">Ouvrir dans Maps</span>
+    </button>
+  </div>
+
+  <div id="accepted-content" class="flex-1 overflow-y-auto px-5 pt-4 flex flex-col gap-3">
+    <div id="address-card" class="bg-white rounded-xl shadow-sm p-4">
+      <div class="flex items-start justify-between gap-2 mb-1">
+        <div class="flex items-start gap-2">
+          <i class="fa-solid fa-location-dot text-[#0B5FA5] text-sm mt-0.5"></i>
+          <span class="text-[#0B1F33] font-bold text-sm">12 Avenue Georges Pompidou, 69003 Lyon</span>
+        </div>
+        <button class="w-11 h-11 rounded-lg bg-[#F0F2F4] flex items-center justify-center flex-shrink-0">
+          <i class="fa-regular fa-copy text-[#6B7280] text-sm"></i>
+        </button>
+      </div>
+      <p class="text-[#6B7280] text-xs font-medium pl-6">Lyon 3e — Part-Dieu · Bâtiment B, 2e étage</p>
+    </div>
+
+    <div id="mission-summary-card" class="bg-white rounded-xl shadow-sm p-4">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-[#0B1F33] font-bold text-sm">Complet</span>
+        <span class="text-[#0B5FA5] font-bold text-sm">77,60 € net</span>
+      </div>
+      <span class="text-[#6B7280] text-xs font-medium">Aujourd'hui, 14h00 · 60 min</span>
+    </div>
+
+    <div id="client-card" class="bg-white rounded-xl shadow-sm p-4 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-circle-user text-[#9CA3AF] text-base"></i>
+        <span class="text-[#0B1F33] font-semibold text-sm">Client vérifié</span>
+      </div>
+      <button class="w-11 h-11 rounded-full bg-[#E7F0FA] flex items-center justify-center flex-shrink-0">
+        <i class="fa-solid fa-phone text-[#0B5FA5] text-sm"></i>
+      </button>
+    </div>
+  </div>
+
+  <div id="accepted-cta" class="px-4 pt-3 pb-2 flex-shrink-0 bg-[#F5F7FA]">
+    <button id="status-btn" onclick="const b=document.getElementById('status-btn'); if(b.dataset.state==='route'){b.dataset.state='arrived'; b.innerText='Je suis arrivé';} else {b.dataset.state='route'; b.innerText='Je suis en route';}" data-state="route" class="w-full h-14 rounded-xl bg-[#0B5FA5] text-white font-bold text-base shadow-sm mb-2.5">Je suis en route</button>
+    <button class="w-full h-12 rounded-xl border-2 border-[#BE3B33] text-[#BE3B33] font-bold text-sm">Annuler la mission</button>
+  </div>
+  <div class="h-[24px] w-full flex-shrink-0 flex items-end justify-center pb-2">
+    <div class="w-32 h-1 rounded-full bg-[#0B1F33]/15"></div>
+  </div>
+</div>
+</body>
+</html>

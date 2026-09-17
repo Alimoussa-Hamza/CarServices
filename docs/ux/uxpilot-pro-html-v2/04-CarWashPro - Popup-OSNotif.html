@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.FontAwesomeConfig = {
+          autoReplaceSvg: 'nest'
+        };
+      </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Permission notifications</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>body{font-family:-apple-system,BlinkMacSystemFont,'Inter',Roboto,sans-serif;}</style>
+</head>
+<body class="bg-[#F5F7FA]">
+<div id="os-notif-popup-screen" class="w-full h-[844px] max-w-[390px] mx-auto relative overflow-hidden">
+
+  <div id="dimmed-backdrop" class="absolute inset-0 bg-[#0B1F33]/70 flex flex-col">
+    <div class="h-[44px]"></div>
+    <div class="px-6 pt-10 opacity-30">
+      <div class="w-28 h-28 rounded-full bg-white mx-auto mb-6"></div>
+      <div class="h-6 w-2/3 bg-white rounded mx-auto mb-3"></div>
+      <div class="h-4 w-4/5 bg-white rounded mx-auto"></div>
+    </div>
+  </div>
+
+  <div id="os-alert-dialog" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[270px] bg-[#F2F2F2] rounded-[14px] overflow-hidden shadow-2xl">
+    <div class="pt-5 px-4 pb-4 flex flex-col items-center text-center">
+      <div class="w-10 h-10 rounded-[10px] bg-[#0B5FA5] flex items-center justify-center mb-3">
+        <span class="text-white font-extrabold text-[10px]">CW</span>
+      </div>
+      <p class="text-[15px] font-semibold text-[#000000] leading-snug mb-1.5">« CarWash Pro » souhaite vous envoyer des notifications</p>
+      <p class="text-[13px] text-[#3C3C43]/80 leading-snug">Les notifications peuvent inclure des alertes, sons et badges. Vous pouvez les configurer dans Réglages.</p>
+    </div>
+    <div class="border-t border-[#3C3C43]/25 flex">
+      <button class="flex-1 py-3 text-[17px] text-[#3C3C43]/90 font-normal border-r border-[#3C3C43]/25">Ne pas autoriser</button>
+      <button class="flex-1 py-3 text-[17px] text-[#0B5FA5] font-semibold">Autoriser</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

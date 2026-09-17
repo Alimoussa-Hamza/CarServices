@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.FontAwesomeConfig = {
+          autoReplaceSvg: 'nest'
+        };
+      </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gains</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>body{font-family:'Inter',sans-serif;}</style>
+</head>
+<body class="bg-[#F5F7FA]">
+<div id="gains-screen" class="w-full h-[844px] max-w-[390px] mx-auto bg-[#F5F7FA] flex flex-col overflow-hidden relative">
+  <div class="h-[44px] w-full flex-shrink-0"></div>
+
+  <div id="gains-header" class="px-5 pt-2 pb-3 flex-shrink-0 flex items-center justify-between">
+    <h1 class="text-[#0B1F33] font-bold text-xl tracking-tight">Gains</h1>
+    <button class="w-9 h-9 flex items-center justify-center"><i class="fa-solid fa-arrow-down-to-line text-[#6B7280] text-base"></i></button>
+  </div>
+
+  <div id="gains-content" class="flex-1 overflow-y-auto px-5 flex flex-col gap-4">
+    <div id="solde-card" class="bg-white rounded-2xl shadow-sm p-6">
+      <div class="flex flex-col items-center text-center mb-5">
+        <span class="text-[#6B7280] text-sm font-semibold mb-1">Solde en transit</span>
+        <span class="text-[#0B5FA5] font-extrabold text-4xl tracking-tight mb-1.5">312,40 €</span>
+        <span class="text-[#9CA3AF] text-xs font-medium">Prochain virement : Vendredi 16 mai</span>
+      </div>
+      <div class="border-t border-[#F0F2F4] pt-4 flex">
+        <div class="flex-1 flex flex-col items-center">
+          <span class="text-[#6B7280] text-xs font-medium mb-1">Cette semaine</span>
+          <span class="text-[#0B1F33] font-bold text-base">228,10 €</span>
+        </div>
+        <div class="w-px bg-[#F0F2F4]"></div>
+        <div class="flex-1 flex flex-col items-center">
+          <span class="text-[#6B7280] text-xs font-medium mb-1">Ce mois</span>
+          <span class="text-[#0B1F33] font-bold text-base">1 042,30 €</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="filter-tabs" class="bg-[#EDF0F3] rounded-xl p-1 flex gap-1">
+      <div class="flex-1 h-9 rounded-lg bg-[#0B1F33] flex items-center justify-center"><span class="text-white font-semibold text-sm">Tout</span></div>
+      <div class="flex-1 h-9 rounded-lg flex items-center justify-center"><span class="text-[#6B7280] font-semibold text-sm">Cette semaine</span></div>
+      <div class="flex-1 h-9 rounded-lg flex items-center justify-center"><span class="text-[#6B7280] font-semibold text-sm">Ce mois</span></div>
+    </div>
+
+    <p class="text-[#0B1F33] font-bold text-sm">Historique des paiements</p>
+
+    <div class="flex flex-col gap-3 pb-3">
+      <div class="bg-white rounded-xl shadow-sm p-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-[#E7F0FA] flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-car-side text-[#0B5FA5] text-sm"></i></div>
+          <div>
+            <p class="text-[#0B1F33] font-bold text-sm">Complet</p>
+            <p class="text-[#6B7280] text-xs font-medium mt-0.5">12 mai, 14h00</p>
+          </div>
+        </div>
+        <div class="flex flex-col items-end gap-1">
+          <span class="text-[#0B5FA5] font-bold text-sm">77,60 €</span>
+          <span class="text-[10px] font-bold text-[#1B8A5A] bg-[#E9F5EE] rounded-full px-2 py-0.5">Versé</span>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm p-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-[#E7F0FA] flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-car-side text-[#0B5FA5] text-sm"></i></div>
+          <div>
+            <p class="text-[#0B1F33] font-bold text-sm">Extérieur rapide</p>
+            <p class="text-[#6B7280] text-xs font-medium mt-0.5">11 mai, 16h30</p>
+          </div>
+        </div>
+        <div class="flex flex-col items-end gap-1">
+          <span class="text-[#0B5FA5] font-bold text-sm">32,00 €</span>
+          <span class="text-[10px] font-bold text-[#1B8A5A] bg-[#E9F5EE] rounded-full px-2 py-0.5">Versé</span>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm p-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-[#E7F0FA] flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-car-side text-[#0B5FA5] text-sm"></i></div>
+          <div>
+            <p class="text-[#0B1F33] font-bold text-sm">Intérieur seul</p>
+            <p class="text-[#6B7280] text-xs font-medium mt-0.5">10 mai, 09h00</p>
+          </div>
+        </div>
+        <div class="flex flex-col items-end gap-1">
+          <span class="text-[#0B5FA5] font-bold text-sm">41,50 €</span>
+          <span class="text-[10px] font-bold text-[#B7791E] bg-[#FBF0DD] rounded-full px-2 py-0.5">En attente</span>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm p-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-[#E7F0FA] flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-car-side text-[#0B5FA5] text-sm"></i></div>
+          <div>
+            <p class="text-[#0B1F33] font-bold text-sm">Premium détailing</p>
+            <p class="text-[#6B7280] text-xs font-medium mt-0.5">8 mai, 11h00</p>
+          </div>
+        </div>
+        <div class="flex flex-col items-end gap-1">
+          <span class="text-[#0B5FA5] font-bold text-sm">96,20 €</span>
+          <span class="text-[10px] font-bold text-[#1B8A5A] bg-[#E9F5EE] rounded-full px-2 py-0.5">Versé</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="bottom-tab-bar" class="flex-shrink-0 bg-white border-t border-[#E2E6EA] flex items-center justify-around pt-2 pb-1">
+    <div class="flex flex-col items-center gap-1">
+      <i class="fa-solid fa-list-check text-[#9CA3AF] text-lg"></i>
+      <span class="text-[#9CA3AF] text-[11px] font-semibold">Missions</span>
+    </div>
+    <div class="flex flex-col items-center gap-1">
+      <i class="fa-regular fa-calendar-days text-[#9CA3AF] text-lg"></i>
+      <span class="text-[#9CA3AF] text-[11px] font-semibold">Planning</span>
+    </div>
+    <div class="flex flex-col items-center gap-1">
+      <i class="fa-solid fa-wallet text-[#0B5FA5] text-lg"></i>
+      <span class="text-[#0B5FA5] text-[11px] font-bold">Gains</span>
+    </div>
+    <div class="flex flex-col items-center gap-1">
+      <i class="fa-regular fa-user text-[#9CA3AF] text-lg"></i>
+      <span class="text-[#9CA3AF] text-[11px] font-semibold">Profil</span>
+    </div>
+  </div>
+  <div class="h-[24px] w-full flex-shrink-0 bg-white flex items-end justify-center pb-2">
+    <div class="w-32 h-1 rounded-full bg-[#0B1F33]/15"></div>
+  </div>
+</div>
+</body>
+</html>

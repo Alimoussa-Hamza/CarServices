@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.FontAwesomeConfig = {
+          autoReplaceSvg: 'nest'
+        };
+      </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Se déconnecter</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>body{font-family:'Inter',sans-serif;}</style>
+</head>
+<body class="bg-[#F5F7FA]">
+<div id="popup-logout-screen" class="w-full h-[844px] max-w-[390px] mx-auto relative overflow-hidden bg-[#F5F7FA]">
+
+  <div id="backdrop" class="absolute inset-0 flex flex-col">
+    <div class="h-[44px]"></div>
+    <div class="px-5 pt-2 opacity-40">
+      <div class="h-20 w-full bg-[#C9CFD6] rounded-2xl mb-4"></div>
+      <div class="h-40 w-full bg-[#C9CFD6] rounded-xl mb-3"></div>
+      <div class="h-32 w-full bg-[#C9CFD6] rounded-xl"></div>
+    </div>
+    <div class="absolute inset-0 bg-[#0B1F33]/60"></div>
+  </div>
+
+  <div id="logout-modal" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] bg-white rounded-2xl shadow-2xl p-6 flex flex-col items-center">
+    <div class="w-14 h-14 rounded-full bg-[#FBEAEA] flex items-center justify-center mb-4">
+      <i class="fa-solid fa-arrow-right-from-bracket text-[#BE3B33] text-xl"></i>
+    </div>
+    <h2 class="text-[#0B1F33] font-bold text-lg text-center mb-1.5">Se déconnecter ?</h2>
+    <p class="text-[#6B7280] text-xs font-medium text-center mb-5">Vous devrez vous reconnecter avec votre numéro de téléphone.</p>
+
+    <button class="w-full h-12 rounded-[10px] bg-[#BE3B33] text-white font-bold text-sm mb-2.5">Se déconnecter</button>
+    <button class="w-full h-12 rounded-[10px] border-2 border-[#E2E6EA] text-[#6B7280] font-semibold text-sm">Annuler</button>
+  </div>
+</div>
+</body>
+</html>

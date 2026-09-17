@@ -1,0 +1,68 @@
+SETTINGS (read first — paid UX Pilot):
+- New File only. Hi-fi Design. Mobile 390×844. Light. Autoflow ON. Deep Design ON (not Blitz).
+- Theme / palette: YOU choose a cohesive Light system (primary, surface, text, success, warning, error). Apply it on EVERY screen. Do not lock hex from this prompt.
+- Do NOT click Enhance Prompt. This brief is already the PRD.
+- Autoflow will list screens + credit cost: KEEP this map, DELETE anything client/admin (no Accueil, no Réserver, no catalog of washes for a car owner).
+- One product in this file: CarWash Pro. Not the client app.
+
+CONTEXT (applies to EVERY screen — UX Pilot uses this for consistency):
+CarWash Pro is the FIELD app for Marc, 28, Lyon, auto-entrepreneur, waterless/steam washer, mid-range Android AND iPhone, one dirty thumb, often outdoors. In 2 seconds he must know: (1) is there a job now? (2) which button? (3) net pay « Vous gagnez 77,60 € net ».
+Calm 2026 operations tool. Large type, one primary sticky CTA bottom ≥52pt radius 10–12, hit 44pt, body ≥16sp, titles ≥22sp, WCAG AA, status = icon+text not color alone.
+UI language: FRENCH on all labels, errors, empty states. ONE Expo layout for iOS+Android (not two apps, not Material-only, not iOS-only). Native OS chrome ONLY for permission sheets, phone dialer, system Maps, and a generic lockscreen notif — not a second set of 24 screens. Safe-area top+bottom on every frame (notch AND Android gesture bar).
+Photography: almost none. Small avatar max. No lifestyle car hero.
+
+Shared chrome after KYC+Connect approved:
+- Bottom tabs: Missions (list icon) | Planning (calendar) | Gains (wallet) | Profil (user)
+- Before approval: NO tabs, NO mission feed — wizard / pending / rejected / Connect only
+- Cards only if tappable. 8pt grid. One soft shadow max. Outline icons 24px 2px stroke; inactive muted, active = your primary. No emoji as icons.
+
+Color: pick one professional Light palette yourself and reuse it. High outdoor contrast. NET pay uses the primary, not a random green money cliché unless primary is already that hue. Avoid purple neon AI gradients and rainbow screens. Warning / error / success must be distinguishable without relying on color alone.
+
+Motion: 200–300ms useful only. No confetti, no loop Lottie, splash ≤0.8s.
+
+HARD NO (if any appears, that frame failed):
+Water-drop logo, « Réserver maintenant », tabs Accueil|Réservations|Profil, month Google/Apple calendar, 8-second Uber countdown, in-app chat, quotes, water wash, polygon zone editor, full street/digicode/phone BEFORE accept, pie charts, turn-by-turn inside the app, Android FAB/drawer, two separate iOS/Android app variants, Skip on Connect.
+
+Calendar pattern (P01f + P07): horizontal week Lun–Dim + hour CHIPS. Accent = dispo, grey = bloqué. Not a month widget.
+Maps: KYC = Places search + ONE base pin + rayon. P02/P03 = MapPin + quartier text, ZERO building map. P04 = map ~40% one street pin. Ouvrir Maps leaves to system Maps.
+Privacy: quartier (ex. Part-Dieu) until Accepter; then full address.
+
+Disabled CTAs (show grey + helper):
+OTP Continuer if CGU off · KYC Continuer if invalid · méthodes if 0 on · formules if 0 checks · Terminer until 2 before + 2 after + required checklist · Son if Nouvelles missions off
+
+AUTOFLOW — generate EXACTLY this connected journey (name frames as written). Autoflow may write a per-screen prompt: keep these names and rules.
+
+1. Pro-P00-Splash — wordmark CarWash Pro, tiny primary loader, no photo
+2. Pro-P00-Auth — Connexion pro, phone, Envoyer le code, 6 OTP, CGU, Continuer. Error: Code incorrect.
+3. Pro-P01-Notif — Bell. Ne ratez aucune mission. Autoriser / Plus tard
+4. Pro-P01a-Societe — Étape 1/7 sticky Continuer. Raison sociale, SIRET, IBAN
+5. Pro-P01b-RCPro — Étape 2/7. Upload PDF/JPG + native date wheel (not month calendar)
+6. Pro-P01c-Methodes — Étape 3/7. Toggles Sans eau / Vapeur, min 1
+7. Pro-P01d-Zone — Étape 4/7. Places + 1 pin + rayon. No polygon
+8. Pro-P01e-Formules — Étape 5/7. Checks Extérieur / Intérieur / Complet / Detailing
+9. Pro-P01f-Dispo — Étape 6/7. Week chips + time ranges
+10. Pro-P01g-PhotoBio — Étape 7/7. Portrait camera + Envoyer mon dossier
+KYC = seven SEPARATE screens. Never one scrolling tax form.
+
+11. Pro-P01-Pending — no tabs. Clock+Lock. Dossier en cours de validation · 48 h. Voir mon dossier
+12. Pro-P01-Rejected — motif RC Pro illisible. Corriger et renvoyer
+13. Pro-P01-Connect — Activer les virements. No Skip
+14. Pro-P02-Missions — tabs Nouvelles | À venir | En cours. Huge TIME, quartier, formule, km, net. Pin Mission en cours if in_progress. Empty: Aucune mission pour le moment.
+15. Pro-P03-Detail — NET hero. Quartier only. Accepter la mission (Vérification…) + Refuser. No building map
+16. Pro-P03e-DejaPrise — Mission déjà prise par un autre pro
+17. Pro-Lockscreen — Bell Nouvelle mission · Complet · Part-Dieu · 14:00 · 77,60 € net
+18. Pro-P04-Acceptee — map 40% one pin, full address, copy, tel 44pt, Ouvrir Maps. Je suis en route → Je suis arrivé. Annuler
+19. Pro-P05-Execution — Avant 0/2 Après 0/2 camera. Checklist. Terminer DISABLED until complete
+20. Pro-P06-Cloture — one check, big net, Voir mes gains. No confetti
+21. Pro-P07-Planning — week + hour chips. Pause aujourd'hui
+22. Pro-P08-Gains — solde en transit, list. No charts
+23. Pro-P09-Profil — avatar, note, RC J-30, Notifications, Aide, Se déconnecter
+24. Pro-P09b-Notifs — toggles Nouvelles missions, Son, Rappels H-1, Compte
+
+Then linked popups only (bottom sheets): OS Notif, OS Camera, Refuser (radios), Annuler (motif required), Terminer confirm, PhotoSource, PhotoPreview, Pause, Logout. Banners on P02: offline, notifs off, slim 4s Nouvelle mission (never full-screen if he is in P04/P05).
+
+Match: client paid → ~8 pros, minutes not 8 seconds, first Accepter wins.
+
+French verbatim: Envoyer le code, Continuer, Code incorrect., Envoyer mon dossier, Vous gagnez 77,60 € net, Adresse exacte après acceptation, Accepter la mission, Refuser, Je suis en route, Je suis arrivé, Terminer la prestation, Activer les virements.
+
+Start Autoflow now. If a frame looks like a client booking app, redo that frame as Pro.

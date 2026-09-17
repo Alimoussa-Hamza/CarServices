@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.FontAwesomeConfig = {
+          autoReplaceSvg: 'nest'
+        };
+      </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexion</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>body{font-family:'Inter',sans-serif;}</style>
+</head>
+<body class="bg-[#F5F7FA]">
+<div id="auth-screen" class="w-full h-[844px] max-w-[390px] mx-auto bg-[#F5F7FA] flex flex-col overflow-hidden relative">
+
+  <div class="h-[44px] w-full flex-shrink-0"></div>
+
+  <div id="auth-header" class="px-5 pt-2 pb-4 flex items-center gap-2 flex-shrink-0">
+    <div class="w-8 h-8 rounded-lg bg-[#0B5FA5] flex items-center justify-center">
+      <span class="text-white font-extrabold text-xs">CW</span>
+    </div>
+    <span class="text-[#0B1F33] font-semibold text-sm">CarWash Pro</span>
+  </div>
+
+  <div id="auth-content" class="flex-1 overflow-y-auto px-5 pb-4">
+    <h1 class="text-[#0B1F33] font-bold text-2xl tracking-tight mb-2">Connexion</h1>
+    <p class="text-[#6B7280] text-sm font-medium mb-6">Recevez le code par SMS pour continuer.</p>
+
+    <div id="phone-field" class="mb-2">
+      <label class="block text-[#0B1F33] text-sm font-semibold mb-2">Numéro de téléphone</label>
+      <div class="h-14 rounded-xl border-2 border-[#0B5FA5] bg-white flex items-center px-4 gap-3">
+        <span class="text-[#0B1F33] font-semibold text-base border-r border-[#E2E6EA] pr-3">+33</span>
+        <input type="tel" value="6 12 34 56 78" class="flex-1 text-[#0B1F33] text-base font-medium outline-none bg-transparent" />
+      </div>
+    </div>
+    <p class="text-[#6B7280] text-xs font-medium mb-6">Un code à 6 chiffres vous sera envoyé par SMS.</p>
+
+    <div id="otp-preview-section" class="mb-6">
+      <div class="border-t border-[#E2E6EA] pt-5 mb-4">
+        <p class="text-[#6B7280] text-xs font-semibold uppercase tracking-wide mb-3">Étape suivante : code reçu</p>
+        <div class="flex justify-between gap-2 mb-3">
+          <div class="w-11 h-11 rounded-lg border-2 border-[#E2E6EA] bg-white"></div>
+          <div class="w-11 h-11 rounded-lg border-2 border-[#E2E6EA] bg-white"></div>
+          <div class="w-11 h-11 rounded-lg border-2 border-[#E2E6EA] bg-white"></div>
+          <div class="w-11 h-11 rounded-lg border-2 border-[#E2E6EA] bg-white"></div>
+          <div class="w-11 h-11 rounded-lg border-2 border-[#E2E6EA] bg-white"></div>
+          <div class="w-11 h-11 rounded-lg border-2 border-[#E2E6EA] bg-white"></div>
+        </div>
+        <p class="text-[#9CA3AF] text-xs font-medium">Exemple d'état d'erreur si le code est faux : <span class="text-[#BE3B33] font-semibold">Code incorrect.</span></p>
+      </div>
+    </div>
+
+    <div id="cgu-row" class="flex items-start gap-3">
+      <div class="w-5 h-5 rounded-md bg-[#0B5FA5] flex items-center justify-center flex-shrink-0 mt-0.5">
+        <i class="fa-solid fa-check text-white text-[10px]"></i>
+      </div>
+      <p class="text-[#374151] text-sm leading-snug">
+        J'accepte les <span class="text-[#0B5FA5] font-semibold underline">Conditions Générales d'Utilisation</span> et la <span class="text-[#0B5FA5] font-semibold underline">Politique de confidentialité</span>
+      </p>
+    </div>
+  </div>
+
+  <div id="auth-cta" class="px-4 pt-3 pb-3 flex-shrink-0 bg-[#F5F7FA]">
+    <button class="w-full h-14 rounded-xl bg-[#0B5FA5] text-white font-bold text-base shadow-sm">Envoyer le code</button>
+  </div>
+  <div class="h-[24px] w-full flex-shrink-0 flex items-end justify-center pb-2">
+    <div class="w-32 h-1 rounded-full bg-[#0B1F33]/15"></div>
+  </div>
+</div>
+</body>
+</html>

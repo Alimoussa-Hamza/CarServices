@@ -1,0 +1,355 @@
+@startuml CarWash_golden_path
+title CarWash — golden path MVP (activité UML)\nBleu = FAIT dans une app · Orange = A FAIRE
+skinparam shadowing false
+skinparam ActivityFontSize 12
+skinparam swimlaneTitleFontSize 13
+
+|Claire|
+start
+#E8F3FA:C00 Splash / session;
+#E8F3FA:C01 Téléphone + OTP + CGU;
+#FFF4E5:C02 Onboarding prénom / véhicule / adresse\n(skippable « Plus tard »);
+#E8F3FA:C03 Home / Réserver maintenant;
+#E8F3FA:C04 Formule → C05 Config live → C06 Adresse → C07 Créneau;
+
+if (Adresse en zone active ?) then (non)
+  #E8F3FA:Message hors zone + lead email;
+  stop
+else (oui)
+endif
+
+#E8F3FA:C08 Récap / Payer (pre-auth);
+
+|Plateforme|
+#E8F3FA:Autorisation carte;
+if (Pre-auth OK ?) then (non)
+  |Claire|
+  #E8F3FA:« Paiement refusé. » / retry;
+  stop
+else (oui)
+endif
+
+|Plateforme|
+#E8F3FA:Broadcast top 8 · T1 30 min puis T2 2h / H-2;
+
+|Marc|
+#FFF4E5:P02 Carte quartier + net\n(+ notif / son);
+
+if (Premier Accepter avant T2 ?) then (non)
+  |Plateforme|
+  #E8F3FA:unassigned · refund ou replanif;
+  |Claire|
+  #E8F3FA:C09 / C10 Unassigned;
+  stop
+else (oui)
+endif
+
+|Plateforme|
+#E8F3FA:Lock exclusif · accepted;
+
+|Claire|
+#E8F3FA:C10 Suivi — Pro confirmé;
+
+|Marc|
+#FFF4E5:P04 Adresse complète / Maps / tel\nJe suis en route → Arrivé;
+#FFF4E5:P05 Checklist + caméra 2 avant + 2 après;
+
+if (2+2 photos + checklist ?) then (non)
+  #FFF4E5:Terminer grisé;
+  stop
+else (oui)
+endif
+
+|Plateforme|
+#E8F3FA:completed · capture · commission;
+
+|Marc|
+#FFF4E5:P06 Clôture net;
+
+|Claire|
+#E8F3FA:C11 Avis sous 72 h;
+#FFF4E5:C14 Aide / ouvrir litige 48 h;
+
+|Ops|
+#E8F3FA:A07 Trancher (client / pro / split);
+
+|Claire|
+stop
+@enduml
+
+@startuml CarWash_Claire_activite
+title Claire — activité UML complète (produit)\nBleu = FAIT · Orange = A FAIRE
+skinparam shadowing false
+
+start
+#E8F3FA:C00 Splash;
+if (Token session ?) then (oui)
+  #E8F3FA:C03 Home;
+else (non)
+  #E8F3FA:C01 Saisir téléphone / Envoyer le code;
+  if (OTP reçu ?) then (non)
+    #E8F3FA:Reste Auth + erreur / rate limit;
+    stop
+  else (oui)
+  endif
+  #E8F3FA:Saisir 6 chiffres + CGU / Continuer;
+  if (Code valide ?) then (non)
+    #E8F3FA:« Code incorrect. »;
+    stop
+  else (oui)
+  endif
+  #FFF4E5:C02 Onboarding skippable;
+  #E8F3FA:C03 Home;
+endif
+
+#FFF4E5:Si flag wash off : « Bientôt disponible »;
+
+fork
+  #E8F3FA:C12 Mes réservations;
+fork again
+  #E8F3FA:C13 Profil / adresses / paiement;
+  #FFF4E5:C14 FAQ + ouvrir litige;
+  #FFF4E5:Supprimer mon compte RGPD;
+fork again
+  #E8F3FA:CTA Réserver;
+end fork
+
+#E8F3FA:C04 Catalogue / clic formule;
+#E8F3FA:C05 Config véhicule options / Continuer;
+#E8F3FA:C06 Adresse Places / Continuer;
+if (En zone ?) then (non)
+  #E8F3FA:Hors zone + lead / PAS Payer;
+  stop
+else (oui)
+endif
+#E8F3FA:C07 Créneau J→J+14 / Continuer;
+#E8F3FA:C08 Récap / Payer;
+if (Pre-auth OK ?) then (non)
+  #E8F3FA:« Paiement refusé. »;
+  stop
+else (oui)
+endif
+#E8F3FA:C09 Recherche d'un professionnel;
+
+if (Marc accepte avant T2 ?) then (non)
+  #E8F3FA:Unassigned / replanifier ou refund;
+  stop
+else (oui)
+endif
+
+#E8F3FA:C10 Suivi Pro confirmé → En route → En cours;
+
+if (Clic Annuler avant en cours ?) then (oui)
+  #E8F3FA:Annulé · frais RG-CANCEL;
+  stop
+else (non)
+endif
+
+#E8F3FA:Terminé;
+if (Avis < 72 h ?) then (oui)
+  #E8F3FA:C11 Avis;
+else (non)
+endif
+#FFF4E5:Signaler / litige 48 h (C10 ou C14);
+stop
+@enduml
+
+@startuml CarWash_Marc_activite
+title Marc — activité UML complète (produit)\nTOUT orange = app pro absente (A FAIRE)
+skinparam shadowing false
+
+start
+#FFF4E5:P00 Auth OTP rôle provider;
+if (Code OK ?) then (non)
+  #FFF4E5:« Code incorrect. »;
+  stop
+else (oui)
+endif
+#FFF4E5:Permission notifs (Autoriser / Plus tard);
+#FFF4E5:P01 KYC 7 × Continuer / Envoyer dossier;
+
+if (Dossier valide ?) then (non)
+  #FFF4E5:Champ invalide / reste wizard;
+  stop
+else (oui)
+endif
+
+#FFF4E5:Pending · 0 mission;
+
+if (Ops tranche KYC ?) then (refuse)
+  #FFF4E5:Motif / Corriger et renvoyer;
+  stop
+else (approuve)
+endif
+
+#FFF4E5:Stripe Connect / Activer les virements;
+if (charges_enabled ?) then (non)
+  #FFF4E5:Reste Connect;
+  stop
+else (oui)
+endif
+
+#FFF4E5:P02 Missions Nouvelles | À venir | En cours;
+
+fork
+  #FFF4E5:P07 Planning / bloquer créneaux;
+fork again
+  #FFF4E5:P08 Gains / virements;
+fork again
+  #FFF4E5:P09 Profil + RC Pro J-30 + toggles son;
+fork again
+  #FFF4E5:Tap carte ou notif mission;
+end fork
+
+#FFF4E5:P03 Détail quartier + net;
+if (Clic ?) then (Refuser)
+  #FFF4E5:Retour P02;
+  stop
+else (Accepter)
+endif
+if (Encore dispo ?) then (non)
+  #FFF4E5:Mission déjà prise;
+  stop
+else (oui)
+endif
+#FFF4E5:P04 Adresse Maps tel / En route / Arrivé;
+#FFF4E5:P05 Caméra 2+2 + checklist;
+if (Terminer autorisé ?) then (non)
+  #FFF4E5:Bouton grisé;
+  stop
+else (oui)
+endif
+#FFF4E5:P06 Clôture net;
+stop
+@enduml
+
+@startuml CarWash_Ops_activite
+title Ops — activité UML complète (produit)\nBleu = FAIT · Orange = A FAIRE
+skinparam shadowing false
+
+start
+#E8F3FA:A01 Login email + mot de passe;
+#FFF4E5:2FA recommandé;
+if (Auth OK ?) then (non)
+  #E8F3FA:Reste login;
+  stop
+else (oui)
+endif
+#E8F3FA:A02 Dashboard KPIs;
+
+fork
+  #E8F3FA:A03 File KYC / Approuver ou Refuser + motif ≥ 5;
+fork again
+  #E8F3FA:A04 Catalogue CRUD / isActive;
+fork again
+  #E8F3FA:A05 Zones + coefficients;
+  #FFF4E5:Éditeur polygone carte;
+fork again
+  #E8F3FA:A06 Bookings / Refund;
+  #FFF4E5:Reassign pro + force cancel;
+fork again
+  #E8F3FA:A07 Litiges 3 décisions;
+fork again
+  #FFF4E5:A08 Masquer avis / ban;
+fork again
+  #E8F3FA:A09 Config commission T1 T2 annulation;
+  #FFF4E5:Feature flag wash;
+end fork
+stop
+@enduml
+
+@startuml CarWash_KYC_swimlane
+title KYC — activité UML (Marc × Ops)\nBleu = FAIT · Orange = A FAIRE
+skinparam shadowing false
+
+|Marc|
+start
+#FFF4E5:P00 Auth;
+#FFF4E5:P01 Wizard 7 steps / Envoyer;
+
+|Plateforme|
+#E8F3FA:Statut submitted · lock missions;
+
+|Ops|
+#E8F3FA:A03 Viewer docs;
+if (Dossier OK ?) then (Refuser)
+  #E8F3FA:Motif;
+  |Marc|
+  #FFF4E5:Banner refus / Corriger;
+  stop
+else (Approuver)
+endif
+
+|Plateforme|
+#E8F3FA:approved · eligible matching si RC Pro valide;
+
+|Marc|
+#FFF4E5:Activer virements Connect;
+stop
+@enduml
+
+@startuml CarWash_notifications
+title Notifications — activité UML (RG-NOTIF)\nBleu = canal API FAIT · Orange = UI / tap / toggles A FAIRE
+skinparam shadowing false
+
+|Claire|
+start
+#E8F3FA:C13 Activer les notifications;
+if (Permission OS ?) then (non)
+  #FFF4E5:Ouvrir les réglages;
+else (oui)
+  #E8F3FA:Token Expo enregistré;
+  #FFF4E5:Toggles Push / SMS / email;
+endif
+
+|Marc|
+#FFF4E5:P01b Autoriser / Plus tard;
+#FFF4E5:P09b Nouvelles / Son / H-1 / Compte;
+
+|Plateforme|
+#E8F3FA:Paiement OK → Claire push+email;
+#E8F3FA:Pro trouvé → Claire push+SMS;
+#E8F3FA:En route / Terminé / Unassigned → Claire push;
+#E8F3FA:Annulation → Claire + Marc push;
+#E8F3FA:Nouvelle mission → Marc push+SMS;
+#E8F3FA:Rappel H-1 / KYC / RC J-30 → Marc;
+
+|Claire|
+if (Tap notif ?) then (oui)
+  #E8F3FA:C09 / C10 / C11;
+endif
+
+|Marc|
+if (Où est l'app ?) then (fermée)
+  #FFF4E5:Lock screen + 1 son si toggle → P03;
+elseif (Missions) then
+  #FFF4E5:Carte + bandeau 4 s;
+else (en job)
+  #FFF4E5:Notif système seule;
+endif
+stop
+@enduml
+
+@startuml CarWash_toggles
+title Activer / désactiver — activité UML
+skinparam shadowing false
+
+start
+fork
+  #E8F3FA:C05 radio véhicule + saleté;
+  #E8F3FA:C05 toggle option → prix live;
+  #FFF4E5:C05 commentaire + photos 0–5;
+  #FFF4E5:C08 CGV → sinon Payer grisé;
+fork again
+  #FFF4E5:P01 méthodes éco min 1;
+  #FFF4E5:P01 capabilities formules;
+  #FFF4E5:P05 checklist + photos 2+2;
+  #FFF4E5:P07 pause / bloquer créneau;
+  #FFF4E5:P09 formules + 4 toggles notifs;
+fork again
+  #E8F3FA:A04 Activer/Désactiver catégorie offre option;
+  #E8F3FA:A05 Activer/Désactiver zone;
+  #FFF4E5:A09 flag wash → home sans CTA;
+end fork
+stop
+@enduml

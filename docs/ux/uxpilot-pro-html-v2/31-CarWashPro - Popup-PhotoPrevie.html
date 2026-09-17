@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aperçu photo</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>body{font-family:'Inter',sans-serif;}</style>
+</head>
+<body class="bg-[#12141A]">
+<div id="photo-preview-screen" class="w-full h-[844px] max-w-[390px] mx-auto bg-[#12141A] flex flex-col overflow-hidden relative">
+
+  <div id="photo-canvas" class="absolute inset-0 bg-[#2A2E38] flex items-center justify-center">
+    <i class="fa-solid fa-car text-[#4A4F5C] text-[96px]"></i>
+  </div>
+
+  <div class="relative z-10 h-[44px] w-full flex-shrink-0"></div>
+
+  <div id="preview-top-bar" class="relative z-10 px-4 pt-2 flex items-center justify-between flex-shrink-0">
+    <button class="w-9 h-9 rounded-full bg-black/40 flex items-center justify-center">
+      <i class="fa-solid fa-xmark text-white text-base"></i>
+    </button>
+    <span class="bg-black/40 rounded-full px-3 py-1.5 text-white text-xs font-bold">Photo avant 2/4</span>
+    <div class="w-9 h-9"></div>
+  </div>
+
+  <div class="relative z-10 flex-1"></div>
+
+  <div id="preview-bottom-bar" class="relative z-10 px-4 pb-3 flex gap-3 flex-shrink-0">
+    <button class="flex-1 h-13 py-3.5 rounded-xl border-2 border-white text-white font-bold text-sm">Reprendre</button>
+    <button class="flex-1 h-13 py-3.5 rounded-xl bg-[#0B5FA5] text-white font-bold text-sm">Utiliser cette photo</button>
+  </div>
+  <div class="relative z-10 h-[24px] w-full flex-shrink-0 flex items-end justify-center pb-2">
+    <div class="w-32 h-1 rounded-full bg-white/40"></div>
+  </div>
+</div>
+</body>
+</html>

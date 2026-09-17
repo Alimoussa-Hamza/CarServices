@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.FontAwesomeConfig = {
+          autoReplaceSvg: 'nest'
+        };
+      </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Missions</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>body{font-family:'Inter',sans-serif;}</style>
+</head>
+<body class="bg-[#F5F7FA]">
+<div id="missions-screen" class="w-full h-[844px] max-w-[390px] mx-auto bg-[#F5F7FA] flex flex-col overflow-hidden relative">
+  <div class="h-[44px] w-full flex-shrink-0"></div>
+
+  <div id="missions-header" class="px-5 pt-2 pb-3 flex-shrink-0">
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-[#0B1F33] font-bold text-xl tracking-tight">Bonjour, Marc</h1>
+      <button class="relative w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center">
+        <i class="fa-regular fa-bell text-[#0B1F33] text-base"></i>
+        <span class="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-[#BE3B33]"></span>
+      </button>
+    </div>
+
+    <div id="availability-card" class="bg-white rounded-xl shadow-sm p-4 flex items-center justify-between mb-3">
+      <span class="text-[#0B1F33] font-semibold text-sm pr-3">Disponible pour de nouvelles missions</span>
+      <div class="w-11 h-[26px] rounded-full bg-[#1B8A5A] flex items-center px-0.5 justify-end flex-shrink-0">
+        <div class="w-[21px] h-[21px] rounded-full bg-white shadow"></div>
+      </div>
+    </div>
+
+    <div id="connectivity-banner" class="bg-[#FBF0DD] rounded-[10px] px-3 py-2.5 flex items-center gap-2.5">
+      <i class="fa-solid fa-wifi text-[#B7791E] text-xs"></i>
+      <span class="text-[#8A5A12] text-xs font-semibold">Connexion instable — les nouvelles missions peuvent être retardées.</span>
+    </div>
+  </div>
+
+  <div id="missions-tabs" class="px-5 flex-shrink-0 mb-3">
+    <div class="bg-[#EDF0F3] rounded-xl p-1 flex gap-1">
+      <div class="flex-1 h-9 rounded-lg bg-[#0B1F33] flex items-center justify-center gap-1.5">
+        <span class="text-white font-semibold text-sm">Nouvelles</span>
+        <span class="w-4 h-4 rounded-full bg-[#0B5FA5] text-white text-[10px] font-bold flex items-center justify-center">3</span>
+      </div>
+      <div class="flex-1 h-9 rounded-lg flex items-center justify-center">
+        <span class="text-[#6B7280] font-semibold text-sm">À venir</span>
+      </div>
+      <div class="flex-1 h-9 rounded-lg flex items-center justify-center">
+        <span class="text-[#6B7280] font-semibold text-sm">En cours</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="missions-list" class="flex-1 overflow-y-auto px-5 pb-3 flex flex-col gap-3 relative">
+
+    <div id="new-mission-toast" class="absolute -top-1 left-0 right-0 mx-auto w-fit bg-[#0B1F33] rounded-[10px] shadow-lg px-4 py-2.5 flex items-center gap-2 z-10">
+      <i class="fa-solid fa-bolt text-[#F2C14E] text-xs"></i>
+      <span class="text-white text-xs font-semibold">Nouvelle mission disponible</span>
+    </div>
+
+    <div class="h-6 flex-shrink-0"></div>
+
+    <div id="mission-card-1" class="bg-white rounded-xl shadow-sm p-4 flex flex-col gap-2.5">
+      <div class="flex items-center justify-between">
+        <span class="text-[#0B1F33] font-bold text-base">Complet</span>
+        <span class="text-[#0B5FA5] font-bold text-base">77,60 € net</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-location-dot text-[#9CA3AF] text-xs"></i>
+        <span class="text-[#6B7280] text-sm font-medium">Lyon 3e — Part-Dieu</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fa-regular fa-clock text-[#9CA3AF] text-xs"></i>
+          <span class="text-[#6B7280] text-sm font-medium">Aujourd'hui, 14h00</span>
+        </div>
+        <span class="text-[10px] font-semibold text-[#0B1F33] bg-[#F0F2F4] rounded-full px-2.5 py-1">60 min</span>
+      </div>
+    </div>
+
+    <div id="mission-card-2" class="bg-white rounded-xl shadow-sm p-4 flex flex-col gap-2.5">
+      <div class="flex items-center justify-between">
+        <span class="text-[#0B1F33] font-bold text-base">Extérieur rapide</span>
+        <span class="text-[#0B5FA5] font-bold text-base">32,00 € net</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-location-dot text-[#9CA3AF] text-xs"></i>
+        <span class="text-[#6B7280] text-sm font-medium">Lyon 6e — Foch</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fa-regular fa-clock text-[#9CA3AF] text-xs"></i>
+          <span class="text-[#6B7280] text-sm font-medium">Aujourd'hui, 16h30</span>
+        </div>
+        <span class="text-[10px] font-semibold text-[#0B1F33] bg-[#F0F2F4] rounded-full px-2.5 py-1">30 min</span>
+      </div>
+    </div>
+
+    <div id="mission-card-3" class="bg-white rounded-xl shadow-sm p-4 flex flex-col gap-2.5">
+      <div class="flex items-center justify-between">
+        <span class="text-[#0B1F33] font-bold text-base">Intérieur seul</span>
+        <span class="text-[#0B5FA5] font-bold text-base">41,50 € net</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-location-dot text-[#9CA3AF] text-xs"></i>
+        <span class="text-[#6B7280] text-sm font-medium">Villeurbanne — Gratte-Ciel</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fa-regular fa-clock text-[#9CA3AF] text-xs"></i>
+          <span class="text-[#6B7280] text-sm font-medium">Demain, 09h00</span>
+        </div>
+        <span class="text-[10px] font-semibold text-[#0B1F33] bg-[#F0F2F4] rounded-full px-2.5 py-1">40 min</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="bottom-tab-bar" class="flex-shrink-0 bg-white border-t border-[#E2E6EA] flex items-center justify-around pt-2 pb-1">
+    <div class="flex flex-col items-center gap-1">
+      <i class="fa-solid fa-list-check text-[#0B5FA5] text-lg"></i>
+      <span class="text-[#0B5FA5] text-[11px] font-bold">Missions</span>
+    </div>
+    <div class="flex flex-col items-center gap-1">
+      <i class="fa-regular fa-calendar-days text-[#9CA3AF] text-lg"></i>
+      <span class="text-[#9CA3AF] text-[11px] font-semibold">Planning</span>
+    </div>
+    <div class="flex flex-col items-center gap-1">
+      <i class="fa-solid fa-wallet text-[#9CA3AF] text-lg"></i>
+      <span class="text-[#9CA3AF] text-[11px] font-semibold">Gains</span>
+    </div>
+    <div class="flex flex-col items-center gap-1">
+      <i class="fa-regular fa-user text-[#9CA3AF] text-lg"></i>
+      <span class="text-[#9CA3AF] text-[11px] font-semibold">Profil</span>
+    </div>
+  </div>
+  <div class="h-[24px] w-full flex-shrink-0 bg-white flex items-end justify-center pb-2">
+    <div class="w-32 h-1 rounded-full bg-[#0B1F33]/15"></div>
+  </div>
+</div>
+</body>
+</html>
