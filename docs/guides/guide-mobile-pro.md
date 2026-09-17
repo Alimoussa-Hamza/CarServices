@@ -87,6 +87,12 @@ Upload docs via presigned URL API.
 - **Terminer** grisé + helper tant que KO ; capture **côté API** (`PATCH completed`)
 - P06 : check, gros net, **Voir mes gains**
 
+### Planning P07
+- Semaine Lun–Dim + chips horaires (`GET/PUT /providers/availability`)
+- Accent = créneau actif, gris = bloqué ; refuse une semaine vide
+- **Pause aujourd’hui** = sheet locale (1 h / aujourd’hui / manuel), pas d’API pause
+- Missions planifiées = cartes `upcoming` (pas de grille mois, pas de FAB)
+
 ---
 
 ## 5. Stripe Connect onboarding

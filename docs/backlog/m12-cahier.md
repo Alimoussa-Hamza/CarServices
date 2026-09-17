@@ -200,10 +200,10 @@ Bandeaux : offline · notifs off · toast 4 s nouvelle mission (**jamais** plein
 
 **API :** `GET/PUT /providers/availability`.
 
-- [ ] Semaine Lun–Dim + chips heures (jamais grille mois)
-- [ ] Accent = dispo, gris = bloqué
-- [ ] **Pause aujourd’hui** → sheet 1 h / aujourd’hui / manuel
-- [ ] Pas de bouton + Material
+- [x] Semaine Lun–Dim + chips heures (jamais grille mois)
+- [x] Accent = dispo, gris = bloqué
+- [x] **Pause aujourd’hui** → sheet 1 h / aujourd’hui / manuel
+- [x] Pas de bouton + Material
 
 ---
 
