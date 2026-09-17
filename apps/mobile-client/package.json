@@ -11,7 +11,8 @@
     "ios": "expo start --ios",
     "lint": "echo 'lint mobile-client'",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "jest --watchAll=false"
+    "test": "jest --watchAll=false",
+    "eas-build-post-install": "pnpm -w --filter @carservice/shared-types build"
   },
   "dependencies": {
     "@carservice/api-client": "workspace:*",

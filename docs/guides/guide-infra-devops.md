@@ -104,27 +104,16 @@ Templates : [deploy/railway.toml](../../deploy/railway.toml) · [deploy/render.y
 
 ## 7. Mobile — EAS
 
-```json
-// eas.json
-{
-  "build": {
-    "development": { "developmentClient": true },
-    "preview": { "distribution": "internal" },
-    "production": {}
-  },
-  "submit": {
-    "production": {}
-  }
-}
-```
+Fichiers : `apps/mobile-client/eas.json` · `apps/mobile-provider/eas.json`  
+Runbook : [eas-preview.md](../runbooks/eas-preview.md)
 
 | Profile | Usage |
 |---------|-------|
 | development | Simulators + dev client |
-| preview | TestFlight / internal APK |
-| production | Store release |
+| preview | APK interne + iOS store (TestFlight via `eas submit`) |
+| production | Store release (N18) |
 
-OTA updates : Expo Updates pour JS-only fixes (pas native modules).
+OTA updates : Expo Updates pour JS-only fixes (pas native modules). SDK **52** figé.
 
 ---
 

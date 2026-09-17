@@ -18,6 +18,8 @@ pnpm --filter @carservice/mobile-client dev
 `EXPO_PUBLIC_USE_MOCKS=true` → repositories mock (pas d’API).  
 `false` → `@carservice/api-client` (`EXPO_PUBLIC_API_URL`).
 
+Preview EAS (APK / TestFlight) : [docs/runbooks/eas-preview.md](../../docs/runbooks/eas-preview.md).
+
 ## Structure
 
 ```

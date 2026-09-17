@@ -15,14 +15,24 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "fr.carservice.client"
+      "bundleIdentifier": "fr.carservice.client",
+      "infoPlist": {
+        "NSCameraUsageDescription": "CarWash utilise l’appareil photo pour les photos du véhicule.",
+        "NSPhotoLibraryUsageDescription": "CarWash accède à la galerie pour les photos du véhicule.",
+        "NSLocationWhenInUseUsageDescription": "CarWash utilise votre position pour vérifier la zone de lavage."
+      }
     },
     "android": {
       "package": "fr.carservice.client",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0D6E4F"
-      }
+      },
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"

@@ -15,14 +15,24 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "fr.carservice.provider"
+      "bundleIdentifier": "fr.carservice.provider",
+      "infoPlist": {
+        "NSCameraUsageDescription": "CarWash Pro utilise l’appareil photo pour les preuves avant/après lavage.",
+        "NSPhotoLibraryUsageDescription": "CarWash Pro accède à la galerie pour joindre les photos de mission.",
+        "NSLocationWhenInUseUsageDescription": "CarWash Pro utilise votre position pour la navigation vers le client."
+      }
     },
     "android": {
       "package": "fr.carservice.provider",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0B5FA5"
-      }
+      },
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -30,8 +40,13 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "expo-web-browser",
-      "expo-clipboard"
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#0B5FA5"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

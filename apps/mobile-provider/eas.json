@@ -1,0 +1,40 @@
+{
+  "cli": {
+    "version": ">= 14.4.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "node": "20.18.0",
+      "pnpm": "9.15.4"
+    },
+    "preview": {
+      "node": "20.18.0",
+      "pnpm": "9.15.4",
+      "env": {
+        "EXPO_PUBLIC_USE_MOCKS": "false"
+      },
+      "android": {
+        "buildType": "apk",
+        "distribution": "internal"
+      },
+      "ios": {
+        "distribution": "store"
+      }
+    },
+    "production": {
+      "node": "20.18.0",
+      "pnpm": "9.15.4",
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_USE_MOCKS": "false"
+      }
+    }
+  },
+  "submit": {
+    "preview": {},
+    "production": {}
+  }
+}

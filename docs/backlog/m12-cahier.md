@@ -235,7 +235,7 @@ Bandeaux : offline · notifs off · toast 4 s nouvelle mission (**jamais** plein
 - [x] P0 photos : `BOOKING_PHOTOS_REQUIRED`
 - [x] `apps/api/test/e2e/m12-provider.e2e-spec.ts` + pyramide unit + build mobile-provider
 
-**Commit gate avant EAS (N16).** Smoke Expo pro = test humain (pas d’EAS tant que tu n’as pas validé).
+**N15 gate commitée.** Smoke simulateur 2026-09-18. N16 : config EAS dans le repo ; builds cloud = compte Expo + Apple.
 
 ---
 

@@ -29,7 +29,7 @@
 | 13 | **N13** | CS-M12-S08 P08 Gains | ia | N12 | `[x]` |
 | 14 | **N14** | CS-M12-S11 Push nouvelle mission | ia | N13 | `[x]` |
 | 15 | **N15** | Gate M12 — golden path client→pro→capture | ia+humain | N14 | `[x]` |
-| 16 | **N16** | M14-S03 EAS preview TestFlight + APK | humain+ia | N15 | `[ ]` |
+| 16 | **N16** | M14-S03 EAS preview TestFlight + APK | humain+ia | N15 | `[~]` |
 | 17 | **N17** | M14-S02 SC-01…06 manuels staging | humain | N16 | `[ ]` |
 | 18 | **N18** | M14-S04/S05 prod + stores | humain | N17 | `[ ]` |
 
@@ -38,7 +38,7 @@
 **Cahier M12 (détail écrans/API/tests) :** [`m12-cahier.md`](m12-cahier.md)  
 **Maquettes v2 :** [`docs/ux/uxpilot-pro-html-v2/`](../ux/uxpilot-pro-html-v2/)
 
-**En cours :** **N16** EAS — seulement après ton smoke Expo. Ne pas lancer sans accord.
+**En cours :** **N16** EAS — config repo `[x]` · builds cloud = `eas login` + Apple (humain).
 
 ---
 
@@ -220,9 +220,24 @@ Token Expo + notif « Nouvelle mission » (high). Mock local si pas `EXPO_ACCESS
 
 ---
 
-## N16–N18 — Launch (M14)
+## N16 — EAS preview (humain+ia)
 
-Uniquement après N15 vert. EAS preview → SC manuels staging → stores. Twilio FR et Places : clés staging ici, pas avant.
+Config repo : `eas.json` client/pro, hook `eas-build-post-install`, runbook [`eas-preview.md`](../runbooks/eas-preview.md).
+
+**Reste humain :**
+
+1. `npx eas-cli@16 login` + `eas init` dans chaque app (écrit `extra.eas.projectId`)
+2. Apple Developer + App Store Connect (`fr.carservice.client` / `fr.carservice.provider`)
+3. `eas env:create` : `EXPO_PUBLIC_API_URL` staging (pas `127.0.0.1`)
+4. `eas build --profile preview -p android` (APK) et `-p ios` puis `eas submit` (TestFlight)
+
+**Done N16 :** liens APK + builds TestFlight `Finished`. Puis N17.
+
+---
+
+## N17–N18 — Launch (M14)
+
+EAS preview → SC manuels staging → stores. Twilio FR et Places : clés staging ici, pas avant.
 
 ---
 
@@ -255,6 +270,7 @@ Uniquement après N15 vert. EAS preview → SC manuels staging → stores. Twili
 | 2026-09-17 | N13 done | P08 Gains solde en transit, sans reverse-commission |
 | 2026-09-17 | N14 done | Push permission + P09b toggles + badge RC Pro |
 | 2026-09-17 | N15 done | Gate e2e m12-provider + pyramide ; EAS bloqué |
+| 2026-09-18 | N16 config | eas.json preview APK+TestFlight · runbook · reste `eas login` |
 
 ### Historique file précédente (post-M11, close)
 

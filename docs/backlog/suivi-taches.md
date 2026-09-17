@@ -25,9 +25,9 @@
 | L — Notifications (M09) | 4/4 | — terminé |
 | M — Admin API (M10) | 8/8 | — terminé |
 | N — Mobile client (M11) | 12/12 | — terminé (gate smoke) |
-| O — Mobile pro (M12) | 11/11 | **gate N15** `[x]` · prochaine N16 EAS après smoke |
+| O — Mobile pro (M12) | 11/11 | — terminé (smoke simulateur 2026-09-18) |
 | P — Admin web (M13) | 8/8 | — terminé |
-| Q — QA & launch (M14) | 5/9 | **après gate M12 (N15)** — EAS / stores |
+| Q — QA & launch (M14) | 5/9 | **N16** `[~]` config EAS · builds = login Expo/Apple |
 | R — Fermeture backend (M15) | 6/6 | — terminé |
 | S — DevOps & Qualité (M16) | 5/5 | — terminé (staging cloud = playbook) |
 
@@ -410,7 +410,7 @@ Cahier : [cahier-mobile-client-m11.md](../cahier-mobile-client-m11.md) · BP UI 
 
 - [x] **CS-M14-S01** Collection Postman API (`docs/postman/`)
 - [ ] **CS-M14-S02** Tests E2E manuels SC-01 à SC-06 (staging réel)
-- [ ] **CS-M14-S03** EAS build preview TestFlight + APK
+- [~] **CS-M14-S03** EAS preview — `eas.json` + runbook `[x]` · cloud builds (login Expo/Apple) `[ ]`
 - [ ] **CS-M14-S04** Prod deploy + smoke tests
 - [ ] **CS-M14-S05** App Store + Play Store submission
 - [x] **CS-M14-S06** Runbook incident + monitoring alertes (docs M16 ; alerting SaaS hors repo)

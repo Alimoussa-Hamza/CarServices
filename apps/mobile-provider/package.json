@@ -11,7 +11,8 @@
     "ios": "expo start --ios",
     "lint": "echo 'lint mobile-provider'",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "jest --watchAll=false --forceExit"
+    "test": "jest --watchAll=false --forceExit",
+    "eas-build-post-install": "pnpm -w --filter @carservice/shared-types build"
   },
   "dependencies": {
     "@carservice/api-client": "workspace:*",
@@ -21,7 +22,9 @@
     "expo": "~52.0.46",
     "expo-clipboard": "~7.0.1",
     "expo-constants": "~17.0.8",
+    "expo-device": "~7.0.3",
     "expo-linking": "~7.0.5",
+    "expo-notifications": "~0.29.14",
     "expo-router": "~4.0.22",
     "expo-secure-store": "~14.0.1",
     "expo-status-bar": "~2.0.1",

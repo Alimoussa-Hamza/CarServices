@@ -156,4 +156,10 @@ Extraire dans `packages/` :
 
 ---
 
+## 9. EAS preview
+
+Bundle ID `fr.carservice.provider`. APK interne + TestFlight : [eas-preview.md](../runbooks/eas-preview.md).
+
+---
+
 → [Guide Client](guide-mobile-client.md) · [Guide API](guide-api-backend.md)
