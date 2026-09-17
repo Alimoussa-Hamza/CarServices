@@ -14,6 +14,7 @@ import type {
   AdminOffer,
   AdminOfferOption,
   AdminPendingProvidersResponse,
+  AdminPlatformConfig,
   AdminRefundBookingDto,
   AdminRefundResponse,
   AdminResolveDisputeDto,
@@ -21,6 +22,7 @@ import type {
   AdminUpdateCategoryDto,
   AdminUpdateOfferDto,
   AdminUpdateOfferOptionDto,
+  AdminUpdatePlatformConfigDto,
   AdminUpdateZoneDto,
   AdminUpsertZonePricingDto,
   AdminZone,
@@ -220,4 +222,16 @@ export async function resolveAdminDispute(
 ): Promise<AdminResolvedDispute> {
   bootstrapAdminApi();
   return api.admin.resolveDispute(disputeId, dto);
+}
+
+export async function fetchAdminConfig(): Promise<AdminPlatformConfig> {
+  bootstrapAdminApi();
+  return api.admin.getConfig();
+}
+
+export async function patchAdminConfig(
+  dto: AdminUpdatePlatformConfigDto,
+): Promise<AdminPlatformConfig> {
+  bootstrapAdminApi();
+  return api.admin.updateConfig(dto);
 }

@@ -138,6 +138,18 @@ Note : Tailwind/shadcn CLI complet reporté — composants maison alignés token
 
 ---
 
+## T04f — CS-M13-S08 Settings
+
+**But :** A09 GET/PATCH `/admin/config` (commission, matching, cancel, frais).
+
+### Checklist
+
+- [x] Formulaire bornes Zod (commission 0–100 exclus, timeouts)
+- [x] PATCH partiel des champs modifiés
+- [x] Tests parse + typecheck + build
+
+---
+
 ## T05 — Maquettes M12
 
 Hors repo code : finaliser UX Pilot pro → puis `CS-M12-S01`.
@@ -163,3 +175,4 @@ EAS / SC-01…06 staging / stores — après T01 et apps stables.
 | 2026-09-17 | T04c done | Zones + pricing A05 |
 | 2026-09-17 | T04d done | Bookings list/detail/refund A06 |
 | 2026-09-17 | T04e done | Litiges file + resolve A07 |
+| 2026-09-17 | T04f done | Settings A09 config plateforme |
