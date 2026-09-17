@@ -1,10 +1,13 @@
 import {
   detectNewMissions,
+  enRouteCtaLabel,
   formatDurationLabel,
   formatNetEur,
   formatSlotLabel,
+  mapsDirectionsUrl,
   quartierLabel,
   missionLocationCopy,
+  telUrl,
 } from '../mission-format';
 
 describe('mission-format', () => {
@@ -48,5 +51,28 @@ describe('mission-format', () => {
   it('détecte une nouvelle mission pour le toast 4 s', () => {
     expect(detectNewMissions(['a'], ['a', 'b'])).toBe(true);
     expect(detectNewMissions(['a', 'b'], ['a', 'b'])).toBe(false);
+  });
+
+  it('ouvre Maps système, pas une nav in-app', () => {
+    expect(
+      mapsDirectionsUrl({
+        lat: 45.76,
+        lng: 4.86,
+        label: '12 rue de la République, 69002 Lyon',
+        platform: 'ios',
+      }),
+    ).toContain('maps.apple.com');
+    expect(
+      mapsDirectionsUrl({
+        lat: 45.76,
+        lng: 4.86,
+        label: '12 rue de la République, 69002 Lyon',
+        platform: 'android',
+      }),
+    ).toMatch(/^geo:/);
+    expect(telUrl('+33612345678')).toBe('tel:+33612345678');
+    expect(enRouteCtaLabel('accepted')).toBe('Je suis en route');
+    expect(enRouteCtaLabel('en_route')).toBe('Je suis arrivé');
+    expect(enRouteCtaLabel('in_progress')).toBeNull();
   });
 });

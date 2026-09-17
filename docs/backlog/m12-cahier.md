@@ -175,12 +175,12 @@ Bandeaux : offline · notifs off · toast 4 s nouvelle mission (**jamais** plein
 
 **API :** `PATCH /bookings/:id/status` `en_route` \| `in_progress` · cancel + motif.
 
-- [ ] Carte ~40 % **un** pin, adresse complète **après** accept, copier, tel ≥ 44 pt
-- [ ] **Ouvrir Maps** = `Linking` système (pas turn-by-turn in-app)
-- [ ] Un sticky CTA : **Je suis en route** → **Je suis arrivé**
-- [ ] Annuler → sheet motif obligatoire (CTA grisé tant que vide)
+- [x] Carte ~40 % **un** pin, adresse complète **après** accept, copier, tel ≥ 44 pt
+- [x] **Ouvrir Maps** = `Linking` système (pas turn-by-turn in-app)
+- [x] Un sticky CTA : **Je suis en route** → **Je suis arrivé**
+- [x] Annuler → sheet motif obligatoire (CTA grisé tant que vide)
 - [ ] `react-native-maps` + `expo-location` si besoin → **dev client EAS** (comme Stripe)
-- [ ] Géofence 200 m = **API**, pas inventée mobile
+- [x] Géofence 200 m = **API**, pas inventée mobile
 
 ---
 

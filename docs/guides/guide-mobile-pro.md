@@ -74,9 +74,12 @@ Upload docs via presigned URL API.
 - 409 `BOOKING_ALREADY_ACCEPTED` → écran déjà prise
 
 ### Active P04
-- Adresse complète après accept
-- CTA morph : `En route` → `Arrivé` → redirect execute
-- Bouton Maps externe + tel client
+- Adresse complète après accept, copier, **un** pin placeholder (pas `react-native-maps` avant EAS)
+- **Ouvrir dans Maps** = `Linking` Apple/Google — pas de turn-by-turn in-app
+- Tel client ≥ 44 pt (`tel:`)
+- CTA sticky : `Je suis en route` (`PATCH en_route`) → `Je suis arrivé` (`PATCH in_progress`, **sans** lat/lng : géofence 200 m = API)
+- Annuler : sheet motif obligatoire (CTA grisé tant que vide)
+- 409 `BOOKING_INVALID_TRANSITION` / 400 `BOOKING_GEOFENCE_FAILED` mappés FR
 
 ### Execute P05
 - Checklist from `offer.checklistTemplate` API

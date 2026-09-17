@@ -19,4 +19,13 @@ describe('mapApiError', () => {
       mapApiError(new ApiError('BOOKING_ALREADY_ACCEPTED', 'x', 409)),
     ).toBe("Cette mission n'est plus disponible.");
   });
+
+  it('mappe géofence et annulation mission', () => {
+    expect(mapApiError(new ApiError('BOOKING_GEOFENCE_FAILED', 'x', 400))).toBe(
+      'Rapprochez-vous du lieu (200 m) pour confirmer l’arrivée.',
+    );
+    expect(
+      mapApiError(new ApiError('BOOKING_CANCEL_REASON_REQUIRED', 'x', 400)),
+    ).toBe('Indiquez un motif d’annulation.');
+  });
 });

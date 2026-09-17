@@ -14,6 +14,7 @@ import { ErrorBanner } from '../../src/components/ui/error-banner';
 import { KycToggle } from '../../src/components/kyc/toggle';
 import {
   fetchMissionBoard,
+  missionOpenHref,
   missionsForTab,
   type MissionBoard,
 } from '../../src/data/missions';
@@ -244,7 +245,9 @@ export default function MissionsScreen() {
               <MissionCard
                 key={mission.id}
                 mission={mission}
-                onPress={() => router.push(`/missions/${mission.id}` as Href)}
+                onPress={() =>
+                  router.push(missionOpenHref(mission, tab) as Href)
+                }
               />
             ))
           )}

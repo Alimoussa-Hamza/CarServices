@@ -14,6 +14,11 @@ const FR_BY_CODE: Record<string, string> = {
   BOOKING_ALREADY_ACCEPTED: "Cette mission n'est plus disponible.",
   BOOKING_NOT_OFFERED: "Cette mission ne vous est plus proposée.",
   BOOKING_NOT_FOUND: 'Mission introuvable.',
+  BOOKING_NOT_ASSIGNED: 'Cette mission ne vous est plus assignée.',
+  BOOKING_INVALID_TRANSITION: 'Cette étape n’est plus possible.',
+  BOOKING_GEOFENCE_FAILED: 'Rapprochez-vous du lieu (200 m) pour confirmer l’arrivée.',
+  BOOKING_CANCEL_REASON_REQUIRED: 'Indiquez un motif d’annulation.',
+  BOOKING_CANCEL_VIA_DISPUTE: 'La mission a déjà commencé. Contactez le support.',
   UNKNOWN_ERROR: 'Une erreur est survenue. Réessaie.',
 };
 

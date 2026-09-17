@@ -48,6 +48,7 @@ function RootNavigator() {
         <Stack.Screen name="missions/[id]/index" />
         <Stack.Screen name="missions/[id]/taken" />
         <Stack.Screen name="missions/[id]/active" />
+        <Stack.Screen name="missions/[id]/execute" />
       </Stack>
     </>
   );

@@ -1,15 +1,22 @@
 import { ApiError } from '@carservice/api-client';
 import {
   acceptMission,
+  canConfirmCancel,
   canConfirmDecline,
+  cancelAssignedMission,
   declineMission,
   fetchMissionBoard,
   fetchMissionDetail,
+  markArrived,
+  missionOpenHref,
+  MOCK_CLIENT_PHONE,
   MOCK_HIDDEN_STREET,
+  MOCK_MISSION_LAT,
   MOCK_MISSION_OK_ID,
   MOCK_MISSION_TAKEN_ID,
   missionsForTab,
   resetMockMissions,
+  startEnRoute,
 } from '../missions';
 
 describe('missions repository (mock)', () => {
@@ -64,5 +71,62 @@ describe('missions repository (mock)', () => {
     await declineMission(MOCK_MISSION_OK_ID, 'Créneau horaire indisponible');
     const board = await fetchMissionBoard();
     expect(board.newMissions.find((item) => item.id === MOCK_MISSION_OK_ID)).toBeUndefined();
+  });
+
+  it('après accept : À venir, rue + tel, pas de saut vers arrivé', async () => {
+    await acceptMission(MOCK_MISSION_OK_ID);
+    const board = await fetchMissionBoard();
+    expect(board.upcoming.map((item) => item.id)).toEqual([MOCK_MISSION_OK_ID]);
+    const detail = await fetchMissionDetail(MOCK_MISSION_OK_ID);
+    expect(detail.street).toBe(MOCK_HIDDEN_STREET);
+    expect(detail.clientPhone).toBe(MOCK_CLIENT_PHONE);
+    expect(detail.lat).toBe(MOCK_MISSION_LAT);
+    await expect(markArrived(MOCK_MISSION_OK_ID)).rejects.toMatchObject({
+      code: 'BOOKING_INVALID_TRANSITION',
+    });
+  });
+
+  it('en route puis arrivé, sans coords géofence côté mobile', async () => {
+    await acceptMission(MOCK_MISSION_OK_ID);
+    const enRoute = await startEnRoute(MOCK_MISSION_OK_ID);
+    expect(enRoute.status).toBe('en_route');
+    const board = await fetchMissionBoard();
+    expect(board.active[0]?.id).toBe(MOCK_MISSION_OK_ID);
+    expect(board.active[0]?.inProgress).toBe(false);
+    const arrived = await markArrived(MOCK_MISSION_OK_ID);
+    expect(arrived.status).toBe('in_progress');
+    expect(arrived.inProgress).toBe(true);
+  });
+
+  it('annuler exige un motif, puis retire la mission assignée', async () => {
+    expect(canConfirmCancel(null)).toBe(false);
+    expect(canConfirmCancel('personal')).toBe(true);
+    await acceptMission(MOCK_MISSION_OK_ID);
+    await expect(cancelAssignedMission(MOCK_MISSION_OK_ID, 'ab')).rejects.toMatchObject({
+      code: 'BOOKING_CANCEL_REASON_REQUIRED',
+    });
+    await cancelAssignedMission(MOCK_MISSION_OK_ID, 'Empêchement personnel');
+    const board = await fetchMissionBoard();
+    expect(board.upcoming).toEqual([]);
+    expect(board.active).toEqual([]);
+  });
+
+  it('ouvre le détail P03 pour une nouvelle, P04 après accept', () => {
+    const card = {
+      id: MOCK_MISSION_OK_ID,
+      offerName: 'Complet',
+      quartier: 'Lyon 3e — Part-Dieu',
+      netLabel: '77,60 € net',
+      slotLabel: "Aujourd'hui, 14h00",
+      durationLabel: '60 min',
+      inProgress: false,
+    };
+    expect(missionOpenHref(card, 'new')).toBe(`/missions/${MOCK_MISSION_OK_ID}`);
+    expect(missionOpenHref(card, 'upcoming')).toBe(
+      `/missions/${MOCK_MISSION_OK_ID}/active`,
+    );
+    expect(missionOpenHref({ ...card, inProgress: true }, 'active')).toBe(
+      `/missions/${MOCK_MISSION_OK_ID}/execute`,
+    );
   });
 });

@@ -4,6 +4,10 @@ jest.mock('expo-secure-store', () => ({
   deleteItemAsync: jest.fn(async () => undefined),
 }));
 
+jest.mock('expo-clipboard', () => ({
+  setStringAsync: jest.fn(async () => true),
+}));
+
 jest.mock('expo-web-browser', () => ({
   openAuthSessionAsync: jest.fn(async () => ({
     type: 'success',
@@ -69,6 +73,8 @@ jest.mock('@carservice/api-client', () => {
         get: jest.fn(),
         accept: jest.fn(),
         decline: jest.fn(),
+        updateStatus: jest.fn(),
+        cancel: jest.fn(),
       },
     },
   };

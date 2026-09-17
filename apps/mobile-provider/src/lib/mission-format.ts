@@ -55,3 +55,34 @@ export function detectNewMissions(
   const previous = new Set(previousIds);
   return nextIds.some((id) => !previous.has(id));
 }
+
+/** Maps système (pas de turn-by-turn in-app). react-native-maps = EAS plus tard. */
+export function mapsDirectionsUrl(input: {
+  lat: number;
+  lng: number;
+  label: string;
+  platform: 'ios' | 'android';
+}): string {
+  const dest = `${input.lat},${input.lng}`;
+  const q = encodeURIComponent(input.label);
+  if (input.platform === 'ios') {
+    return `http://maps.apple.com/?daddr=${dest}&q=${q}`;
+  }
+  return `geo:${dest}?q=${dest}(${q})`;
+}
+
+export function telUrl(phone: string): string {
+  return `tel:${phone.replace(/\s/g, '')}`;
+}
+
+export function enRouteCtaLabel(
+  status: 'accepted' | 'en_route' | 'in_progress' | string,
+): string | null {
+  if (status === 'accepted') {
+    return 'Je suis en route';
+  }
+  if (status === 'en_route') {
+    return 'Je suis arrivé';
+  }
+  return null;
+}

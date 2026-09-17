@@ -1,5 +1,6 @@
 import { api, ApiError } from '@carservice/api-client';
 import type {
+  AddressSnapshot,
   AvailableBooking,
   BookingListItem,
   BookingStatus,
@@ -16,6 +17,10 @@ import { bootstrapApiClient } from './api-bootstrap';
 export const MOCK_MISSION_OK_ID = 'a1111111-1111-4111-8111-111111111101';
 export const MOCK_MISSION_TAKEN_ID = 'a1111111-1111-4111-8111-111111111102';
 export const MOCK_HIDDEN_STREET = '12 rue de la République, 69002 Lyon';
+export const MOCK_ADDRESS_COMPLEMENT = 'Bâtiment B, 2e étage';
+export const MOCK_CLIENT_PHONE = '+33612345678';
+export const MOCK_MISSION_LAT = 45.7606;
+export const MOCK_MISSION_LNG = 4.8594;
 
 export const DECLINE_REASONS = [
   { id: 'too_far', label: 'Trop loin de ma zone' },
@@ -24,6 +29,13 @@ export const DECLINE_REASONS = [
   { id: 'other', label: 'Autre raison' },
 ] as const;
 export type DeclineReasonId = (typeof DECLINE_REASONS)[number]['id'];
+
+export const CANCEL_REASONS = [
+  { id: 'unreachable', label: 'Client injoignable' },
+  { id: 'personal', label: 'Empêchement personnel' },
+  { id: 'vehicle', label: 'Problème de véhicule' },
+] as const;
+export type CancelReasonId = (typeof CANCEL_REASONS)[number]['id'];
 
 export type MissionTab = 'new' | 'upcoming' | 'active';
 
@@ -40,13 +52,23 @@ export type MissionCardModel = {
 export type MissionDetailModel = MissionCardModel & {
   vehicleLabel: string;
   street: string | null;
+  complement: string | null;
   offerHint: string;
+  status: BookingStatus;
+  lat: number | null;
+  lng: number | null;
+  clientPhone: string | null;
 };
 
 export type MissionBoard = {
   newMissions: MissionCardModel[];
   upcoming: MissionCardModel[];
   active: MissionCardModel[];
+};
+
+type MockAssigned = {
+  booking: AvailableBooking;
+  status: Extract<BookingStatus, 'accepted' | 'en_route' | 'in_progress'>;
 };
 
 function useMocksNow(): boolean {
@@ -94,11 +116,18 @@ let mockAvailable: AvailableBooking[] = MOCK_SEED.map((item) => ({
   zone: { ...item.zone },
 }));
 
+let mockAssigned: MockAssigned[] = [];
+
 export function resetMockMissions(): void {
   mockAvailable = MOCK_SEED.map((item) => ({
     ...item,
     zone: { ...item.zone },
   }));
+  mockAssigned = [];
+}
+
+function cloneAvailable(booking: AvailableBooking): AvailableBooking {
+  return { ...booking, zone: { ...booking.zone } };
 }
 
 function toCardFromAvailable(booking: AvailableBooking): MissionCardModel {
@@ -125,22 +154,6 @@ function toCardFromAssigned(booking: BookingListItem): MissionCardModel {
   };
 }
 
-function toDetail(
-  booking: AvailableBooking,
-  street: string | null,
-  vehicleType?: string | null,
-): MissionDetailModel {
-  return {
-    ...toCardFromAvailable(booking),
-    vehicleLabel: vehicleLabel(vehicleType ?? 'berline'),
-    street,
-    offerHint:
-      booking.offerName === 'Complet'
-        ? 'Extérieur + intérieur détaillé'
-        : 'Formule plateforme',
-  };
-}
-
 function vehicleLabel(type: string): string {
   if (type === 'suv') {
     return 'SUV';
@@ -155,6 +168,71 @@ function vehicleLabel(type: string): string {
     return 'Moto';
   }
   return 'Berline';
+}
+
+function offerHint(offerName: string): string {
+  return offerName === 'Complet'
+    ? 'Extérieur + intérieur détaillé'
+    : 'Formule plateforme';
+}
+
+function formatStreet(snapshot: AddressSnapshot): string {
+  return `${snapshot.street}, ${snapshot.postalCode} ${snapshot.city}`;
+}
+
+function toDetail(
+  booking: AvailableBooking,
+  extras: {
+    status: BookingStatus;
+    street: string | null;
+    complement: string | null;
+    lat: number | null;
+    lng: number | null;
+    clientPhone: string | null;
+    vehicleType?: string | null;
+    inProgress?: boolean;
+  },
+): MissionDetailModel {
+  return {
+    ...toCardFromAvailable(booking),
+    inProgress: extras.inProgress ?? extras.status === 'in_progress',
+    vehicleLabel: vehicleLabel(extras.vehicleType ?? 'berline'),
+    street: extras.street,
+    complement: extras.complement,
+    offerHint: offerHint(booking.offerName),
+    status: extras.status,
+    lat: extras.lat,
+    lng: extras.lng,
+    clientPhone: extras.clientPhone,
+  };
+}
+
+function assignedExtras(status: MockAssigned['status']): {
+  status: MockAssigned['status'];
+  street: string;
+  complement: string;
+  lat: number;
+  lng: number;
+  clientPhone: string;
+  inProgress: boolean;
+} {
+  return {
+    status,
+    street: MOCK_HIDDEN_STREET,
+    complement: MOCK_ADDRESS_COMPLEMENT,
+    lat: MOCK_MISSION_LAT,
+    lng: MOCK_MISSION_LNG,
+    clientPhone: MOCK_CLIENT_PHONE,
+    inProgress: status === 'in_progress',
+  };
+}
+
+function requireAssigned(bookingId: string): MockAssigned {
+  const row = mockAssigned.find((item) => item.booking.id === bookingId);
+  if (!row) {
+    throw new ApiError('BOOKING_NOT_FOUND', 'Mission introuvable.', 404);
+  }
+  return row;
 }
 
 export function missionsForTab(
@@ -174,12 +252,38 @@ export function canConfirmDecline(reasonId: DeclineReasonId | null): boolean {
   return reasonId !== null;
 }
 
+export function canConfirmCancel(reasonId: CancelReasonId | null): boolean {
+  return reasonId !== null;
+}
+
+export function missionOpenHref(
+  mission: MissionCardModel,
+  tab: MissionTab,
+): string {
+  if (tab === 'new') {
+    return `/missions/${mission.id}`;
+  }
+  if (mission.inProgress) {
+    return `/missions/${mission.id}/execute`;
+  }
+  return `/missions/${mission.id}/active`;
+}
+
 export async function fetchMissionBoard(): Promise<MissionBoard> {
   if (useMocksNow()) {
     return {
       newMissions: mockAvailable.map(toCardFromAvailable),
-      upcoming: [],
-      active: [],
+      upcoming: mockAssigned
+        .filter((item) => item.status === 'accepted')
+        .map((item) => toCardFromAvailable(item.booking)),
+      active: mockAssigned
+        .filter(
+          (item) => item.status === 'en_route' || item.status === 'in_progress',
+        )
+        .map((item) => ({
+          ...toCardFromAvailable(item.booking),
+          inProgress: item.status === 'in_progress',
+        })),
     };
   }
 
@@ -203,19 +307,29 @@ export async function fetchMissionDetail(
   bookingId: string,
 ): Promise<MissionDetailModel> {
   if (useMocksNow()) {
+    const assigned = mockAssigned.find((item) => item.booking.id === bookingId);
+    if (assigned) {
+      return toDetail(assigned.booking, assignedExtras(assigned.status));
+    }
     const row = mockAvailable.find((item) => item.id === bookingId);
     if (!row) {
       throw new ApiError('BOOKING_NOT_FOUND', 'Mission introuvable.', 404);
     }
-    return toDetail(row, null);
+    return toDetail(row, {
+      status: 'pending_provider',
+      street: null,
+      complement: null,
+      lat: null,
+      lng: null,
+      clientPhone: null,
+    });
   }
 
   bootstrapApiClient();
   const detail = await api.bookings.get(bookingId);
-  const street =
-    detail.status !== 'pending_provider' && detail.addressSnapshot
-      ? `${detail.addressSnapshot.street}, ${detail.addressSnapshot.postalCode} ${detail.addressSnapshot.city}`
-      : null;
+  const snapshot = detail.addressSnapshot;
+  const reveal =
+    detail.status !== 'pending_provider' && snapshot !== null;
   return toDetail(
     {
       id: detail.id,
@@ -228,8 +342,16 @@ export async function fetchMissionDetail(
       score: 0,
       zone: detail.zone,
     },
-    street,
-    detail.vehicleType,
+    {
+      status: detail.status,
+      street: reveal && snapshot ? formatStreet(snapshot) : null,
+      complement: reveal && snapshot ? snapshot.complement ?? snapshot.instructions : null,
+      lat: reveal && snapshot ? snapshot.lat : null,
+      lng: reveal && snapshot ? snapshot.lng : null,
+      clientPhone: reveal ? detail.client?.phone ?? null : null,
+      vehicleType: detail.vehicleType,
+      inProgress: detail.status === 'in_progress',
+    },
   );
 }
 
@@ -249,13 +371,17 @@ export async function acceptMission(bookingId: string): Promise<{
       throw new ApiError('BOOKING_NOT_FOUND', 'Mission introuvable.', 404);
     }
     mockAvailable = mockAvailable.filter((item) => item.id !== bookingId);
+    mockAssigned = [
+      ...mockAssigned,
+      { booking: cloneAvailable(row), status: 'accepted' },
+    ];
     return { street: MOCK_HIDDEN_STREET };
   }
 
   bootstrapApiClient();
   const accepted = await api.bookings.accept(bookingId);
   return {
-    street: `${accepted.addressSnapshot.street}, ${accepted.addressSnapshot.postalCode} ${accepted.addressSnapshot.city}`,
+    street: formatStreet(accepted.addressSnapshot),
   };
 }
 
@@ -270,4 +396,78 @@ export async function declineMission(
 
   bootstrapApiClient();
   await api.bookings.decline(bookingId, { reason });
+}
+
+/** PATCH en_route — transition validée par l’API, pas ici. */
+export async function startEnRoute(
+  bookingId: string,
+): Promise<MissionDetailModel> {
+  if (useMocksNow()) {
+    const row = requireAssigned(bookingId);
+    if (row.status !== 'accepted') {
+      throw new ApiError(
+        'BOOKING_INVALID_TRANSITION',
+        'Cette étape n’est plus possible.',
+        409,
+      );
+    }
+    row.status = 'en_route';
+    return toDetail(row.booking, assignedExtras(row.status));
+  }
+
+  bootstrapApiClient();
+  await api.bookings.updateStatus(bookingId, { status: 'en_route' });
+  return fetchMissionDetail(bookingId);
+}
+
+/** PATCH in_progress — lat/lng omis : géofence 200 m = API (RG-BOOK-03). */
+export async function markArrived(
+  bookingId: string,
+): Promise<MissionDetailModel> {
+  if (useMocksNow()) {
+    const row = requireAssigned(bookingId);
+    if (row.status !== 'en_route') {
+      throw new ApiError(
+        'BOOKING_INVALID_TRANSITION',
+        'Cette étape n’est plus possible.',
+        409,
+      );
+    }
+    row.status = 'in_progress';
+    return toDetail(row.booking, assignedExtras(row.status));
+  }
+
+  bootstrapApiClient();
+  await api.bookings.updateStatus(bookingId, { status: 'in_progress' });
+  return fetchMissionDetail(bookingId);
+}
+
+export async function cancelAssignedMission(
+  bookingId: string,
+  reason: string,
+): Promise<void> {
+  const trimmed = reason.trim();
+  if (trimmed.length < 3) {
+    throw new ApiError(
+      'BOOKING_CANCEL_REASON_REQUIRED',
+      'Indiquez un motif d’annulation.',
+      400,
+    );
+  }
+
+  if (useMocksNow()) {
+    const row = requireAssigned(bookingId);
+    if (row.status === 'in_progress') {
+      throw new ApiError(
+        'BOOKING_CANCEL_VIA_DISPUTE',
+        'La mission a déjà commencé. Contactez le support.',
+        409,
+      );
+    }
+    mockAssigned = mockAssigned.filter((item) => item.booking.id !== bookingId);
+    return;
+  }
+
+  bootstrapApiClient();
+  await api.bookings.cancel(bookingId, { reason: trimmed });
 }

@@ -23,7 +23,7 @@
 | 7 | **N07** | CS-M12-S10 Stripe Connect onboarding | ia | N06 | `[x]` |
 | 8 | **N08** | CS-M12-S04 P02 Liste missions (3 tabs) | ia | N07 | `[x]` |
 | 9 | **N09** | CS-M12-S05 P03 Détail accept / refuse | ia | N08 | `[x]` |
-| 10 | **N10** | CS-M12-S06 P04 En route + Maps + tel | ia | N09 | `[ ]` |
+| 10 | **N10** | CS-M12-S06 P04 En route + Maps + tel | ia | N09 | `[x]` |
 | 11 | **N11** | CS-M12-S07 P05 Checklist + photos 2+2 | ia | N10 | `[ ]` |
 | 12 | **N12** | CS-M12-S09 P07 Planning disponibilités | ia | N11 | `[ ]` |
 | 13 | **N13** | CS-M12-S08 P08 Gains | ia | N12 | `[ ]` |
@@ -38,7 +38,7 @@
 **Cahier M12 (détail écrans/API/tests) :** [`m12-cahier.md`](m12-cahier.md)  
 **Maquettes v2 :** [`docs/ux/uxpilot-pro-html-v2/`](../ux/uxpilot-pro-html-v2/)
 
-**En cours :** prochaine = **N10** En route P04 (dis « ok »).
+**En cours :** prochaine = **N11** Exécution P05 (dis « ok »).
 
 ---
 
@@ -245,6 +245,11 @@ Uniquement après N15 vert. EAS preview → SC manuels staging → stores. Twili
 | 2026-09-17 | N03 GO M12 | maquettes v2 + [`m12-cahier.md`](m12-cahier.md) · N04 ouvert |
 | 2026-09-17 | N04 done | Expo Router + tabs FR + thème Navy · 7 tests |
 | 2026-09-17 | N05 done | OTP provider + gate KYC · 23 tests |
+| 2026-09-17 | N06 done | KYC wizard 7 steps · mock pending |
+| 2026-09-17 | N07 done | Stripe Connect onboarding, pas de Skip |
+| 2026-09-17 | N08 done | P02 liste missions 3 onglets |
+| 2026-09-17 | N09 done | P03 accept/refuse, pas de chrono 8 s |
+| 2026-09-17 | N10 done | P04 En route Maps Linking + tel · géofence API |
 
 ### Historique file précédente (post-M11, close)
 
