@@ -1,8 +1,16 @@
 import { api, initApiClient } from '@carservice/api-client';
 import type {
+  AdminCategory,
+  AdminCreateOfferInput,
+  AdminCreateOfferOptionInput,
   AdminDashboard,
   AdminKycDecisionResponse,
+  AdminOffer,
+  AdminOfferOption,
   AdminPendingProvidersResponse,
+  AdminUpdateCategoryDto,
+  AdminUpdateOfferDto,
+  AdminUpdateOfferOptionDto,
 } from '@carservice/shared-types';
 import { env } from './env';
 import {
@@ -76,4 +84,53 @@ export async function rejectPendingKyc(
 ): Promise<AdminKycDecisionResponse> {
   bootstrapAdminApi();
   return api.admin.rejectProvider(providerId, { reason });
+}
+
+export async function fetchAdminCategories(): Promise<AdminCategory[]> {
+  bootstrapAdminApi();
+  return api.admin.listCategories();
+}
+
+export async function patchAdminCategory(
+  categoryId: string,
+  dto: AdminUpdateCategoryDto,
+): Promise<AdminCategory> {
+  bootstrapAdminApi();
+  return api.admin.updateCategory(categoryId, dto);
+}
+
+export async function fetchAdminOffers(): Promise<AdminOffer[]> {
+  bootstrapAdminApi();
+  return api.admin.listOffers();
+}
+
+export async function createAdminOffer(
+  dto: AdminCreateOfferInput,
+): Promise<AdminOffer> {
+  bootstrapAdminApi();
+  return api.admin.createOffer(dto);
+}
+
+export async function patchAdminOffer(
+  offerId: string,
+  dto: AdminUpdateOfferDto,
+): Promise<AdminOffer> {
+  bootstrapAdminApi();
+  return api.admin.updateOffer(offerId, dto);
+}
+
+export async function createAdminOfferOption(
+  offerId: string,
+  dto: AdminCreateOfferOptionInput,
+): Promise<AdminOfferOption> {
+  bootstrapAdminApi();
+  return api.admin.createOfferOption(offerId, dto);
+}
+
+export async function patchAdminOfferOption(
+  optionId: string,
+  dto: AdminUpdateOfferOptionDto,
+): Promise<AdminOfferOption> {
+  bootstrapAdminApi();
+  return api.admin.updateOfferOption(optionId, dto);
 }
