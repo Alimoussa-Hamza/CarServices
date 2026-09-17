@@ -154,6 +154,8 @@ Onglets **Nouvelles | À venir | En cours**. Carte : horaire gros, **quartier se
 
 Bandeaux : offline · notifs off · toast 4 s nouvelle mission (**jamais** plein écran si P04/P05). Pull-to-refresh. Toggle pause (ouvre sheet Pause).
 
+- [x] 3 onglets + empty + net/quartier + pause
+
 ---
 
 ### N09 · CS-M12-S05 — Détail P03 + refuse

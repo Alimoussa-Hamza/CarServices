@@ -12,6 +12,16 @@ jest.mock('expo-web-browser', () => ({
   maybeCompleteAuthSession: jest.fn(),
 }));
 
+jest.mock('@carservice/shared-types', () => ({
+  computePaymentSplit: (amountCents: number, rate = 0.2) => {
+    const commissionCents = Math.round(amountCents * rate);
+    return {
+      commissionCents,
+      providerNetCents: amountCents - commissionCents,
+    };
+  },
+}));
+
 jest.mock('@carservice/api-client', () => {
   class ApiError extends Error {
     code: string;
@@ -52,6 +62,10 @@ jest.mock('@carservice/api-client', () => {
       },
       zones: {
         check: jest.fn(),
+      },
+      bookings: {
+        available: jest.fn(),
+        list: jest.fn(),
       },
     },
   };

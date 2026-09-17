@@ -25,7 +25,7 @@
 | L — Notifications (M09) | 4/4 | — terminé |
 | M — Admin API (M10) | 8/8 | — terminé |
 | N — Mobile client (M11) | 12/12 | — terminé (gate smoke) |
-| O — Mobile pro (M12) | 4/11 | prochaine **N08** missions · cahier [`m12-cahier.md`](m12-cahier.md) |
+| O — Mobile pro (M12) | 5/11 | prochaine **N09** détail · cahier [`m12-cahier.md`](m12-cahier.md) |
 | P — Admin web (M13) | 8/8 | — terminé |
 | Q — QA & launch (M14) | 5/9 | **après gate M12 (N15)** — EAS / stores |
 | R — Fermeture backend (M15) | 6/6 | — terminé |
@@ -381,7 +381,7 @@ Cahier : [cahier-mobile-client-m11.md](../cahier-mobile-client-m11.md) · BP UI 
 - [x] **CS-M12-S01** Setup Expo Router pro + tabs — **N04** `[x]` (GO N03 2026-09-17)
 - [x] **CS-M12-S02** Auth P00 OTP — **N05** `[x]`
 - [x] **CS-M12-S03** KYC wizard P01 (7 steps) — **N06** `[x]`
-- [ ] **CS-M12-S04** P02 Liste missions (3 tabs)
+- [x] **CS-M12-S04** P02 Liste missions (3 tabs) — **N08** `[x]`
 - [ ] **CS-M12-S05** P03 Détail + accept/decline
 - [ ] **CS-M12-S06** P04 En route + Maps + tel client
 - [ ] **CS-M12-S07** P05 Checklist + upload photos

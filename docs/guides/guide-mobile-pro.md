@@ -61,7 +61,10 @@ Upload docs via presigned URL API.
 ### Liste P02 (tabs segment)
 - **Nouvelles** : `GET /bookings/available` — badge count
 - **À venir** : accepted, slot future
-- **En cours** : in_progress today
+- **En cours** : `en_route` / `in_progress`
+- Carte : horaire, **quartier / zone** (jamais la rue), formule, **net** (`computePaymentSplit` partagé)
+- Empty : *Aucune mission pour le moment.*
+- Pause locale (sheet) — pas de Skip vers une mission sans Connect
 
 ### Détail P03
 - Broadcast ~8 pros, **premier Accepter gagne** (fenêtre minutes). **Pas** de chrono 8 s Uber.

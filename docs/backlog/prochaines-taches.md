@@ -21,7 +21,7 @@
 | 5 | **N05** | CS-M12-S02 Auth P00 OTP | ia | N04 | `[x]` |
 | 6 | **N06** | CS-M12-S03 KYC wizard P01 (7 steps) | ia | N05 | `[x]` |
 | 7 | **N07** | CS-M12-S10 Stripe Connect onboarding | ia | N06 | `[x]` |
-| 8 | **N08** | CS-M12-S04 P02 Liste missions (3 tabs) | ia | N07 | `[ ]` |
+| 8 | **N08** | CS-M12-S04 P02 Liste missions (3 tabs) | ia | N07 | `[x]` |
 | 9 | **N09** | CS-M12-S05 P03 Détail accept / refuse | ia | N08 | `[ ]` |
 | 10 | **N10** | CS-M12-S06 P04 En route + Maps + tel | ia | N09 | `[ ]` |
 | 11 | **N11** | CS-M12-S07 P05 Checklist + photos 2+2 | ia | N10 | `[ ]` |
@@ -38,7 +38,7 @@
 **Cahier M12 (détail écrans/API/tests) :** [`m12-cahier.md`](m12-cahier.md)  
 **Maquettes v2 :** [`docs/ux/uxpilot-pro-html-v2/`](../ux/uxpilot-pro-html-v2/)
 
-**En cours :** prochaine = **N08** liste missions P02 (dis « ok »).
+**En cours :** prochaine = **N09** détail mission P03 (dis « ok »).
 
 ---
 
@@ -153,6 +153,13 @@ Ordre **avant** la file missions : un pro qui accepte sans Connect = dette paiem
 ## N08 — CS-M12-S04 Liste missions P02
 
 Tabs **Nouvelles | À venir | En cours**. Carte : créneau, **quartier seul**, formule, **net pro**, distance. Empty KYC pending.
+
+### Checklist
+
+- [x] 3 onglets + empty
+- [x] Quartier (zone), net (split partagé), pas de rue
+- [x] Pause sheet + pull-to-refresh + toast 4 s
+- [x] Tests + typecheck
 
 ---
 

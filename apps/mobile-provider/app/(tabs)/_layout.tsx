@@ -51,6 +51,7 @@ export default function TabsLayout() {
           key={tab.name}
           name={tab.name}
           options={{
+            headerShown: tab.name !== 'missions',
             title: tab.label,
             tabBarLabel: tab.label,
             tabBarIcon: ({ color, size }) => (
