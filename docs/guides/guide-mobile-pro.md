@@ -70,7 +70,8 @@ Upload docs via presigned URL API.
 - Broadcast ~8 pros, **premier Accepter gagne** (fenêtre minutes). **Pas** de chrono 8 s Uber.
 - Helper : « Plusieurs pros voient cette mission… »
 - **Pas d’adresse exacte** avant accept (RG-SEC-02) — quartier seulement, pas de carte immeuble
-- Afficher gain **net** après commission (API, jamais calculé ici)
+- Afficher gain **net** après commission (helper partagé, jamais un taux inventé ici)
+- 409 `BOOKING_ALREADY_ACCEPTED` → écran déjà prise
 
 ### Active P04
 - Adresse complète après accept

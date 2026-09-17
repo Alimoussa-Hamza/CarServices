@@ -5,6 +5,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { router, type Href } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MissionCard } from '../../src/components/missions/mission-card';
 import { MissionTabs } from '../../src/components/missions/mission-tabs';
@@ -240,7 +241,11 @@ export default function MissionsScreen() {
             </Text>
           ) : (
             items.map((mission) => (
-              <MissionCard key={mission.id} mission={mission} />
+              <MissionCard
+                key={mission.id}
+                mission={mission}
+                onPress={() => router.push(`/missions/${mission.id}` as Href)}
+              />
             ))
           )}
         </ScrollView>

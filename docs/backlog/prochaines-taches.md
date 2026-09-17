@@ -22,7 +22,7 @@
 | 6 | **N06** | CS-M12-S03 KYC wizard P01 (7 steps) | ia | N05 | `[x]` |
 | 7 | **N07** | CS-M12-S10 Stripe Connect onboarding | ia | N06 | `[x]` |
 | 8 | **N08** | CS-M12-S04 P02 Liste missions (3 tabs) | ia | N07 | `[x]` |
-| 9 | **N09** | CS-M12-S05 P03 Détail accept / refuse | ia | N08 | `[ ]` |
+| 9 | **N09** | CS-M12-S05 P03 Détail accept / refuse | ia | N08 | `[x]` |
 | 10 | **N10** | CS-M12-S06 P04 En route + Maps + tel | ia | N09 | `[ ]` |
 | 11 | **N11** | CS-M12-S07 P05 Checklist + photos 2+2 | ia | N10 | `[ ]` |
 | 12 | **N12** | CS-M12-S09 P07 Planning disponibilités | ia | N11 | `[ ]` |
@@ -38,7 +38,7 @@
 **Cahier M12 (détail écrans/API/tests) :** [`m12-cahier.md`](m12-cahier.md)  
 **Maquettes v2 :** [`docs/ux/uxpilot-pro-html-v2/`](../ux/uxpilot-pro-html-v2/)
 
-**En cours :** prochaine = **N09** détail mission P03 (dis « ok »).
+**En cours :** prochaine = **N10** En route P04 (dis « ok »).
 
 ---
 
@@ -166,6 +166,13 @@ Tabs **Nouvelles | À venir | En cours**. Carte : créneau, **quartier seul**, f
 ## N09 — CS-M12-S05 Détail + accept/refuse P03
 
 CTAs Accepter / Refuser. Après accept : adresse complète. Logique transition = API.
+
+### Checklist
+
+- [x] Hero net, quartier, pas de rue avant accept
+- [x] Helper premier qui accepte + pas de chrono 8 s
+- [x] Sheet refus + P03e déjà prise
+- [x] Tests + typecheck
 
 ---
 

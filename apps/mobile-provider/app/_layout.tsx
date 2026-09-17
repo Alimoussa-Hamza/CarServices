@@ -45,6 +45,9 @@ function RootNavigator() {
         <Stack.Screen name="(kyc)/rejected" />
         <Stack.Screen name="(kyc)/connect" />
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="missions/[id]/index" />
+        <Stack.Screen name="missions/[id]/taken" />
+        <Stack.Screen name="missions/[id]/active" />
       </Stack>
     </>
   );

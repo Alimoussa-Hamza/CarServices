@@ -11,6 +11,9 @@ const FR_BY_CODE: Record<string, string> = {
   STRIPE_ACCOUNT_LINK_FAILED: 'Impossible d’ouvrir l’onboarding Stripe.',
   STRIPE_CHARGES_DISABLED: 'Activez les virements pour recevoir des missions.',
   NETWORK_ERROR: 'Connexion impossible. Vérifie ton réseau.',
+  BOOKING_ALREADY_ACCEPTED: "Cette mission n'est plus disponible.",
+  BOOKING_NOT_OFFERED: "Cette mission ne vous est plus proposée.",
+  BOOKING_NOT_FOUND: 'Mission introuvable.',
   UNKNOWN_ERROR: 'Une erreur est survenue. Réessaie.',
 };
 

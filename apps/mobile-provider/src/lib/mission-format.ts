@@ -37,6 +37,17 @@ export function quartierLabel(zoneName: string): string {
   return zoneName.trim();
 }
 
+/** RG-SEC-02: rue seulement après accept. */
+export function missionLocationCopy(input: {
+  quartier: string;
+  street: string | null;
+}): { title: string; hint: string } {
+  return {
+    title: quartierLabel(input.quartier),
+    hint: input.street ?? 'Adresse exacte après acceptation',
+  };
+}
+
 export function detectNewMissions(
   previousIds: string[],
   nextIds: string[],

@@ -4,6 +4,7 @@ import {
   formatNetEur,
   formatSlotLabel,
   quartierLabel,
+  missionLocationCopy,
 } from '../mission-format';
 
 describe('mission-format', () => {
@@ -24,6 +25,24 @@ describe('mission-format', () => {
     expect(formatDurationLabel(start.toISOString(), end.toISOString())).toBe(
       '60 min',
     );
+  });
+
+  it('masque la rue tant que la mission n’est pas acceptée', () => {
+    expect(
+      missionLocationCopy({
+        quartier: 'Lyon 3e — Part-Dieu',
+        street: null,
+      }),
+    ).toEqual({
+      title: 'Lyon 3e — Part-Dieu',
+      hint: 'Adresse exacte après acceptation',
+    });
+    expect(
+      missionLocationCopy({
+        quartier: 'Lyon 3e — Part-Dieu',
+        street: '12 rue de la République, 69002 Lyon',
+      }).hint,
+    ).toContain('rue');
   });
 
   it('détecte une nouvelle mission pour le toast 4 s', () => {

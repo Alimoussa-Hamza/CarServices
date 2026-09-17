@@ -66,6 +66,9 @@ jest.mock('@carservice/api-client', () => {
       bookings: {
         available: jest.fn(),
         list: jest.fn(),
+        get: jest.fn(),
+        accept: jest.fn(),
+        decline: jest.fn(),
       },
     },
   };

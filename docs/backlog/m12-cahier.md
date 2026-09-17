@@ -162,12 +162,12 @@ Bandeaux : offline · notifs off · toast 4 s nouvelle mission (**jamais** plein
 
 **API :** `GET /bookings/:id` · `POST .../accept` · `POST .../decline`.
 
-- [ ] Hero **Vous gagnez 77,60 € net** (montant API)
-- [ ] Quartier + *Adresse exacte après acceptation* — **zéro carte immeuble**
-- [ ] Helper : *Plusieurs pros voient cette mission. Le premier qui accepte la prend.*
-- [ ] Accepter → **Vérification…** → P04 ou P03e
-- [ ] **Pas** de chrono 8 s Uber
-- [ ] Sheet Refuser (radios + confirmer)
+- [x] Hero **Vous gagnez 77,60 € net** (montant API)
+- [x] Quartier + *Adresse exacte après acceptation* — **zéro carte immeuble**
+- [x] Helper : *Plusieurs pros voient cette mission. Le premier qui accepte la prend.*
+- [x] Accepter → **Vérification…** → P04 ou P03e
+- [x] **Pas** de chrono 8 s Uber
+- [x] Sheet Refuser (radios + confirmer)
 
 ---
 

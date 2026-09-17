@@ -13,4 +13,10 @@ describe('mapApiError', () => {
       'Stripe est indisponible. Réessaie dans un instant.',
     );
   });
+
+  it('mappe une mission déjà prise', () => {
+    expect(
+      mapApiError(new ApiError('BOOKING_ALREADY_ACCEPTED', 'x', 409)),
+    ).toBe("Cette mission n'est plus disponible.");
+  });
 });

@@ -1,13 +1,21 @@
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import type { MissionCardModel } from '../../data/missions';
 import { useTheme } from '../../theme/theme-provider';
 
-export function MissionCard({ mission }: { mission: MissionCardModel }) {
+export function MissionCard({
+  mission,
+  onPress,
+}: {
+  mission: MissionCardModel;
+  onPress?: () => void;
+}) {
   const { colors, radius, spacing, typography } = useTheme();
 
   return (
-    <View
+    <Pressable
       testID={`mission-card-${mission.id}`}
+      onPress={onPress}
+      disabled={!onPress}
       style={{
         backgroundColor: colors.neutral[0],
         borderRadius: radius.md,
@@ -101,6 +109,6 @@ export function MissionCard({ mission }: { mission: MissionCardModel }) {
           </Text>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
