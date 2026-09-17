@@ -31,6 +31,17 @@ jest.mock('@carservice/api-client', () => {
       providers: {
         me: jest.fn(),
         kycStatus: jest.fn(),
+        updateMe: jest.fn(),
+        submitKyc: jest.fn(),
+        updateCapabilities: jest.fn(),
+        updateAvailability: jest.fn(),
+        updateZones: jest.fn(),
+      },
+      catalog: {
+        offers: jest.fn(),
+      },
+      zones: {
+        check: jest.fn(),
       },
     },
   };

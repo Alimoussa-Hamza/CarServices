@@ -18,7 +18,7 @@ describe('resolveSessionRoute', () => {
         kycStatus: 'draft',
         chargesEnabled: false,
       }),
-    ).toBe('/(kyc)/start');
+    ).toBe('/(kyc)/wizard/1');
   });
 
   it('pending / rejected / connect avant missions', () => {

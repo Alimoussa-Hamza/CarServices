@@ -40,6 +40,7 @@ function RootNavigator() {
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)/login" />
         <Stack.Screen name="(kyc)/start" />
+        <Stack.Screen name="(kyc)/wizard/[step]" />
         <Stack.Screen name="(kyc)/pending" />
         <Stack.Screen name="(kyc)/rejected" />
         <Stack.Screen name="(kyc)/connect" />

@@ -2,7 +2,7 @@ import type { KycStatus } from '@carservice/shared-types';
 
 export type SessionRoute =
   | '/(auth)/login'
-  | '/(kyc)/start'
+  | '/(kyc)/wizard/1'
   | '/(kyc)/pending'
   | '/(kyc)/rejected'
   | '/(kyc)/connect'
@@ -32,5 +32,5 @@ export function resolveSessionRoute(input: {
   if (input.kycStatus === 'approved') {
     return '/(kyc)/connect';
   }
-  return '/(kyc)/start';
+  return '/(kyc)/wizard/1';
 }

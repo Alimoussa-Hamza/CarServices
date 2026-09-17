@@ -131,6 +131,8 @@ Puis Pending (pas de tabs, 48 h, Voir/Actualiser) · Rejected (RC illisible, **C
 
 **RG-KYC :** missions lock si pas `approved`.
 
+- [x] Wizard `/(kyc)/wizard/1`–`7` + pending/rejected
+
 ---
 
 ### N07 · CS-M12-S10 — Stripe Connect

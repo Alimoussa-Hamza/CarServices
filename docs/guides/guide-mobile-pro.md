@@ -18,7 +18,7 @@ Permettre au pro de **recevoir, accepter et exécuter** des missions, avec **cl�
 |-------|-----------|----------|
 | `app/index.tsx` | P00 Splash | P0 |
 | `app/(auth)/login.tsx` | P00 Auth OTP | P0 |
-| `app/(kyc)/[step].tsx` | P01 KYC 7 écrans | P0 |
+| `app/(kyc)/wizard/[step].tsx` | P01 KYC 7 écrans | P0 |
 | `app/(kyc)/pending.tsx` | Attente validation | P0 |
 | `app/(kyc)/rejected.tsx` | Dossier refusé | P0 |
 | `app/(kyc)/connect.tsx` | Stripe Connect (pas de Skip) | P0 |
@@ -44,7 +44,7 @@ Wizard 7 étapes — **bloquant** tant que `kyc_status !== approved`
 
 | Step | Champs | Validation |
 |------|--------|------------|
-| 1 | companyName, siret, iban | SIRET 14 chiffres |
+| 1 | companyName, siret | SIRET 14 chiffres (IBAN via Connect, pas ici) |
 | 2 | rcPro document upload | PDF/JPG, expiry date |
 | 3 | washMethods[] | min 1: waterless|steam |
 | 4 | zones + base address | map radius |
