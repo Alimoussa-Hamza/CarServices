@@ -24,6 +24,9 @@ importers:
       '@carservice/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
+      '@carservice/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       '@carservice/ui-tokens':
         specifier: workspace:*
         version: link:../../packages/ui-tokens

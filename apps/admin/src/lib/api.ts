@@ -1,4 +1,5 @@
 import { api, initApiClient } from '@carservice/api-client';
+import type { AdminDashboard } from '@carservice/shared-types';
 import { env } from './env';
 import {
   clearAdminSession,
@@ -46,4 +47,9 @@ export async function logoutAdmin(): Promise<void> {
   } catch {
     // session locale déjà effacée
   }
+}
+
+export async function fetchAdminDashboard(): Promise<AdminDashboard> {
+  bootstrapAdminApi();
+  return api.admin.dashboard();
 }
