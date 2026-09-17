@@ -188,11 +188,11 @@ Bandeaux : offline · notifs off · toast 4 s nouvelle mission (**jamais** plein
 
 **API :** upload photos · checklist · `PATCH .../status` `completed` (capture **côté API**).
 
-- [ ] Compteurs **Avant n/2** · **Après n/2** (min 2+2, RG-BOOK-04)
-- [ ] Checklist offre
-- [ ] **Terminer la prestation** grisé + helper tant que KO
-- [ ] Sheets : caméra OS, source, preview, confirm
-- [ ] P06 : check, gros net, **Voir mes gains** (pas confettis)
+- [x] Compteurs **Avant n/2** · **Après n/2** (min 2+2, RG-BOOK-04)
+- [x] Checklist offre
+- [x] **Terminer la prestation** grisé + helper tant que KO
+- [x] Sheets : caméra OS, source, preview, confirm
+- [x] P06 : check, gros net, **Voir mes gains** (pas confettis)
 
 ---
 

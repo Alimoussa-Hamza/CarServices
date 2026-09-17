@@ -27,5 +27,8 @@ describe('mapApiError', () => {
     expect(
       mapApiError(new ApiError('BOOKING_CANCEL_REASON_REQUIRED', 'x', 400)),
     ).toBe('Indiquez un motif d’annulation.');
+    expect(
+      mapApiError(new ApiError('BOOKING_PHOTOS_REQUIRED', 'x', 400)),
+    ).toBe('Ajoutez 2 photos avant et 2 photos après pour terminer.');
   });
 });

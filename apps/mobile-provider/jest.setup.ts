@@ -58,6 +58,8 @@ jest.mock('@carservice/api-client', () => {
         updateCapabilities: jest.fn(),
         updateAvailability: jest.fn(),
         updateZones: jest.fn(),
+        kycAlerts: jest.fn(),
+        availability: jest.fn(),
         createStripeOnboardingLink: jest.fn(),
         missionEligibility: jest.fn(),
       },
@@ -75,6 +77,13 @@ jest.mock('@carservice/api-client', () => {
         decline: jest.fn(),
         updateStatus: jest.fn(),
         cancel: jest.fn(),
+      },
+      media: {
+        createUploadUrl: jest.fn(),
+        confirmUpload: jest.fn(),
+      },
+      users: {
+        registerPushToken: jest.fn(),
       },
     },
   };

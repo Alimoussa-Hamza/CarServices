@@ -82,9 +82,10 @@ Upload docs via presigned URL API.
 - 409 `BOOKING_INVALID_TRANSITION` / 400 `BOOKING_GEOFENCE_FAILED` mappés FR
 
 ### Execute P05
-- Checklist from `offer.checklistTemplate` API
-- Photos : min 2 before + 2 after (compteur UI)
-- CTA "Terminer" disabled jusqu’à valid
+- Compteurs **Avant n/2** · **Après n/2** (min 2+2, RG-BOOK-04)
+- Checklist locale (pas de state-machine)
+- **Terminer** grisé + helper tant que KO ; capture **côté API** (`PATCH completed`)
+- P06 : check, gros net, **Voir mes gains**
 
 ---
 

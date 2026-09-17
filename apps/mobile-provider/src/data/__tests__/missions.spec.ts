@@ -1,10 +1,14 @@
 import { ApiError } from '@carservice/api-client';
 import {
   acceptMission,
+  addExecutionPhoto,
+  canCompleteExecution,
   canConfirmCancel,
   canConfirmDecline,
   cancelAssignedMission,
+  completeMission,
   declineMission,
+  fetchExecution,
   fetchMissionBoard,
   fetchMissionDetail,
   markArrived,
@@ -17,6 +21,7 @@ import {
   missionsForTab,
   resetMockMissions,
   startEnRoute,
+  toggleChecklistItem,
 } from '../missions';
 
 describe('missions repository (mock)', () => {
@@ -128,5 +133,31 @@ describe('missions repository (mock)', () => {
     expect(missionOpenHref({ ...card, inProgress: true }, 'active')).toBe(
       `/missions/${MOCK_MISSION_OK_ID}/execute`,
     );
+  });
+
+  it('P05 : Terminer reste bloqué tant que 2+2 et checklist incomplets', async () => {
+    await acceptMission(MOCK_MISSION_OK_ID);
+    await startEnRoute(MOCK_MISSION_OK_ID);
+    await markArrived(MOCK_MISSION_OK_ID);
+    let execution = await fetchExecution(MOCK_MISSION_OK_ID);
+    expect(canCompleteExecution(execution)).toBe(false);
+    execution = await addExecutionPhoto(MOCK_MISSION_OK_ID, 'before');
+    execution = await addExecutionPhoto(MOCK_MISSION_OK_ID, 'before');
+    execution = await addExecutionPhoto(MOCK_MISSION_OK_ID, 'after');
+    execution = await addExecutionPhoto(MOCK_MISSION_OK_ID, 'after');
+    expect(canCompleteExecution(execution)).toBe(false);
+    for (const item of execution.checklist) {
+      execution = await toggleChecklistItem(
+        MOCK_MISSION_OK_ID,
+        item.id,
+        execution,
+      );
+    }
+    expect(canCompleteExecution(execution)).toBe(true);
+    const done = await completeMission(MOCK_MISSION_OK_ID);
+    expect(done.payout).toBe('pending');
+    expect(done.netLabel).toBe('77,60 € net');
+    const board = await fetchMissionBoard();
+    expect(board.active).toEqual([]);
   });
 });

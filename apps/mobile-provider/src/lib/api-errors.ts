@@ -19,6 +19,7 @@ const FR_BY_CODE: Record<string, string> = {
   BOOKING_GEOFENCE_FAILED: 'Rapprochez-vous du lieu (200 m) pour confirmer l’arrivée.',
   BOOKING_CANCEL_REASON_REQUIRED: 'Indiquez un motif d’annulation.',
   BOOKING_CANCEL_VIA_DISPUTE: 'La mission a déjà commencé. Contactez le support.',
+  BOOKING_PHOTOS_REQUIRED: 'Ajoutez 2 photos avant et 2 photos après pour terminer.',
   UNKNOWN_ERROR: 'Une erreur est survenue. Réessaie.',
 };
 

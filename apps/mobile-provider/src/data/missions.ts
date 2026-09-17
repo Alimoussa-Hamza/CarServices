@@ -69,6 +69,9 @@ export type MissionBoard = {
 type MockAssigned = {
   booking: AvailableBooking;
   status: Extract<BookingStatus, 'accepted' | 'en_route' | 'in_progress'>;
+  beforeUris: string[];
+  afterUris: string[];
+  checkedIds: string[];
 };
 
 function useMocksNow(): boolean {
@@ -118,12 +121,42 @@ let mockAvailable: AvailableBooking[] = MOCK_SEED.map((item) => ({
 
 let mockAssigned: MockAssigned[] = [];
 
+export const DEFAULT_CHECKLIST = [
+  { id: 'vacuum', label: 'Aspiration intérieure' },
+  { id: 'windows', label: 'Nettoyage des vitres' },
+  { id: 'wheels', label: 'Traitement des jantes' },
+  { id: 'dashboard', label: 'Plastiques et tableau de bord' },
+] as const;
+
+export const MIN_BEFORE_PHOTOS = 2;
+export const MIN_AFTER_PHOTOS = 2;
+
+export type ChecklistItemModel = {
+  id: string;
+  label: string;
+  done: boolean;
+};
+
+export type ExecutionModel = MissionDetailModel & {
+  beforeUris: string[];
+  afterUris: string[];
+  checklist: ChecklistItemModel[];
+};
+
+export type CompletedMissionModel = MissionCardModel & {
+  completedAt: string;
+  payout: 'pending' | 'paid';
+};
+
+let mockCompleted: CompletedMissionModel[] = [];
+
 export function resetMockMissions(): void {
   mockAvailable = MOCK_SEED.map((item) => ({
     ...item,
     zone: { ...item.zone },
   }));
   mockAssigned = [];
+  mockCompleted = [];
 }
 
 function cloneAvailable(booking: AvailableBooking): AvailableBooking {
@@ -373,7 +406,13 @@ export async function acceptMission(bookingId: string): Promise<{
     mockAvailable = mockAvailable.filter((item) => item.id !== bookingId);
     mockAssigned = [
       ...mockAssigned,
-      { booking: cloneAvailable(row), status: 'accepted' },
+      {
+        booking: cloneAvailable(row),
+        status: 'accepted',
+        beforeUris: [],
+        afterUris: [],
+        checkedIds: [],
+      },
     ];
     return { street: MOCK_HIDDEN_STREET };
   }
@@ -471,3 +510,179 @@ export async function cancelAssignedMission(
   bootstrapApiClient();
   await api.bookings.cancel(bookingId, { reason: trimmed });
 }
+
+function checklistFromAssigned(row: MockAssigned): ChecklistItemModel[] {
+  return DEFAULT_CHECKLIST.map((item) => ({
+    id: item.id,
+    label: item.label,
+    done: row.checkedIds.includes(item.id),
+  }));
+}
+
+function toExecution(row: MockAssigned): ExecutionModel {
+  return {
+    ...toDetail(row.booking, assignedExtras(row.status)),
+    beforeUris: [...row.beforeUris],
+    afterUris: [...row.afterUris],
+    checklist: checklistFromAssigned(row),
+  };
+}
+
+export function canCompleteExecution(execution: ExecutionModel): boolean {
+  return (
+    execution.beforeUris.length >= MIN_BEFORE_PHOTOS &&
+    execution.afterUris.length >= MIN_AFTER_PHOTOS &&
+    execution.checklist.every((item) => item.done)
+  );
+}
+
+export async function fetchExecution(
+  bookingId: string,
+): Promise<ExecutionModel> {
+  if (useMocksNow()) {
+    const row = requireAssigned(bookingId);
+    return toExecution(row);
+  }
+
+  bootstrapApiClient();
+  const [detail, full] = await Promise.all([
+    fetchMissionDetail(bookingId),
+    api.bookings.get(bookingId),
+  ]);
+  return {
+    ...detail,
+    beforeUris: full.photos
+      .filter((photo) => photo.photoType === 'before')
+      .map((photo) => photo.fileUrl),
+    afterUris: full.photos
+      .filter((photo) => photo.photoType === 'after')
+      .map((photo) => photo.fileUrl),
+    checklist: DEFAULT_CHECKLIST.map((item) => ({
+      id: item.id,
+      label: item.label,
+      done: false,
+    })),
+  };
+}
+
+export async function addExecutionPhoto(
+  bookingId: string,
+  kind: 'before' | 'after',
+  uri = `mock://${kind}-${Date.now()}`,
+): Promise<ExecutionModel> {
+  if (useMocksNow()) {
+    const row = requireAssigned(bookingId);
+    if (kind === 'before') {
+      row.beforeUris = [...row.beforeUris, uri];
+    } else {
+      row.afterUris = [...row.afterUris, uri];
+    }
+    return toExecution(row);
+  }
+
+  bootstrapApiClient();
+  const uploaded = await api.media.createUploadUrl({
+    mimeType: 'image/jpeg',
+    context: 'booking_photo',
+    bookingId,
+    photoType: kind,
+  });
+  await fetch(uploaded.uploadUrl, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'image/jpeg' },
+    body: uri,
+  });
+  await api.media.confirmUpload({ fileKey: uploaded.fileKey });
+  return fetchExecution(bookingId);
+}
+
+export async function toggleChecklistItem(
+  bookingId: string,
+  itemId: string,
+  current: ExecutionModel,
+): Promise<ExecutionModel> {
+  const checklist = current.checklist.map((item) =>
+    item.id === itemId ? { ...item, done: !item.done } : item,
+  );
+  if (useMocksNow()) {
+    const row = requireAssigned(bookingId);
+    row.checkedIds = checklist.filter((item) => item.done).map((item) => item.id);
+  }
+  return { ...current, checklist };
+}
+
+export async function completeMission(
+  bookingId: string,
+): Promise<CompletedMissionModel> {
+  if (useMocksNow()) {
+    const row = requireAssigned(bookingId);
+    const execution = toExecution(row);
+    if (!canCompleteExecution(execution)) {
+      throw new ApiError(
+        'BOOKING_PHOTOS_REQUIRED',
+        'Ajoutez 2 photos avant et 2 photos après pour terminer.',
+        400,
+      );
+    }
+    const card = toCardFromAvailable(row.booking);
+    const completed: CompletedMissionModel = {
+      ...card,
+      inProgress: false,
+      completedAt: new Date().toISOString(),
+      payout: 'pending',
+    };
+    mockAssigned = mockAssigned.filter((item) => item.booking.id !== bookingId);
+    mockCompleted = [completed, ...mockCompleted];
+    return completed;
+  }
+
+  bootstrapApiClient();
+  await api.bookings.updateStatus(bookingId, { status: 'completed' });
+  const detail = await fetchMissionDetail(bookingId);
+  return {
+    ...detail,
+    completedAt: new Date().toISOString(),
+    payout: 'pending',
+  };
+}
+
+export async function fetchCompletedMissions(): Promise<CompletedMissionModel[]> {
+  if (useMocksNow()) {
+    if (mockCompleted.length === 0) {
+      return [
+        {
+          id: 'c1111111-1111-4111-8111-111111111201',
+          offerName: 'Complet',
+          quartier: 'Lyon 3e — Part-Dieu',
+          netLabel: formatNetEur(9700),
+          slotLabel: formatSlotLabel(new Date().toISOString()),
+          durationLabel: '60 min',
+          inProgress: false,
+          completedAt: new Date().toISOString(),
+          payout: 'pending',
+        },
+        {
+          id: 'c1111111-1111-4111-8111-111111111202',
+          offerName: 'Extérieur',
+          quartier: 'Lyon 6e — Foch',
+          netLabel: formatNetEur(4000),
+          slotLabel: formatSlotLabel(new Date(Date.now() - 86400000).toISOString()),
+          durationLabel: '45 min',
+          inProgress: false,
+          completedAt: new Date(Date.now() - 86400000).toISOString(),
+          payout: 'paid',
+        },
+      ];
+    }
+    return [...mockCompleted];
+  }
+
+  bootstrapApiClient();
+  const rows = await api.bookings.list({ status: ['completed'] });
+  return rows.map((row) => ({
+    ...toCardFromAssigned(row),
+    completedAt: row.slotEnd,
+    payout: 'pending' as const,
+  }));
+}
+
