@@ -10,6 +10,7 @@ type MissionsUiState = {
   pausedUntil: number | null;
   notificationsEnabled: boolean;
   setTab: (tab: MissionTab) => void;
+  setNotificationsEnabled: (value: boolean) => void;
   openPauseSheet: () => void;
   closePauseSheet: () => void;
   setPauseChoice: (choice: PauseChoice) => void;
@@ -36,6 +37,7 @@ export const useMissionsUiStore = create<MissionsUiState>((set) => ({
   pausedUntil: null,
   notificationsEnabled: true,
   setTab: (tab) => set({ tab }),
+  setNotificationsEnabled: (notificationsEnabled) => set({ notificationsEnabled }),
   openPauseSheet: () => set({ pauseSheetOpen: true, pauseChoice: '1h' }),
   closePauseSheet: () => set({ pauseSheetOpen: false }),
   setPauseChoice: (pauseChoice) => set({ pauseChoice }),

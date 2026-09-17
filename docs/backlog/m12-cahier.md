@@ -221,11 +221,11 @@ Bandeaux : offline · notifs off · toast 4 s nouvelle mission (**jamais** plein
 
 **API :** register token Expo · events déjà envoyés (M09).
 
-- [ ] Permission Autoriser / Plus tard
-- [ ] Tap notif → P03 ; si P04/P05 → système only
-- [ ] P09b : Nouvelles missions · Son (grisé si Nouvelles off) · Rappels H-1 · Compte
-- [ ] 1 ping court si Son on · mock si pas `EXPO_ACCESS_TOKEN`
-- [ ] Profil : badge **RC Pro · expire dans 30 j** (`/providers/kyc/alerts`)
+- [x] Permission Autoriser / Plus tard
+- [x] Tap notif → P03 ; si P04/P05 → système only
+- [x] P09b : Nouvelles missions · Son (grisé si Nouvelles off) · Rappels H-1 · Compte
+- [x] 1 ping court si Son on · mock si pas `EXPO_ACCESS_TOKEN`
+- [x] Profil : badge **RC Pro · expire dans 30 j** (`/providers/kyc/alerts`)
 
 ---
 

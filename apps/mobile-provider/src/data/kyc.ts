@@ -141,3 +141,20 @@ export async function submitKycDossier(draft: KycDraft): Promise<KycGate> {
   await api.providers.submitKyc(toSubmitKycDto(draft));
   return fetchKycGate();
 }
+
+export type RcProBadge = {
+  kind: 'expiring_soon' | 'expired';
+  daysRemaining: number;
+} | null;
+
+export async function fetchRcProAlert(): Promise<RcProBadge> {
+  if (useMocksNow()) {
+    return { kind: 'expiring_soon', daysRemaining: 30 };
+  }
+  bootstrapApiClient();
+  const { alert } = await api.providers.kycAlerts();
+  if (!alert) {
+    return null;
+  }
+  return { kind: alert.kind, daysRemaining: alert.daysRemaining };
+}

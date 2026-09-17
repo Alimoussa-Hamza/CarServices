@@ -2,6 +2,7 @@ import { ApiError } from '@carservice/api-client';
 import { EMPTY_KYC_DRAFT, type KycDraft } from '../../lib/kyc-validation';
 import {
   fetchKycGate,
+  fetchRcProAlert,
   refreshKycStatus,
   resetMockKycGate,
   setMockKycGate,
@@ -70,6 +71,13 @@ describe('kyc repository (mock)', () => {
       kycStatus: 'approved',
       chargesEnabled: false,
       rejectionReason: null,
+    });
+  });
+
+  it('badge RC Pro J-30 depuis /providers/kyc/alerts (mock)', async () => {
+    await expect(fetchRcProAlert()).resolves.toEqual({
+      kind: 'expiring_soon',
+      daysRemaining: 30,
     });
   });
 });

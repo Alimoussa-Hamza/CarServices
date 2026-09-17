@@ -27,7 +27,7 @@
 | 11 | **N11** | CS-M12-S07 P05 Checklist + photos 2+2 | ia | N10 | `[x]` |
 | 12 | **N12** | CS-M12-S09 P07 Planning disponibilités | ia | N11 | `[x]` |
 | 13 | **N13** | CS-M12-S08 P08 Gains | ia | N12 | `[x]` |
-| 14 | **N14** | CS-M12-S11 Push nouvelle mission | ia | N13 | `[ ]` |
+| 14 | **N14** | CS-M12-S11 Push nouvelle mission | ia | N13 | `[x]` |
 | 15 | **N15** | Gate M12 — golden path client→pro→capture | ia+humain | N14 | `[ ]` |
 | 16 | **N16** | M14-S03 EAS preview TestFlight + APK | humain+ia | N15 | `[ ]` |
 | 17 | **N17** | M14-S02 SC-01…06 manuels staging | humain | N16 | `[ ]` |
@@ -38,7 +38,7 @@
 **Cahier M12 (détail écrans/API/tests) :** [`m12-cahier.md`](m12-cahier.md)  
 **Maquettes v2 :** [`docs/ux/uxpilot-pro-html-v2/`](../ux/uxpilot-pro-html-v2/)
 
-**En cours :** prochaine = **N14** Push (enchaînement M12).
+**En cours :** prochaine = **N15** Gate M12 (enchaînement).
 
 ---
 
@@ -253,6 +253,7 @@ Uniquement après N15 vert. EAS preview → SC manuels staging → stores. Twili
 | 2026-09-17 | N11 done | P05 2+2 photos + checklist + P06 clôture |
 | 2026-09-17 | N12 done | P07 Planning chips semaine + pause locale |
 | 2026-09-17 | N13 done | P08 Gains solde en transit, sans reverse-commission |
+| 2026-09-17 | N14 done | Push permission + P09b toggles + badge RC Pro |
 
 ### Historique file précédente (post-M11, close)
 

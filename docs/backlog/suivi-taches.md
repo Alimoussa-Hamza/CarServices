@@ -25,7 +25,7 @@
 | L — Notifications (M09) | 4/4 | — terminé |
 | M — Admin API (M10) | 8/8 | — terminé |
 | N — Mobile client (M11) | 12/12 | — terminé (gate smoke) |
-| O — Mobile pro (M12) | 10/11 | prochaine **N14** push · cahier [`m12-cahier.md`](m12-cahier.md) |
+| O — Mobile pro (M12) | 11/11 | prochaine **N15** gate · cahier [`m12-cahier.md`](m12-cahier.md) |
 | P — Admin web (M13) | 8/8 | — terminé |
 | Q — QA & launch (M14) | 5/9 | **après gate M12 (N15)** — EAS / stores |
 | R — Fermeture backend (M15) | 6/6 | — terminé |
@@ -388,7 +388,7 @@ Cahier : [cahier-mobile-client-m11.md](../cahier-mobile-client-m11.md) · BP UI 
 - [x] **CS-M12-S08** P08 Gains / historique — **N13** `[x]`
 - [x] **CS-M12-S09** P07 Planning disponibilités — **N12** `[x]`
 - [x] **CS-M12-S10** Stripe Connect onboarding in-app — **N07** `[x]`
-- [ ] **CS-M12-S11** Push nouvelle mission (high priority)
+- [x] **CS-M12-S11** Push nouvelle mission (high priority) — **N14** `[x]`
 
 ---
 

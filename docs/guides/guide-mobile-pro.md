@@ -117,7 +117,7 @@ Upload docs via presigned URL API.
 | KYC approved/rejected | Default |
 | Payout | Default |
 
-**Permission push** demandée après KYC step 1 (contexte clair).
+**Permission push** : écran Autoriser / Plus tard après Connect (pas au step 1 KYC). Tap → P03 ; si déjà P04/P05, rester. Mock token si `EXPO_PUBLIC_USE_MOCKS` ou pas d’`EXPO_ACCESS_TOKEN`. P09b : Son grisé si Nouvelles missions off. Profil : badge RC Pro J-30 via `GET /providers/kyc/alerts`.
 
 ---
 

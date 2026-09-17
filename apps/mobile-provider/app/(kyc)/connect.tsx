@@ -9,6 +9,7 @@ import { mapApiError } from '../../src/lib/api-errors';
 import { openStripeConnectBrowser } from '../../src/lib/stripe-connect';
 import { syncKycAndResolveRoute } from '../../src/lib/sync-session';
 import { useAuthStore } from '../../src/stores/auth.store';
+import { useNotifPrefsStore } from '../../src/stores/notif-prefs.store';
 import { useTheme } from '../../src/theme/theme-provider';
 
 const BENEFITS = [
@@ -35,7 +36,8 @@ export default function ConnectScreen() {
       }
       const route = await syncKycAndResolveRoute();
       if (route !== '/(kyc)/connect') {
-        router.replace(route as Href);
+        const asked = useNotifPrefsStore.getState().permissionAsked;
+        router.replace((asked ? route : '/(kyc)/notifications') as Href);
         return;
       }
       if (outcome === 'cancel') {
