@@ -126,6 +126,18 @@ Note : Tailwind/shadcn CLI complet reporté — composants maison alignés token
 
 ---
 
+## T04e — CS-M13-S07 Litiges
+
+**But :** A07 file + resolve (GET /admin/disputes + PATCH resolve déjà M10).
+
+### Checklist
+
+- [x] File ouverts + filtre résolus
+- [x] Décisions client / pro / split (notes split obligatoires)
+- [x] Tests parse + typecheck + build
+
+---
+
 ## T05 — Maquettes M12
 
 Hors repo code : finaliser UX Pilot pro → puis `CS-M12-S01`.
@@ -150,3 +162,4 @@ EAS / SC-01…06 staging / stores — après T01 et apps stables.
 | 2026-09-17 | T04b done | Catalogue admin A04 |
 | 2026-09-17 | T04c done | Zones + pricing A05 |
 | 2026-09-17 | T04d done | Bookings list/detail/refund A06 |
+| 2026-09-17 | T04e done | Litiges file + resolve A07 |

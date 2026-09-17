@@ -7,13 +7,17 @@ import type {
   AdminCreateOfferOptionInput,
   AdminCreateZoneInput,
   AdminDashboard,
+  AdminDisputesListResponse,
   AdminKycDecisionResponse,
   AdminListBookingsQuery,
+  AdminListDisputesQuery,
   AdminOffer,
   AdminOfferOption,
   AdminPendingProvidersResponse,
   AdminRefundBookingDto,
   AdminRefundResponse,
+  AdminResolveDisputeDto,
+  AdminResolvedDispute,
   AdminUpdateCategoryDto,
   AdminUpdateOfferDto,
   AdminUpdateOfferOptionDto,
@@ -201,4 +205,19 @@ export async function refundAdminBooking(
 ): Promise<AdminRefundResponse> {
   bootstrapAdminApi();
   return api.admin.refundBooking(bookingId, dto);
+}
+
+export async function fetchAdminDisputes(
+  query: Partial<AdminListDisputesQuery> = {},
+): Promise<AdminDisputesListResponse> {
+  bootstrapAdminApi();
+  return api.admin.listDisputes(query);
+}
+
+export async function resolveAdminDispute(
+  disputeId: string,
+  dto: AdminResolveDisputeDto,
+): Promise<AdminResolvedDispute> {
+  bootstrapAdminApi();
+  return api.admin.resolveDispute(disputeId, dto);
 }
