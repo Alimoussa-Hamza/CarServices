@@ -6,6 +6,10 @@ const FR_BY_CODE: Record<string, string> = {
   AUTH_RATE_LIMIT: 'Trop de tentatives. Réessaie plus tard.',
   VALIDATION_ERROR: 'Vérifie les informations saisies.',
   ZONE_UNCOVERED: 'Cette adresse n’est pas encore couverte.',
+  STRIPE_REQUEST_FAILED: 'Stripe est indisponible. Réessaie dans un instant.',
+  STRIPE_ACCOUNT_CREATE_FAILED: 'Impossible de créer le compte virements.',
+  STRIPE_ACCOUNT_LINK_FAILED: 'Impossible d’ouvrir l’onboarding Stripe.',
+  STRIPE_CHARGES_DISABLED: 'Activez les virements pour recevoir des missions.',
   NETWORK_ERROR: 'Connexion impossible. Vérifie ton réseau.',
   UNKNOWN_ERROR: 'Une erreur est survenue. Réessaie.',
 };

@@ -7,4 +7,10 @@ describe('mapApiError', () => {
       'Code incorrect.',
     );
   });
+
+  it('mappe une erreur Stripe Connect', () => {
+    expect(mapApiError(new ApiError('STRIPE_REQUEST_FAILED', 'x', 503))).toBe(
+      'Stripe est indisponible. Réessaie dans un instant.',
+    );
+  });
 });

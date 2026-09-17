@@ -83,9 +83,9 @@ Upload docs via presigned URL API.
 
 ## 5. Stripe Connect onboarding
 
-- Au KYC step ou post-approval : `POST /providers/stripe/onboard`
-- Ouvrir Account Link in-app browser (expo-web-browser)
-- Block missions si `stripe_account_id` charges_enabled false
+- Au KYC approved : écran **Activer les virements** — **pas de Skip**
+- `POST /providers/stripe/onboard` puis Account Link (`expo-web-browser`)
+- Retour app → re-fetch `chargesEnabled` / eligibility. Sans Connect → pas de P02
 
 ---
 

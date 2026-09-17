@@ -59,6 +59,25 @@ export async function fetchKycGate(): Promise<KycGate> {
   };
 }
 
+/** Mock only: Actualiser simule la revue admin → approved, sans Connect. */
+export async function refreshKycStatus(): Promise<KycGate> {
+  if (useMocksNow() && mockKycGate.kycStatus === 'submitted') {
+    mockKycGate = {
+      kycStatus: 'approved',
+      chargesEnabled: false,
+      rejectionReason: null,
+    };
+    return { ...mockKycGate };
+  }
+  return fetchKycGate();
+}
+
+export function enableMockCharges(): void {
+  if (mockKycGate.kycStatus === 'approved') {
+    mockKycGate = { ...mockKycGate, chargesEnabled: true };
+  }
+}
+
 export async function submitKycDossier(draft: KycDraft): Promise<KycGate> {
   if (!canSubmitKyc(draft)) {
     throw new ApiError(

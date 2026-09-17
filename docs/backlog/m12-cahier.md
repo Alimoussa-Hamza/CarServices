@@ -139,10 +139,10 @@ Puis Pending (pas de tabs, 48 h, Voir/Actualiser) · Rejected (RC illisible, **C
 
 **API :** `POST /providers/stripe/onboard` · statut `charges_enabled`.
 
-- [ ] Écran **Activer les virements** — **pas de Skip**
-- [ ] Account Link via `expo-web-browser` (page Stripe, pas nous)
-- [ ] Retour app → re-fetch eligibility
-- [ ] Sans Connect → pas de P02
+- [x] Écran **Activer les virements** — **pas de Skip**
+- [x] Account Link via `expo-web-browser` (page Stripe, pas nous)
+- [x] Retour app → re-fetch eligibility
+- [x] Sans Connect → pas de P02
 
 ---
 

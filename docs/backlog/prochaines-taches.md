@@ -20,7 +20,7 @@
 | 4 | **N04** | CS-M12-S01 Setup Expo Router pro + tabs | ia | N03 GO | `[x]` |
 | 5 | **N05** | CS-M12-S02 Auth P00 OTP | ia | N04 | `[x]` |
 | 6 | **N06** | CS-M12-S03 KYC wizard P01 (7 steps) | ia | N05 | `[x]` |
-| 7 | **N07** | CS-M12-S10 Stripe Connect onboarding | ia | N06 | `[ ]` |
+| 7 | **N07** | CS-M12-S10 Stripe Connect onboarding | ia | N06 | `[x]` |
 | 8 | **N08** | CS-M12-S04 P02 Liste missions (3 tabs) | ia | N07 | `[ ]` |
 | 9 | **N09** | CS-M12-S05 P03 Détail accept / refuse | ia | N08 | `[ ]` |
 | 10 | **N10** | CS-M12-S06 P04 En route + Maps + tel | ia | N09 | `[ ]` |
@@ -38,7 +38,7 @@
 **Cahier M12 (détail écrans/API/tests) :** [`m12-cahier.md`](m12-cahier.md)  
 **Maquettes v2 :** [`docs/ux/uxpilot-pro-html-v2/`](../ux/uxpilot-pro-html-v2/)
 
-**En cours :** prochaine = **N07** Stripe Connect (dis « ok »).
+**En cours :** prochaine = **N08** liste missions P02 (dis « ok »).
 
 ---
 
@@ -140,6 +140,13 @@ S3 peut rester mock local si pas de bucket.
 **But :** onboarding in-app jusqu’à `charges_enabled`. Sans ça, payout cassé.
 
 Ordre **avant** la file missions : un pro qui accepte sans Connect = dette paiement.
+
+### Checklist
+
+- [x] Activer les virements — pas de Skip
+- [x] Account Link `expo-web-browser`
+- [x] Retour → eligibility / `chargesEnabled`
+- [x] Tests + typecheck
 
 ---
 

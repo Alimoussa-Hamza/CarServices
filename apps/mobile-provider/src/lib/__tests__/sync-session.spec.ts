@@ -1,4 +1,5 @@
-import { resetMockKycGate, submitKycDossier } from '../../data/kyc';
+import { applyConnectSuccess } from '../../data/connect';
+import { resetMockKycGate, refreshKycStatus, submitKycDossier } from '../../data/kyc';
 import { EMPTY_KYC_DRAFT } from '../kyc-validation';
 import { resetMemoryTokenStore } from '../token-storage';
 import { useAuthStore } from '../../stores/auth.store';
@@ -50,5 +51,41 @@ describe('syncKycAndResolveRoute (mock)', () => {
     });
     await expect(syncKycAndResolveRoute()).resolves.toBe('/(kyc)/pending');
     expect(useAuthStore.getState().kycStatus).toBe('submitted');
+  });
+
+  it('après revue mock, Connect puis pas de tabs sans charges', async () => {
+    useAuthStore.setState({ accessToken: 'a' });
+    await submitKycDossier({
+      ...EMPTY_KYC_DRAFT,
+      companyName: 'Marc Dubois AE',
+      siret: '81234567800021',
+      rcSelected: true,
+      rcExpiresAt: '2099-12-31',
+      waterless: true,
+      zoneAddress: '12 rue de la République, 69002 Lyon',
+      formulas: ['complet'],
+      hasPortrait: true,
+    });
+    await refreshKycStatus();
+    await expect(syncKycAndResolveRoute()).resolves.toBe('/(kyc)/connect');
+    expect(useAuthStore.getState().chargesEnabled).toBe(false);
+  });
+
+  it('après Connect mock, Missions', async () => {
+    useAuthStore.setState({ accessToken: 'a' });
+    await submitKycDossier({
+      ...EMPTY_KYC_DRAFT,
+      companyName: 'Marc Dubois AE',
+      siret: '81234567800021',
+      rcSelected: true,
+      rcExpiresAt: '2099-12-31',
+      waterless: true,
+      zoneAddress: '12 rue de la République, 69002 Lyon',
+      formulas: ['complet'],
+      hasPortrait: true,
+    });
+    await refreshKycStatus();
+    await applyConnectSuccess();
+    await expect(syncKycAndResolveRoute()).resolves.toBe('/(tabs)/missions');
   });
 });

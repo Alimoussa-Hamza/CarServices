@@ -2,6 +2,7 @@ import { ApiError } from '@carservice/api-client';
 import { EMPTY_KYC_DRAFT, type KycDraft } from '../../lib/kyc-validation';
 import {
   fetchKycGate,
+  refreshKycStatus,
   resetMockKycGate,
   setMockKycGate,
   submitKycDossier,
@@ -60,6 +61,15 @@ describe('kyc repository (mock)', () => {
     await expect(fetchKycGate()).resolves.toMatchObject({
       kycStatus: 'rejected',
       rejectionReason: 'Document RC Pro illisible',
+    });
+  });
+
+  it('Actualiser mock (revue admin) → approved sans charges', async () => {
+    await submitKycDossier(validDraft);
+    await expect(refreshKycStatus()).resolves.toEqual({
+      kycStatus: 'approved',
+      chargesEnabled: false,
+      rejectionReason: null,
     });
   });
 });

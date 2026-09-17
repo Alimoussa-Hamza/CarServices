@@ -4,6 +4,14 @@ jest.mock('expo-secure-store', () => ({
   deleteItemAsync: jest.fn(async () => undefined),
 }));
 
+jest.mock('expo-web-browser', () => ({
+  openAuthSessionAsync: jest.fn(async () => ({
+    type: 'success',
+    url: 'https://pro.carservice.test/stripe/return',
+  })),
+  maybeCompleteAuthSession: jest.fn(),
+}));
+
 jest.mock('@carservice/api-client', () => {
   class ApiError extends Error {
     code: string;
@@ -36,6 +44,8 @@ jest.mock('@carservice/api-client', () => {
         updateCapabilities: jest.fn(),
         updateAvailability: jest.fn(),
         updateZones: jest.fn(),
+        createStripeOnboardingLink: jest.fn(),
+        missionEligibility: jest.fn(),
       },
       catalog: {
         offers: jest.fn(),

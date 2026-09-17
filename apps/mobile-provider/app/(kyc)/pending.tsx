@@ -4,6 +4,7 @@ import { router, type Href } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../src/components/ui/button';
 import { ErrorBanner } from '../../src/components/ui/error-banner';
+import { refreshKycStatus } from '../../src/data/kyc';
 import { mapApiError } from '../../src/lib/api-errors';
 import { syncKycAndResolveRoute } from '../../src/lib/sync-session';
 import { useAuthStore } from '../../src/stores/auth.store';
@@ -19,6 +20,7 @@ export default function KycPendingScreen() {
     setError(null);
     setLoading(true);
     try {
+      await refreshKycStatus();
       const route = await syncKycAndResolveRoute();
       if (route !== '/(kyc)/pending') {
         router.replace(route as Href);
