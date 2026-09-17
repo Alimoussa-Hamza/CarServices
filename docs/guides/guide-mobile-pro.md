@@ -93,6 +93,11 @@ Upload docs via presigned URL API.
 - **Pause aujourd’hui** = sheet locale (1 h / aujourd’hui / manuel), pas d’API pause
 - Missions planifiées = cartes `upcoming` (pas de grille mois, pas de FAB)
 
+### Gains P08
+- Hero **Solde en transit** = somme des **nets** pending (pas « disponible cash », pas de `/0.8`)
+- Filtres Tout / cette semaine / ce mois — liste Versé / En attente, **pas de camembert**
+- Source : missions completed + mock payout ; commission déjà calculée API
+
 ---
 
 ## 5. Stripe Connect onboarding

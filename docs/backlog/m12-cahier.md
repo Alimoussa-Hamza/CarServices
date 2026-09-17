@@ -211,9 +211,9 @@ Bandeaux : offline · notifs off · toast 4 s nouvelle mission (**jamais** plein
 
 **API :** payouts Connect / bookings completed (affichage, pas de calcul commission).
 
-- [ ] Hero **Solde en transit** (pas « disponible cash »)
-- [ ] Liste versé / en attente — **pas de camembert**
-- [ ] Lien depuis P06 et tab Gains
+- [x] Hero **Solde en transit** (pas « disponible cash »)
+- [x] Liste versé / en attente — **pas de camembert**
+- [x] Lien depuis P06 et tab Gains
 
 ---
 
