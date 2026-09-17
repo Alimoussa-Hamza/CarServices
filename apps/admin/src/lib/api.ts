@@ -1,5 +1,9 @@
 import { api, initApiClient } from '@carservice/api-client';
-import type { AdminDashboard } from '@carservice/shared-types';
+import type {
+  AdminDashboard,
+  AdminKycDecisionResponse,
+  AdminPendingProvidersResponse,
+} from '@carservice/shared-types';
 import { env } from './env';
 import {
   clearAdminSession,
@@ -52,4 +56,24 @@ export async function logoutAdmin(): Promise<void> {
 export async function fetchAdminDashboard(): Promise<AdminDashboard> {
   bootstrapAdminApi();
   return api.admin.dashboard();
+}
+
+export async function fetchPendingKyc(): Promise<AdminPendingProvidersResponse> {
+  bootstrapAdminApi();
+  return api.admin.listPendingProviders();
+}
+
+export async function approvePendingKyc(
+  providerId: string,
+): Promise<AdminKycDecisionResponse> {
+  bootstrapAdminApi();
+  return api.admin.approveProvider(providerId);
+}
+
+export async function rejectPendingKyc(
+  providerId: string,
+  reason: string,
+): Promise<AdminKycDecisionResponse> {
+  bootstrapAdminApi();
+  return api.admin.rejectProvider(providerId, { reason });
 }

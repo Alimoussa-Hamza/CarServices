@@ -26,7 +26,7 @@
 | M — Admin API (M10) | 8/8 | — terminé |
 | N — Mobile client (M11) | 12/12 | — terminé (gate smoke) |
 | O — Mobile pro (M12) | 0/11 | — en attente maquettes |
-| P — Admin web (M13) | 2/8 | CS-M13-S02 ✅ · next S03 KYC |
+| P — Admin web (M13) | 3/8 | CS-M13-S03 ✅ · next S04 catalog |
 | Q — QA & launch (M14) | 5/9 | EAS / stores / SC staging / prod deploy |
 | R — Fermeture backend (M15) | 6/6 | — terminé |
 | S — DevOps & Qualité (M16) | 5/5 | — terminé (staging cloud = playbook) |
@@ -396,7 +396,7 @@ Cahier : [cahier-mobile-client-m11.md](../cahier-mobile-client-m11.md) · BP UI 
 
 - [x] **CS-M13-S01** Setup Next.js + auth admin (login email/mdp + shell)
 - [x] **CS-M13-S02** A02 Dashboard KPIs
-- [ ] **CS-M13-S03** A03 Validation KYC pros
+- [x] **CS-M13-S03** A03 Validation KYC pros
 - [ ] **CS-M13-S04** A04 CRUD catalog
 - [ ] **CS-M13-S05** A05 Zones + pricing editor
 - [ ] **CS-M13-S06** A06 Bookings list + detail + refund

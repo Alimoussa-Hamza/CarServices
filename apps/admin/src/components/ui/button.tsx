@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes, CSSProperties } from 'react';
 import { colors, radius, spacing } from '@carservice/ui-tokens';
 
-type Variant = 'primary' | 'secondary' | 'ghost';
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
 const styles: Record<Variant, CSSProperties> = {
   primary: {
@@ -17,6 +17,11 @@ const styles: Record<Variant, CSSProperties> = {
   ghost: {
     backgroundColor: 'transparent',
     color: colors.brand.primary,
+    border: 'none',
+  },
+  danger: {
+    backgroundColor: colors.semantic.error,
+    color: colors.neutral[0],
     border: 'none',
   },
 };
