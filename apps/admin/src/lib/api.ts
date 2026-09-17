@@ -1,14 +1,19 @@
 import { api, initApiClient } from '@carservice/api-client';
 import type {
+  AdminBookingDetail,
+  AdminBookingsListResponse,
   AdminCategory,
   AdminCreateOfferInput,
   AdminCreateOfferOptionInput,
   AdminCreateZoneInput,
   AdminDashboard,
   AdminKycDecisionResponse,
+  AdminListBookingsQuery,
   AdminOffer,
   AdminOfferOption,
   AdminPendingProvidersResponse,
+  AdminRefundBookingDto,
+  AdminRefundResponse,
   AdminUpdateCategoryDto,
   AdminUpdateOfferDto,
   AdminUpdateOfferOptionDto,
@@ -174,4 +179,26 @@ export async function putAdminZonePricing(
 ): Promise<AdminZonePricing> {
   bootstrapAdminApi();
   return api.admin.upsertZonePricing(zoneId, offerId, dto);
+}
+
+export async function fetchAdminBookings(
+  query: Partial<AdminListBookingsQuery> = {},
+): Promise<AdminBookingsListResponse> {
+  bootstrapAdminApi();
+  return api.admin.listBookings(query);
+}
+
+export async function fetchAdminBooking(
+  bookingId: string,
+): Promise<AdminBookingDetail> {
+  bootstrapAdminApi();
+  return api.admin.getBooking(bookingId);
+}
+
+export async function refundAdminBooking(
+  bookingId: string,
+  dto: AdminRefundBookingDto = {},
+): Promise<AdminRefundResponse> {
+  bootstrapAdminApi();
+  return api.admin.refundBooking(bookingId, dto);
 }

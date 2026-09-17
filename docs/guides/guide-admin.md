@@ -125,7 +125,7 @@ Afficher historique sur fiche booking/provider (phase 1.5).
 - [ ] Login + middleware protection
 - [ ] CRUD catalog fonctionnel staging
 - [ ] Approve/reject KYC avec motif
-- [ ] Refund Stripe depuis booking detail
+- [x] Refund Stripe depuis booking detail
 - [ ] Settings commission modifiable sans redeploy
 - [ ] RBAC si multi-admin (phase 2)
 

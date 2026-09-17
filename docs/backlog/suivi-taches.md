@@ -26,7 +26,7 @@
 | M — Admin API (M10) | 8/8 | — terminé |
 | N — Mobile client (M11) | 12/12 | — terminé (gate smoke) |
 | O — Mobile pro (M12) | 0/11 | — en attente maquettes |
-| P — Admin web (M13) | 5/8 | CS-M13-S05 ✅ · next S06 bookings |
+| P — Admin web (M13) | 6/8 | CS-M13-S06 ✅ · next S07 litiges |
 | Q — QA & launch (M14) | 5/9 | EAS / stores / SC staging / prod deploy |
 | R — Fermeture backend (M15) | 6/6 | — terminé |
 | S — DevOps & Qualité (M16) | 5/5 | — terminé (staging cloud = playbook) |
@@ -399,7 +399,7 @@ Cahier : [cahier-mobile-client-m11.md](../cahier-mobile-client-m11.md) · BP UI 
 - [x] **CS-M13-S03** A03 Validation KYC pros
 - [x] **CS-M13-S04** A04 CRUD catalog
 - [x] **CS-M13-S05** A05 Zones + pricing editor
-- [ ] **CS-M13-S06** A06 Bookings list + detail + refund
+- [x] **CS-M13-S06** A06 Bookings list + detail + refund
 - [ ] **CS-M13-S07** A07 Litiges file + resolve
 - [ ] **CS-M13-S08** A09 Settings config plateforme
 

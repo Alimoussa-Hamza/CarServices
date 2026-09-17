@@ -61,7 +61,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <div style={{ fontWeight: 700, fontSize: 18 }}>CARSERVICE</div>
         <nav style={{ display: 'grid', gap: spacing[3], flex: 1 }}>
           {NAV.map((item) => {
-            const active = pathname === item.href;
+            const active =
+              pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
               <Link
                 key={item.href}

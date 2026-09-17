@@ -113,6 +113,19 @@ Note : Tailwind/shadcn CLI complet reporté — composants maison alignés token
 
 ---
 
+## T04d — CS-M13-S06 Bookings + refund
+
+**But :** A06 liste / détail / remboursement (GET + POST refund déjà M10).
+
+### Checklist
+
+- [x] Liste paginée + recherche `q` / filtre statut
+- [x] Détail `/bookings/[id]` timeline + paiement
+- [x] Refund RG-PAY-05 + tests parse motif
+- [x] Typecheck + build admin
+
+---
+
 ## T05 — Maquettes M12
 
 Hors repo code : finaliser UX Pilot pro → puis `CS-M12-S01`.
@@ -136,3 +149,4 @@ EAS / SC-01…06 staging / stores — après T01 et apps stables.
 | 2026-09-17 | T04 done | KYC pending + approve/reject |
 | 2026-09-17 | T04b done | Catalogue admin A04 |
 | 2026-09-17 | T04c done | Zones + pricing A05 |
+| 2026-09-17 | T04d done | Bookings list/detail/refund A06 |
